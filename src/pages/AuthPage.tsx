@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +53,49 @@ const AuthPage = () => {
       y: 0, 
       opacity: 1,
       transition: { type: "spring", stiffness: 100 }
+    }
+  };
+
+  // Tab transition variants
+  const tabVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 30
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -20, 
+      transition: {
+        duration: 0.2
+      }
+    }
+  };
+
+  // Decorative shape variants
+  const shapeVariants = {
+    login: {
+      rotate: [0, 10, 0],
+      scale: [1, 1.1, 1],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        repeatType: "reverse" as const
+      }
+    },
+    register: {
+      rotate: [0, -10, 0],
+      scale: [1, 1.15, 1],
+      transition: {
+        duration: 2.5,
+        repeat: Infinity,
+        repeatType: "reverse" as const
+      }
     }
   };
 
@@ -172,6 +216,18 @@ const AuthPage = () => {
               </div>
             </motion.div>
           </div>
+
+          {/* Decorative shapes that respond to tab changes */}
+          <motion.div 
+            variants={shapeVariants}
+            animate={activeTab === "login" ? "login" : "register"}
+            className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-gradient-to-r from-blue-400/30 to-purple-500/30 blur-2xl"
+          />
+          <motion.div 
+            variants={shapeVariants}
+            animate={activeTab === "login" ? "login" : "register"}
+            className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-xl"
+          />
         </motion.div>
       </motion.div>
       
@@ -224,241 +280,272 @@ const AuthPage = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="card-3d bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
           >
-            <Tabs defaultValue="login" className="w-full">
+            <Tabs 
+              defaultValue="login" 
+              className="w-full"
+              onValueChange={(value) => setActiveTab(value)}
+            >
               <TabsList className="grid w-full grid-cols-2 p-1 bg-gray-100/80">
                 <TabsTrigger 
                   value="login" 
-                  className="flex items-center gap-2 py-3 data-[state=active]:bg-white data-[state=active]:text-dtktmt-blue-medium data-[state=active]:shadow-lg data-[state=active]:font-bold rounded-md transition-all duration-300"
+                  className="flex items-center gap-2 py-3 data-[state=active]:bg-white data-[state=active]:text-dtktmt-blue-medium data-[state=active]:shadow-lg data-[state=active]:font-bold rounded-md transition-all duration-300 relative overflow-hidden group"
                 >
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-dtktmt-blue-light/0 via-dtktmt-blue-light/30 to-dtktmt-blue-light/0 group-data-[state=active]:translate-x-full transition-transform duration-1000 ease-in-out opacity-70"></div>
                   <LogIn size={16} />
                   <span>Đăng nhập</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="register" 
-                  className="flex items-center gap-2 py-3 data-[state=active]:bg-white data-[state=active]:text-dtktmt-blue-medium data-[state=active]:shadow-lg data-[state=active]:font-bold rounded-md transition-all duration-300"
+                  className="flex items-center gap-2 py-3 data-[state=active]:bg-white data-[state=active]:text-dtktmt-purple-medium data-[state=active]:shadow-lg data-[state=active]:font-bold rounded-md transition-all duration-300 relative overflow-hidden group"
                 >
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-dtktmt-purple-light/0 via-dtktmt-purple-light/30 to-dtktmt-purple-light/0 group-data-[state=active]:translate-x-full transition-transform duration-1000 ease-in-out opacity-70"></div>
                   <UserPlus size={16} />
                   <span>Đăng ký</span>
                 </TabsTrigger>
               </TabsList>
               
-              <div className="p-6">
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin}>
-                    <div className="space-y-4">
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Email"
-                          type="email"
-                          className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                      </div>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Mật khẩu"
-                          type={showPassword ? "text" : "password"}
-                          className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+              <div className="p-6 min-h-[420px] relative">
+                <AnimatePresence mode="wait">
+                  {activeTab === "login" ? (
+                    <motion.div
+                      key="login"
+                      variants={tabVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="absolute inset-0 p-6"
+                    >
+                      <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Email"
+                            type="email"
+                            className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
+                            required
+                          />
+                        </div>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Mật khẩu"
+                            type={showPassword ? "text" : "password"}
+                            className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                          >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <input
+                              id="remember-me"
+                              name="remember-me"
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-dtktmt-blue-medium focus:ring-dtktmt-blue-medium"
+                            />
+                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                              Ghi nhớ đăng nhập
+                            </label>
+                          </div>
+                          <div className="text-sm">
+                            <a href="#" className="text-dtktmt-blue-medium hover:text-dtktmt-blue-dark font-medium transition-colors duration-300">
+                              Quên mật khẩu?
+                            </a>
+                          </div>
+                        </div>
+                        
+                        <Button
+                          className="w-full bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-lg font-medium text-white rounded-lg py-2.5"
+                          disabled={isLoading}
+                          type="submit"
                         >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
+                          {isLoading ? (
+                            <div className="flex items-center gap-2">
+                              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              <span>Đang đăng nhập...</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <LogIn size={18} />
+                              <span>Đăng nhập</span>
+                            </div>
+                          )}
+                        </Button>
                       
-                      <div className="flex items-center justify-between">
+                        <div className="mt-6">
+                          <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                              <div className="w-full border-t border-gray-200"></div>
+                            </div>
+                            <div className="relative flex justify-center">
+                              <span className="px-2 bg-white text-gray-500 text-sm">hoặc đăng nhập với</span>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            <Button variant="outline" className="w-full hover:bg-gray-50 border-gray-200 transition-all duration-300 transform hover:-translate-y-1">
+                              <svg className="mr-2 h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
+                                <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25526 2.69 1.28027 6.60998L5.27026 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335" />
+                                <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4" />
+                                <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05" />
+                                <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25537 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853" />
+                              </svg>
+                              Google
+                            </Button>
+                            <Button variant="outline" className="w-full hover:bg-gray-50 border-gray-200 transition-all duration-300 transform hover:-translate-y-1">
+                              <svg className="mr-2 h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clipRule="evenodd" />
+                              </svg>
+                              Facebook
+                            </Button>
+                          </div>
+                        </div>
+                      </form>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="register"
+                      variants={tabVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      className="absolute inset-0 p-6"
+                    >
+                      <form onSubmit={handleRegister} className="space-y-4">
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Họ và tên"
+                            type="text"
+                            className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Email"
+                            type="email"
+                            className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Số điện thoại"
+                            type="tel"
+                            className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="relative">
+                          <School className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Trường/Cơ quan"
+                            type="text"
+                            className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Mật khẩu"
+                            type={showPassword ? "text" : "password"}
+                            className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                          >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                        
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <Input
+                            placeholder="Xác nhận mật khẩu"
+                            type={showConfirmPassword ? "text" : "password"}
+                            className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                          >
+                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                        
                         <div className="flex items-center">
                           <input
-                            id="remember-me"
-                            name="remember-me"
+                            id="terms"
+                            name="terms"
                             type="checkbox"
-                            className="h-4 w-4 rounded border-gray-300 text-dtktmt-blue-medium focus:ring-dtktmt-blue-medium"
+                            className="h-4 w-4 rounded border-gray-300 text-dtktmt-purple-medium focus:ring-dtktmt-purple-medium"
+                            required
                           />
-                          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                            Ghi nhớ đăng nhập
+                          <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+                            Tôi đồng ý với <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Điều khoản sử dụng</a> và <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Chính sách bảo mật</a>
                           </label>
                         </div>
-                        <div className="text-sm">
-                          <a href="#" className="text-dtktmt-blue-medium hover:text-dtktmt-blue-dark font-medium transition-colors duration-300">
-                            Quên mật khẩu?
-                          </a>
-                        </div>
-                      </div>
-                      
-                      <Button
-                        className="w-full bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-lg font-medium text-white rounded-lg py-2.5"
-                        disabled={isLoading}
-                        type="submit"
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center gap-2">
-                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Đang đăng nhập...</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <LogIn size={18} />
-                            <span>Đăng nhập</span>
-                          </div>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                  
-                  <div className="mt-6">
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-200"></div>
-                      </div>
-                      <div className="relative flex justify-center">
-                        <span className="px-2 bg-white text-gray-500 text-sm">hoặc đăng nhập với</span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      <Button variant="outline" className="w-full hover:bg-gray-50 border-gray-200 transition-all duration-300 transform hover:-translate-y-1">
-                        <svg className="mr-2 h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
-                          <path d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25526 2.69 1.28027 6.60998L5.27026 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z" fill="#EA4335" />
-                          <path d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z" fill="#4285F4" />
-                          <path d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z" fill="#FBBC05" />
-                          <path d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25537 21.31 7.3104 24.0001 12.0004 24.0001Z" fill="#34A853" />
-                        </svg>
-                        Google
-                      </Button>
-                      <Button variant="outline" className="w-full hover:bg-gray-50 border-gray-200 transition-all duration-300 transform hover:-translate-y-1">
-                        <svg className="mr-2 h-5 w-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" clipRule="evenodd" />
-                        </svg>
-                        Facebook
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="register">
-                  <form onSubmit={handleRegister}>
-                    <div className="space-y-4">
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Họ và tên"
-                          type="text"
-                          className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Email"
-                          type="email"
-                          className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Số điện thoại"
-                          type="tel"
-                          className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <School className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Trường/Cơ quan"
-                          type="text"
-                          className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Mật khẩu"
-                          type={showPassword ? "text" : "password"}
-                          className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                        
+                        <Button
+                          className="w-full bg-gradient-to-r from-dtktmt-purple-medium to-dtktmt-pink-medium hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-lg font-medium text-white rounded-lg py-2.5"
+                          disabled={isLoading}
+                          type="submit"
                         >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                      
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <Input
-                          placeholder="Xác nhận mật khẩu"
-                          type={showConfirmPassword ? "text" : "password"}
-                          className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                        >
-                          {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                      
-                      <div className="flex items-center">
-                        <input
-                          id="terms"
-                          name="terms"
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-dtktmt-blue-medium focus:ring-dtktmt-blue-medium"
-                          required
-                        />
-                        <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                          Tôi đồng ý với <a href="#" className="text-dtktmt-blue-medium hover:text-dtktmt-blue-dark font-medium">Điều khoản sử dụng</a> và <a href="#" className="text-dtktmt-blue-medium hover:text-dtktmt-blue-dark font-medium">Chính sách bảo mật</a>
-                        </label>
-                      </div>
-                      
-                      <Button
-                        className="w-full bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-lg font-medium text-white rounded-lg py-2.5"
-                        disabled={isLoading}
-                        type="submit"
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center gap-2">
-                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Đang đăng ký...</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <UserPlus size={18} />
-                            <span>Đăng ký</span>
-                          </div>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
+                          {isLoading ? (
+                            <div className="flex items-center gap-2">
+                              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              <span>Đang đăng ký...</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <UserPlus size={18} />
+                              <span>Đăng ký</span>
+                            </div>
+                          )}
+                        </Button>
+                      </form>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </Tabs>
+          </motion.div>
+
+          {/* Decorative elements */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.8 }}
+            className="absolute -z-10"
+          >
+            <div className="absolute -bottom-10 -right-20 w-40 h-40 rounded-full bg-gradient-to-r from-dtktmt-blue-light/20 to-dtktmt-purple-light/20 blur-3xl"></div>
+            <div className="absolute -top-10 -left-20 w-40 h-40 rounded-full bg-gradient-to-r from-dtktmt-purple-light/10 to-dtktmt-pink-light/10 blur-3xl"></div>
           </motion.div>
         </motion.div>
       </div>
