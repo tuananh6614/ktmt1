@@ -1,8 +1,7 @@
-
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
-import { Mail, Phone, MapPin, Linkedin, GitHub, Award, BookOpen, Trophy, GraduationCap } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Github, Award, BookOpen, Trophy, GraduationCap } from "lucide-react";
 
 const AboutPage = () => {
   // Sample team members data
@@ -156,7 +155,7 @@ const AboutPage = () => {
                         <Linkedin size={18} />
                       </a>
                       <a href={member.social.github} className="text-gray-500 hover:text-dtktmt-blue-medium">
-                        <GitHub size={18} />
+                        <Github size={18} />
                       </a>
                     </div>
                   </div>
