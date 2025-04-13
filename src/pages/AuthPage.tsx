@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -57,26 +57,26 @@ const AuthPage = () => {
     }
   };
 
-  // Decorative bubble animation
-  const bubbleVariants = {
-    initial: (i: number) => ({
+  // Decorative bubble animation - Sửa lại định nghĩa để phù hợp với kiểu Variants
+  const bubbleVariants: Variants = {
+    initial: {
       opacity: 0.7,
       scale: 1,
       y: 0,
       x: 0,
-    }),
-    animate: (i: number) => ({
+    },
+    animate: {
       opacity: [0.7, 0.9, 0.7],
       scale: [1, 1.1, 1],
       y: [0, -15, 0],
-      x: [0, i % 2 === 0 ? 10 : -10, 0],
+      x: [0, 10, 0],
       transition: {
         repeat: Infinity,
-        repeatType: "reverse",
-        duration: 3 + i * 0.5,
-        ease: "easeInOut",
+        repeatType: "reverse" as const,
+        duration: 3,
+        ease: "easeInOut"
       }
-    })
+    }
   };
 
   // Tab indicator animation
@@ -102,17 +102,25 @@ const AuthPage = () => {
           {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
-              custom={i}
               variants={bubbleVariants}
+              custom={i}
               initial="initial"
               animate="animate"
-              className={`absolute rounded-full blur-xl bg-white/30`}
               style={{
                 width: `${80 + Math.random() * 120}px`,
                 height: `${80 + Math.random() * 120}px`,
                 top: `${Math.random() * 80}%`,
                 left: `${Math.random() * 80}%`,
+                position: 'absolute',
+                borderRadius: '50%',
+                filter: 'blur(15px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
                 zIndex: 0,
+                transition: {
+                  duration: 3 + i * 0.5,
+                  repeatType: "reverse" as const,
+                  repeat: Infinity
+                }
               }}
             />
           ))}
