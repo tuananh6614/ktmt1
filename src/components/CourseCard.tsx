@@ -37,8 +37,8 @@ const CourseCard = ({
               ></div>
             </div>
           )}
-          <div className="absolute -top-1 -right-1 rounded-tl-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 px-4 py-1 text-xs font-bold text-white shadow-md transform rotate-0 translate-x-[30%] translate-y-[-10%]">
+          <div className="absolute -top-0 -right-0 overflow-hidden">
+            <div className="bg-gradient-to-r from-dtktmt-blue-dark to-[#F97316] px-4 py-1 text-sm font-bold text-white shadow-lg transform rotate-0 translate-x-0 translate-y-0">
               Hot
             </div>
           </div>
