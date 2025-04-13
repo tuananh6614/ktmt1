@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   User, Settings, Clock, BookOpen, FileText, Award, 
-  Edit, Save, LogOut, Star, Activity, Trophy, Check, X 
+  Edit, Save, LogOut, Star, Activity, Check, X 
 } from "lucide-react";
 
 const ProfilePage = () => {
@@ -101,22 +101,6 @@ const ProfilePage = () => {
     },
   ];
 
-  // Sample certificates data
-  const myCertificates = [
-    {
-      id: "1",
-      title: "Vi điều khiển STM32",
-      date: "15/06/2023",
-      image: "/placeholder.svg",
-    },
-    {
-      id: "2",
-      title: "Điện tử số",
-      date: "10/03/2023",
-      image: "/placeholder.svg",
-    },
-  ];
-  
   // Sample test results
   const testResults = [
     {
@@ -268,7 +252,7 @@ const ProfilePage = () => {
           </div>
 
           <Tabs defaultValue="courses" className="w-full">
-            <TabsList className="w-full grid grid-cols-4 mb-8">
+            <TabsList className="w-full grid grid-cols-3 mb-8">
               <TabsTrigger value="courses" className="flex items-center gap-2">
                 <BookOpen size={16} />
                 <span>Khóa học của tôi</span>
@@ -276,10 +260,6 @@ const ProfilePage = () => {
               <TabsTrigger value="documents" className="flex items-center gap-2">
                 <FileText size={16} />
                 <span>Tài liệu của tôi</span>
-              </TabsTrigger>
-              <TabsTrigger value="certificates" className="flex items-center gap-2">
-                <Award size={16} />
-                <span>Chứng chỉ</span>
               </TabsTrigger>
               <TabsTrigger value="tests" className="flex items-center gap-2">
                 <Star size={16} />
@@ -299,37 +279,6 @@ const ProfilePage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {myDocuments.map((document) => (
                   <DocumentCard key={document.id} {...document} />
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="certificates">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myCertificates.map((certificate) => (
-                  <div key={certificate.id} className="bg-white rounded-xl shadow-md overflow-hidden card-3d">
-                    <div className="relative">
-                      <img 
-                        src={certificate.image} 
-                        alt={certificate.title} 
-                        className="w-full h-48 object-cover" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-4">
-                        <Trophy size={32} className="text-dtktmt-yellow" />
-                      </div>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="text-lg font-bold mb-2 text-dtktmt-blue-dark">
-                        Chứng chỉ: {certificate.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-4">
-                        Cấp ngày: {certificate.date}
-                      </p>
-                      <Button className="w-full bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark">
-                        <FileText size={16} className="mr-2" />
-                        Xem chứng chỉ
-                      </Button>
-                    </div>
-                  </div>
                 ))}
               </div>
             </TabsContent>
