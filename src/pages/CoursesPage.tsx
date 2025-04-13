@@ -10,13 +10,13 @@ import { Input } from "@/components/ui/input";
 const CoursesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Sample courses data
+  // Sample courses data with better images
   const allCourses = [
     {
       id: "1",
       title: "Vi điều khiển STM32",
       description: "Lập trình vi điều khiển STM32 từ cơ bản đến nâng cao",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       lessons: 24,
       category: "vi-dieu-khien",
       progress: 75,
@@ -25,7 +25,7 @@ const CoursesPage = () => {
       id: "2",
       title: "Điện tử số",
       description: "Tổng quan về kỹ thuật điện tử số và thiết kế mạch",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       lessons: 18,
       category: "dien-tu-so",
     },
@@ -33,7 +33,7 @@ const CoursesPage = () => {
       id: "3",
       title: "Xử lý tín hiệu số",
       description: "Các phương pháp xử lý tín hiệu số trong thực tế",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       lessons: 30,
       category: "xu-ly-tin-hieu",
       progress: 35,
@@ -42,7 +42,7 @@ const CoursesPage = () => {
       id: "4",
       title: "IoT và ứng dụng",
       description: "Phát triển các ứng dụng IoT với Arduino và ESP8266",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       lessons: 22,
       category: "iot",
       progress: 10,
@@ -67,7 +67,7 @@ const CoursesPage = () => {
       id: "7",
       title: "Thiết kế PCB chuyên nghiệp",
       description: "Quy trình thiết kế và sản xuất PCB trong thực tế công nghiệp",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1557858310-9052820906f7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       lessons: 15,
       category: "thiet-ke",
     },
@@ -75,7 +75,7 @@ const CoursesPage = () => {
       id: "8",
       title: "FPGA và VHDL",
       description: "Thiết kế số sử dụng FPGA và ngôn ngữ mô tả phần cứng VHDL",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
       lessons: 26,
       category: "dien-tu-so",
     },
