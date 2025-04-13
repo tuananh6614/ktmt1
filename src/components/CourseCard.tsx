@@ -8,8 +8,6 @@ interface CourseCardProps {
   description: string;
   image: string;
   lessons: number;
-  duration?: string; // Để optional để không gây lỗi với dữ liệu có sẵn
-  level?: string; // Để optional để không gây lỗi với dữ liệu có sẵn
   progress?: number;
 }
 
@@ -39,8 +37,10 @@ const CourseCard = ({
               ></div>
             </div>
           )}
-          <div className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full px-3 py-1 text-xs font-bold transform rotate-12 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 delay-100 text-white">
-            Hot!
+          <div className="absolute -top-1 -right-1 rounded-tl-xl overflow-hidden">
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 px-4 py-1 text-xs font-bold text-white shadow-md transform rotate-0 translate-x-[30%] translate-y-[-10%]">
+              Hot
+            </div>
           </div>
         </div>
         <div className="p-5 transition-all duration-300 group-hover:bg-gradient-to-br from-white to-dtktmt-blue-light/20 rounded-b-xl">

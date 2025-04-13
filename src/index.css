@@ -114,9 +114,19 @@
   }
   
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-dtktmt-blue-dark via-dtktmt-purple-medium to-dtktmt-pink-medium;
-    background-size: 200% auto;
-    animation: text-shimmer 3s linear infinite;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, #5da7e8, #c9a9ff, #ffaed3, #c9a9ff, #5da7e8);
+    background-size: 300% 100%;
+    animation: gradient-slide 6s linear infinite;
+  }
+  
+  @keyframes gradient-slide {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 300% 50%;
+    }
   }
   
   .glowing-text {

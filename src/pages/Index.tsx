@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Book, FileText, Award, ArrowRight, Sparkles } from "lucide-react";
@@ -110,7 +109,7 @@ const Index = () => {
             >
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
                 <span className="text-dtktmt-blue-dark text-3d">Học liệu </span>
-                <span className="gradient-text font-extrabold animate-text-shimmer">chất lượng</span>
+                <span className="gradient-text font-extrabold">chất lượng</span>
                 <span className="text-dtktmt-blue-dark text-3d"> cho sinh viên Điện Tử</span>
               </h1>
               <p className="text-lg text-gray-600 mb-8 animated-underline inline-block">
@@ -184,11 +183,11 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <div className="relative">
-                <div className="w-64 h-64 md:w-80 md:h-80 bg-dtktmt-blue-medium rounded-full absolute -top-5 -left-5 -z-10 animate-pulse-soft"></div>
-                <div className="w-48 h-48 md:w-64 md:h-64 bg-dtktmt-pink-medium rounded-full absolute -bottom-5 -right-5 -z-10 animate-pulse-soft" style={{ animationDelay: "1s" }}></div>
+              <div className="relative w-full max-w-sm mx-auto">
+                <div className="w-64 h-64 md:w-80 md:h-80 bg-dtktmt-blue-medium rounded-full absolute -top-5 -left-5 -z-10 animate-pulse-soft opacity-60"></div>
+                <div className="w-48 h-48 md:w-64 md:h-64 bg-dtktmt-pink-medium rounded-full absolute -bottom-5 -right-5 -z-10 animate-pulse-soft opacity-60" style={{ animationDelay: "1s" }}></div>
                 <motion.div 
-                  className="bg-white p-3 rounded-2xl shadow-lg relative z-10"
+                  className="bg-white p-3 rounded-2xl shadow-lg relative z-10 mt-10"
                   whileHover={{ 
                     scale: 1.03, 
                     rotateY: 5, 
@@ -197,13 +196,13 @@ const Index = () => {
                   style={{ transformStyle: "preserve-3d" }}
                 >
                   <img
-                    src="/placeholder.svg"
-                    alt="Student learning"
-                    className="w-full max-w-md rounded-xl"
+                    src="/lovable-uploads/4ec8d887-3792-433e-bb58-7792ac0a36ea.png"
+                    alt="Course example"
+                    className="w-full rounded-xl"
                   />
                 </motion.div>
                 <motion.div 
-                  className="absolute -top-4 -right-4 bg-white p-3 rounded-xl shadow-lg animate-float"
+                  className="absolute -top-4 -right-4 bg-white p-3 rounded-xl shadow-lg animate-float z-20"
                   whileHover={{ scale: 1.1, rotateZ: 5 }}
                 >
                   <div className="flex items-center gap-2 text-dtktmt-blue-dark">
@@ -212,7 +211,7 @@ const Index = () => {
                   </div>
                 </motion.div>
                 <motion.div 
-                  className="absolute -bottom-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-float"
+                  className="absolute -bottom-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-float z-20"
                   style={{ animationDelay: "1.5s" }}
                   whileHover={{ scale: 1.1, rotateZ: -5 }}
                 >
