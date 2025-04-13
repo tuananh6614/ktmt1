@@ -1,25 +1,14 @@
 
 import { useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
 import CourseCard from "@/components/CourseCard";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const CoursesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
   
   // Sample courses data
   const allCourses = [
@@ -92,22 +81,9 @@ const CoursesPage = () => {
     },
   ];
   
-  const categories = [
-    { id: "all", name: "Tất cả", icon: "🎓" },
-    { id: "vi-dieu-khien", name: "Vi điều khiển", icon: "🔌" },
-    { id: "dien-tu-so", name: "Điện tử số", icon: "💻" },
-    { id: "xu-ly-tin-hieu", name: "Xử lý tín hiệu", icon: "📊" },
-    { id: "iot", name: "IoT", icon: "🌐" },
-    { id: "thiet-ke", name: "Thiết kế", icon: "✏️" },
-  ];
-  
   const filteredCourses = allCourses.filter((course) => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
+    return course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           course.description.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   return (
@@ -125,7 +101,7 @@ const CoursesPage = () => {
 
           <div className="mb-8">
             <div className="bg-white p-6 rounded-2xl shadow-lg animate-scale-in">
-              <div className="relative flex-grow mb-6">
+              <div className="relative flex-grow mb-2">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input 
                   placeholder="Tìm kiếm khóa học..." 
@@ -133,38 +109,6 @@ const CoursesPage = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-              </div>
-              
-              <div className="flex items-center justify-center mb-2">
-                <div className="text-sm font-medium text-gray-700 mr-3">Lĩnh vực:</div>
-              </div>
-              
-              <div className="overflow-x-auto pb-2">
-                <div className="flex justify-center space-x-2 min-w-max mx-auto">
-                  <ToggleGroup
-                    type="single"
-                    value={selectedCategory}
-                    onValueChange={(value) => value && setSelectedCategory(value)}
-                    className="flex-wrap justify-center gap-2 bg-gray-50/50 p-2 rounded-xl"
-                  >
-                    {categories.map((category) => (
-                      <ToggleGroupItem
-                        key={category.id}
-                        value={category.id} 
-                        aria-label={category.name}
-                        className={`
-                          px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 
-                          ${selectedCategory === category.id 
-                            ? 'bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-blue-dark text-white shadow-md animate-scale-in' 
-                            : 'hover:bg-gray-100'}
-                        `}
-                      >
-                        <span className="text-lg">{category.icon}</span>
-                        <span>{category.name}</span>
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                </div>
               </div>
             </div>
           </div>
