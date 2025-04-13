@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                dtktmt: {
+                    'blue-light': '#a6d0f3',
+                    'blue-medium': '#5da7e8',
+                    'blue-dark': '#2b78c2',
+                    'pink-light': '#ffd1e8',
+                    'pink-medium': '#ffaed3',
+                    'pink-dark': '#ff7fad',
+                    'purple-light': '#e5d6ff',
+                    'purple-medium': '#c9a9ff',
+                    'yellow': '#ffde59'
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +96,54 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+                'float': {
+                    '0%, 100%': {
+                        transform: 'translateY(0)'
+                    },
+                    '50%': {
+                        transform: 'translateY(-10px)'
+                    }
+                },
+                'pulse-soft': {
+                    '0%, 100%': {
+                        transform: 'scale(1)'
+                    },
+                    '50%': {
+                        transform: 'scale(1.05)'
+                    }
+                },
+                'rotate-slow': {
+                    '0%': {
+                        transform: 'rotate(0deg)'
+                    },
+                    '100%': {
+                        transform: 'rotate(360deg)'
+                    }
+                },
+                'slide-in-bottom': {
+                    '0%': {
+                        transform: 'translateY(20px)',
+                        opacity: '0'
+                    },
+                    '100%': {
+                        transform: 'translateY(0)',
+                        opacity: '1'
+                    }
+                },
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+                'float': 'float 4s infinite ease-in-out',
+                'pulse-soft': 'pulse-soft 2s infinite ease-in-out',
+                'rotate-slow': 'rotate-slow 15s linear infinite',
+                'slide-in-bottom': 'slide-in-bottom 0.5s ease-out forwards',
+			},
+            fontFamily: {
+                'vietnam': ['Be Vietnam Pro', 'sans-serif'],
+                'montserrat': ['Montserrat', 'sans-serif'],
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
