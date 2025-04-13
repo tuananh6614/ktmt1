@@ -131,6 +131,61 @@ export default {
                         opacity: '1'
                     }
                 },
+                'text-shimmer': {
+                    '0%': {
+                        backgroundPosition: '100% 50%'
+                    },
+                    '100%': {
+                        backgroundPosition: '0% 50%'
+                    }
+                },
+                'text-pop': {
+                    '0%': {
+                        transform: 'scale(1)'
+                    },
+                    '50%': {
+                        transform: 'scale(1.1)'
+                    },
+                    '100%': {
+                        transform: 'scale(1)'
+                    }
+                },
+                'bounce-light': {
+                    '0%, 100%': {
+                        transform: 'translateY(0)',
+                    },
+                    '50%': {
+                        transform: 'translateY(-5px)'
+                    }
+                },
+                'wave': {
+                    '0%, 100%': {
+                        transform: 'rotate(-3deg)'
+                    },
+                    '50%': {
+                        transform: 'rotate(3deg)'
+                    }
+                },
+                'wobble': {
+                    '0%, 100%': {
+                        transform: 'translateX(0)',
+                    },
+                    '15%': {
+                        transform: 'translateX(-5px) rotate(-5deg)'
+                    },
+                    '30%': {
+                        transform: 'translateX(4px) rotate(3deg)'
+                    },
+                    '45%': {
+                        transform: 'translateX(-3px) rotate(-2deg)'
+                    },
+                    '60%': {
+                        transform: 'translateX(2px) rotate(1deg)'
+                    },
+                    '75%': {
+                        transform: 'translateX(-1px) rotate(-1deg)'
+                    }
+                }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -139,6 +194,11 @@ export default {
                 'pulse-soft': 'pulse-soft 2s infinite ease-in-out',
                 'rotate-slow': 'rotate-slow 15s linear infinite',
                 'slide-in-bottom': 'slide-in-bottom 0.5s ease-out forwards',
+                'text-shimmer': 'text-shimmer 3s infinite',
+                'text-pop': 'text-pop 0.5s ease-in-out',
+                'bounce-light': 'bounce-light 2s ease-in-out infinite',
+                'wave': 'wave 2s ease-in-out infinite',
+                'wobble': 'wobble 1s ease-in-out',
 			},
             fontFamily: {
                 'vietnam': ['Be Vietnam Pro', 'sans-serif'],
