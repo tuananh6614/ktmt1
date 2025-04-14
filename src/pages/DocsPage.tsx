@@ -1,20 +1,21 @@
-
 import { useState } from "react";
 import { Search, SortAsc, SortDesc, FileText } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
 import DocumentCard from "@/components/DocumentCard";
+import DocumentCategories, { documentCategories } from "@/components/DocumentCategories";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { motion } from "framer-motion";
 
 const DocsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [fileTypeFilter, setFileTypeFilter] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Sample documents data
   const allDocuments = [
     {
       id: "1",
@@ -100,8 +101,6 @@ const DocsPage = () => {
     },
   ];
 
-  const fileTypes = ["pdf", "docx", "pptx"];
-
   const filteredDocuments = allDocuments
     .filter((doc) => {
       const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,7 +108,9 @@ const DocsPage = () => {
       
       const matchesFileType = !fileTypeFilter || doc.fileType === fileTypeFilter;
       
-      return matchesSearch && matchesFileType;
+      const matchesCategory = !selectedCategory || doc.category === selectedCategory;
+      
+      return matchesSearch && matchesFileType && matchesCategory;
     })
     .sort((a, b) => {
       if (sortDirection === "asc") {
@@ -129,14 +130,36 @@ const DocsPage = () => {
 
       <main className="flex-1 py-8 px-4 bg-gradient-to-b from-blue-50 to-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-pink-medium bg-clip-text text-transparent drop-shadow-sm">Tài liệu học tập</h1>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-pink-medium bg-clip-text text-transparent drop-shadow-sm">
+              Tài liệu học tập
+            </h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Khám phá thư viện tài liệu đa dạng để nâng cao kiến thức của bạn về Điện tử và Kỹ thuật máy tính
             </p>
-          </div>
+          </motion.div>
 
-          <div className="mb-8 bg-white p-6 rounded-2xl shadow-lg animate-scale-in">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <DocumentCategories
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8 bg-white p-6 rounded-2xl shadow-lg"
+          >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative flex-grow md:col-span-2">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -156,7 +179,7 @@ const DocsPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tất cả</SelectItem>
-                      {fileTypes.map((type) => (
+                      {["pdf", "docx", "pptx"].map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.toUpperCase()}
                         </SelectItem>
@@ -184,14 +207,27 @@ const DocsPage = () => {
                 </Button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          >
             {filteredDocuments.length > 0 ? (
               filteredDocuments.map((doc) => (
-                <div key={doc.id} className="animate-enter" style={{ animationDelay: `${parseInt(doc.id) * 0.1}s` }}>
-                  <DocumentCard key={doc.id} {...doc} />
-                </div>
+                <motion.div
+                  key={doc.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    delay: parseInt(doc.id) * 0.1,
+                    duration: 0.3
+                  }}
+                >
+                  <DocumentCard {...doc} />
+                </motion.div>
               ))
             ) : (
               <div className="col-span-full py-8 text-center">
@@ -201,7 +237,7 @@ const DocsPage = () => {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
       </main>
 
