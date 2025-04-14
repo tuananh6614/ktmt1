@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CoursesPage from "./pages/CoursesPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
 import DocsPage from "./pages/DocsPage";
 import AboutPage from "./pages/AboutPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -23,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/khoa-hoc" element={<CoursesPage />} />
+          <Route path="/khoa-hoc/:courseId" element={<CourseDetailPage />} />
           <Route path="/tai-lieu" element={<DocsPage />} />
           <Route path="/gioi-thieu" element={<AboutPage />} />
           <Route path="/profile" element={<ProfilePage />} />
