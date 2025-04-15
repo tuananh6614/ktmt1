@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Clock, HelpCircle, CheckCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Quiz } from "@/components/course/Quiz";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface LessonContentProps {
   courseData: any;
@@ -155,146 +156,152 @@ export const LessonContent = ({
         
         <div className="mt-6">
           <TabsContent value="noi-dung" className="mt-0">
-            <div className="prose max-w-none">
-              <h3>Nội dung chi tiết bài học</h3>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec auctor, 
-                nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget tincidunt nisl 
-                nisl eget nisl. Donec auctor, nisl eget ultricies tincidunt, nisl nisl aliquam 
-                nisl, eget tincidunt nisl nisl eget nisl.
-              </p>
-              
-              <p>
-                Ut at nisi vel risus finibus elementum. Donec pharetra tellus maximus tellus egestas 
-                scelerisque. Nunc feugiat lobortis consequat. Sed ac imperdiet ex, nec pulvinar quam.
-              </p>
-              
-              <h4>Kiến thức quan trọng</h4>
-              
-              <ul>
-                <li>Đặc tính của vi điều khiển STM32</li>
-                <li>Cách sử dụng công cụ để lập trình</li>
-                <li>Các chế độ hoạt động của STM32</li>
-              </ul>
-              
-              <div className="bg-dtktmt-blue-light/10 border-l-4 border-dtktmt-blue-medium p-4 my-4 rounded-r-md">
-                <h5 className="text-dtktmt-blue-dark font-semibold">Lưu ý quan trọng</h5>
-                <p className="mb-0">Hãy đảm bảo bạn đã cài đặt đầy đủ phần mềm trước khi thực hành</p>
+            <ScrollArea className="h-[60vh] pr-4">
+              <div className="prose max-w-none">
+                <h3>Nội dung chi tiết bài học</h3>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec auctor, 
+                  nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget tincidunt nisl 
+                  nisl eget nisl. Donec auctor, nisl eget ultricies tincidunt, nisl nisl aliquam 
+                  nisl, eget tincidunt nisl nisl eget nisl.
+                </p>
+                
+                <p>
+                  Ut at nisi vel risus finibus elementum. Donec pharetra tellus maximus tellus egestas 
+                  scelerisque. Nunc feugiat lobortis consequat. Sed ac imperdiet ex, nec pulvinar quam.
+                </p>
+                
+                <h4>Kiến thức quan trọng</h4>
+                
+                <ul>
+                  <li>Đặc tính của vi điều khiển STM32</li>
+                  <li>Cách sử dụng công cụ để lập trình</li>
+                  <li>Các chế độ hoạt động của STM32</li>
+                </ul>
+                
+                <div className="bg-dtktmt-blue-light/10 border-l-4 border-dtktmt-blue-medium p-4 my-4 rounded-r-md">
+                  <h5 className="text-dtktmt-blue-dark font-semibold">Lưu ý quan trọng</h5>
+                  <p className="mb-0">Hãy đảm bảo bạn đã cài đặt đầy đủ phần mềm trước khi thực hành</p>
+                </div>
+                
+                <h4>Video hướng dẫn</h4>
+                
+                <div className="aspect-video bg-gray-100 rounded-xl flex items-center justify-center">
+                  <div className="text-gray-500">Video nội dung bài học</div>
+                </div>
               </div>
               
-              <h4>Video hướng dẫn</h4>
-              
-              <div className="aspect-video bg-gray-100 rounded-xl flex items-center justify-center">
-                <div className="text-gray-500">Video nội dung bài học</div>
+              <div className="mt-8 flex justify-between">
+                <button className="px-4 py-2 text-dtktmt-blue-dark border border-dtktmt-blue-light rounded-lg flex items-center gap-2 hover:bg-dtktmt-blue-light/10 transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Bài trước
+                </button>
+                
+                <button className="px-4 py-2 bg-dtktmt-blue-medium text-white rounded-lg flex items-center gap-2 hover:bg-dtktmt-blue-dark transition-colors">
+                  Bài tiếp theo
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
-            </div>
-            
-            <div className="mt-8 flex justify-between">
-              <button className="px-4 py-2 text-dtktmt-blue-dark border border-dtktmt-blue-light rounded-lg flex items-center gap-2 hover:bg-dtktmt-blue-light/10 transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                Bài trước
-              </button>
-              
-              <button className="px-4 py-2 bg-dtktmt-blue-medium text-white rounded-lg flex items-center gap-2 hover:bg-dtktmt-blue-dark transition-colors">
-                Bài tiếp theo
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
+            </ScrollArea>
           </TabsContent>
           
           <TabsContent value="tai-lieu" className="mt-0">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Tài liệu tham khảo</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex gap-4">
-                  <div className="p-3 bg-dtktmt-pink-light/50 rounded-lg self-start">
-                    <svg className="w-6 h-6 text-dtktmt-pink-medium" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Cẩm nang STM32</h4>
-                    <p className="text-sm text-gray-500 mt-1">PDF, 1.2 MB</p>
-                    <button className="mt-2 text-sm text-dtktmt-blue-dark hover:text-dtktmt-blue-medium font-medium flex items-center gap-1">
-                      <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Tải xuống
-                    </button>
-                  </div>
-                </div>
+            <ScrollArea className="h-[60vh] pr-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Tài liệu tham khảo</h3>
                 
-                <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex gap-4">
-                  <div className="p-3 bg-dtktmt-blue-light/50 rounded-lg self-start">
-                    <svg className="w-6 h-6 text-dtktmt-blue-medium" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Mã nguồn mẫu</h4>
-                    <p className="text-sm text-gray-500 mt-1">ZIP, 345 KB</p>
-                    <button className="mt-2 text-sm text-dtktmt-blue-dark hover:text-dtktmt-blue-medium font-medium flex items-center gap-1">
-                      <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex gap-4">
+                    <div className="p-3 bg-dtktmt-pink-light/50 rounded-lg self-start">
+                      <svg className="w-6 h-6 text-dtktmt-pink-medium" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
-                      Tải xuống
-                    </button>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Cẩm nang STM32</h4>
+                      <p className="text-sm text-gray-500 mt-1">PDF, 1.2 MB</p>
+                      <button className="mt-2 text-sm text-dtktmt-blue-dark hover:text-dtktmt-blue-medium font-medium flex items-center gap-1">
+                        <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Tải xuống
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow flex gap-4">
+                    <div className="p-3 bg-dtktmt-blue-light/50 rounded-lg self-start">
+                      <svg className="w-6 h-6 text-dtktmt-blue-medium" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-medium">Mã nguồn mẫu</h4>
+                      <p className="text-sm text-gray-500 mt-1">ZIP, 345 KB</p>
+                      <button className="mt-2 text-sm text-dtktmt-blue-dark hover:text-dtktmt-blue-medium font-medium flex items-center gap-1">
+                        <svg className="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Tải xuống
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </ScrollArea>
           </TabsContent>
           
           <TabsContent value="bai-tap" className="mt-0">
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold">Bài tập thực hành</h3>
-              
-              <div className="space-y-4">
-                <div className="bg-white border border-gray-100 rounded-xl p-5">
-                  <h4 className="font-medium text-dtktmt-blue-dark">Bài tập 1: Cấu hình GPIO</h4>
-                  <p className="text-sm text-gray-600 mt-1 mb-4">
-                    Hãy cấu hình chân PA5 làm ngõ ra để điều khiển LED trên board STM32.
-                  </p>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <pre className="text-sm overflow-auto"><code>/* Mã khởi tạo GPIO */
+            <ScrollArea className="h-[60vh] pr-4">
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold">Bài tập thực hành</h3>
+                
+                <div className="space-y-4">
+                  <div className="bg-white border border-gray-100 rounded-xl p-5">
+                    <h4 className="font-medium text-dtktmt-blue-dark">Bài tập 1: Cấu hình GPIO</h4>
+                    <p className="text-sm text-gray-600 mt-1 mb-4">
+                      Hãy cấu hình chân PA5 làm ngõ ra để điều khiển LED trên board STM32.
+                    </p>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <pre className="text-sm overflow-auto"><code>/* Mã khởi tạo GPIO */
 void GPIO_Init(void) {
   // Viết mã của bạn ở đây
   
 }</code></pre>
+                    </div>
+                    
+                    <button className="mt-4 bg-dtktmt-blue-medium/90 hover:bg-dtktmt-blue-medium text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                      Nộp bài
+                    </button>
                   </div>
                   
-                  <button className="mt-4 bg-dtktmt-blue-medium/90 hover:bg-dtktmt-blue-medium text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    Nộp bài
-                  </button>
-                </div>
-                
-                <div className="bg-white border border-gray-100 rounded-xl p-5">
-                  <h4 className="font-medium text-dtktmt-blue-dark">Bài tập 2: Đọc nút nhấn</h4>
-                  <p className="text-sm text-gray-600 mt-1 mb-4">
-                    Cấu hình chân PC13 làm ngõ vào để đọc trạng thái của nút nhấn trên board.
-                  </p>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <pre className="text-sm overflow-auto"><code>/* Mã đọc nút nhấn */
+                  <div className="bg-white border border-gray-100 rounded-xl p-5">
+                    <h4 className="font-medium text-dtktmt-blue-dark">Bài tập 2: Đọc nút nhấn</h4>
+                    <p className="text-sm text-gray-600 mt-1 mb-4">
+                      Cấu hình chân PC13 làm ngõ vào để đọc trạng thái của nút nhấn trên board.
+                    </p>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <pre className="text-sm overflow-auto"><code>/* Mã đọc nút nhấn */
 uint8_t ReadButtonState(void) {
   // Viết mã của bạn ở đây
   
   return 0;
 }</code></pre>
+                    </div>
+                    
+                    <button className="mt-4 bg-dtktmt-blue-medium/90 hover:bg-dtktmt-blue-medium text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                      Nộp bài
+                    </button>
                   </div>
-                  
-                  <button className="mt-4 bg-dtktmt-blue-medium/90 hover:bg-dtktmt-blue-medium text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    Nộp bài
-                  </button>
                 </div>
               </div>
-            </div>
+            </ScrollArea>
           </TabsContent>
         </div>
       </Tabs>
