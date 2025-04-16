@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -266,55 +265,30 @@
   }
   
   .neo-button {
-    @apply py-2 px-6 rounded-full font-medium transition-all duration-300 relative overflow-hidden;
-    background: linear-gradient(135deg, #5da7e8, #2b78c2);
-    box-shadow: 0 10px 20px rgba(43, 120, 194, 0.3),
-                0 6px 6px rgba(43, 120, 194, 0.2),
-                inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    @apply bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-blue-dark hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1 text-white font-medium rounded-lg py-2.5 px-4;
+    box-shadow: 0 10px 20px rgba(43, 120, 194, 0.2),
+                0 6px 6px rgba(43, 120, 194, 0.1),
+                inset 0 2px 0 rgba(255, 255, 255, 0.1);
   }
-  
-  .neo-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
-    opacity: 0.8;
-    transition: opacity 0.3s;
-  }
-  
-  .neo-button:hover::before {
-    opacity: 0.5;
-  }
-  
+
   .neo-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 25px rgba(43, 120, 194, 0.4),
+    box-shadow: 0 15px 25px rgba(43, 120, 194, 0.3),
                 0 10px 10px rgba(43, 120, 194, 0.2),
                 inset 0 2px 0 rgba(255, 255, 255, 0.2);
   }
-  
-  .luxury-heading {
-    @apply font-bold;
-    background: linear-gradient(135deg, #2b78c2, #5da7e8);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    text-shadow: 0 5px 15px rgba(43, 120, 194, 0.2);
+
+  .neo-button-outline {
+    @apply bg-white hover:bg-gray-50 border border-gray-200 transition-all duration-300 transform hover:-translate-y-1;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05),
+                inset 0 2px 0 rgba(255, 255, 255, 0.1);
   }
-  
-  .inner-glow {
-    box-shadow: inset 0 0 20px rgba(93, 167, 232, 0.2),
-                inset 0 0 6px rgba(255, 255, 255, 0.4);
+
+  .neo-button-outline:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1),
+                0 4px 6px rgba(0, 0, 0, 0.05),
+                inset 0 2px 0 rgba(255, 255, 255, 0.2);
   }
-  
-  .outer-glow {
-    box-shadow: 0 0 20px rgba(93, 167, 232, 0.3),
-                0 0 60px rgba(93, 167, 232, 0.1);
-  }
-  
+
   .glass-input {
     @apply bg-white/50 backdrop-blur-md border border-white/30 rounded-lg px-4 py-2 shadow-inner;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05),
