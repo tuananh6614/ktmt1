@@ -19,9 +19,10 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Log middleware để kiểm tra request
+// Log middleware để kiểm tra request chi tiết
 app.use((req, res, next) => {
   console.log(`📝 ${req.method} ${req.originalUrl}`);
+  console.log('📦 Headers:', req.headers);
   console.log('📦 Request body:', req.body);
   next();
 });
@@ -34,6 +35,15 @@ app.get('/', (req, res) => {
   res.send('DT&KTMT1 Backend API is running');
 });
 
+// Test route để kiểm tra kết nối
+app.get('/api/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'API is working properly',
+    timestamp: new Date()
+  });
+});
+
 // Error handler middleware
 app.use(errorHandler);
 
@@ -41,4 +51,3 @@ app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);
   console.log(`🔗 API endpoint: http://localhost:${PORT}/api/users`);
 });
-

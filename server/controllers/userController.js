@@ -1,3 +1,4 @@
+
 const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -8,6 +9,7 @@ const catchAsync = (fn) => {
   return (req, res, next) => {
     fn(req, res, next).catch((error) => {
       console.error('❌ LỖI:', error.message);
+      console.error('❌ STACK:', error.stack);
       res.status(500).json({
         success: false,
         message: 'Có lỗi xảy ra, vui lòng thử lại sau',
@@ -25,49 +27,69 @@ exports.register = catchAsync(async (req, res, next) => {
   try {
     const { email, password, full_name, phone_number, school } = req.body;
 
+    // Kiểm tra dữ liệu đầu vào
     if (!email || !password || !full_name) {
       console.log('❌ Dữ liệu đầu vào không hợp lệ');
       return res.status(400).json({
         success: false,
-        message: 'Vui lòng cung cấp đầy đủ thông tin bắt buộc'
+        message: 'Vui lòng cung cấp đầy đủ thông tin bắt buộc: email, mật khẩu và họ tên'
       });
     }
 
     console.log('🔍 Kiểm tra email đã tồn tại:', email);
-    const [existingUser] = await pool.query(
-      'SELECT * FROM users WHERE email = ?',
-      [email]
-    );
+    
+    try {
+      const [existingUser] = await pool.query(
+        'SELECT * FROM users WHERE email = ?',
+        [email]
+      );
 
-    console.log('✅ Kết quả kiểm tra:', existingUser.length > 0 ? 'Email đã tồn tại' : 'Email chưa được sử dụng');
+      console.log('✅ Kết quả kiểm tra:', existingUser.length > 0 ? 'Email đã tồn tại' : 'Email chưa được sử dụng');
 
-    if (existingUser.length > 0) {
-      console.log('❌ Email đã tồn tại:', email);
-      return res.status(400).json({
+      if (existingUser.length > 0) {
+        console.log('❌ Email đã tồn tại:', email);
+        return res.status(400).json({
+          success: false,
+          message: 'Email này đã được đăng ký'
+        });
+      }
+    } catch (error) {
+      console.error('❌ Lỗi khi kiểm tra email:', error.message);
+      return res.status(500).json({
         success: false,
-        message: 'Email này đã được đăng ký'
+        message: 'Lỗi khi kiểm tra email: ' + error.message
       });
     }
 
+    // Mã hoá mật khẩu
     console.log('🔐 Đang mã hoá mật khẩu...');
     const hashedPassword = await bcrypt.hash(password, 12);
+    console.log('✅ Mã hoá mật khẩu thành công');
 
+    // Lưu thông tin vào cơ sở dữ liệu
     console.log('💾 Đang lưu thông tin người dùng mới vào CSDL...');
-    const [result] = await pool.query(
-      'INSERT INTO users (email, password, full_name, phone_number, school, status, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [email, hashedPassword, full_name, phone_number || null, school || null, 'active', 'user']
-    );
+    try {
+      const [result] = await pool.query(
+        'INSERT INTO users (email, password, full_name, phone_number, school, status, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [email, hashedPassword, full_name, phone_number || null, school || null, 'active', 'user']
+      );
 
-    console.log('✅ Kết quả thêm người dùng:', result);
-    console.log('✅ Đăng ký thành công, user ID:', result.insertId);
+      console.log('✅ Kết quả thêm người dùng:', result);
+      console.log('✅ Đăng ký thành công, user ID:', result.insertId);
 
-    res.status(201).json({
-      success: true,
-      message: 'Đăng ký thành công',
-      userId: result.insertId
-    });
+      res.status(201).json({
+        success: true,
+        message: 'Đăng ký thành công',
+        userId: result.insertId
+      });
+    } catch (error) {
+      console.error('❌ LỖI KHI LƯU DỮ LIỆU:', error.message);
+      console.error('SQL state:', error.sqlState);
+      console.error('SQL code:', error.code);
+      throw error; // Ném lỗi để catchAsync xử lý
+    }
   } catch (error) {
-    console.error('❌ LỖI ĐĂNG KÝ:', error.message);
+    console.error('❌ LỖI TỔNG THỂ:', error.message);
     console.error('Chi tiết lỗi:', error.stack);
     console.error('SQL state (nếu có):', error.sqlState);
     console.error('SQL code (nếu có):', error.code);
@@ -85,55 +107,72 @@ exports.register = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   
+  console.log('🔄 Xử lý đăng nhập cho email:', email);
+  
   if (!email || !password) {
+    console.log('❌ Thiếu thông tin đăng nhập');
     return res.status(400).json({
       success: false,
       message: 'Vui lòng cung cấp email và mật khẩu'
     });
   }
   
-  const [rows] = await pool.query(
-    'SELECT * FROM users WHERE email = ?',
-    [email]
-  );
-  
-  const user = rows[0];
-  
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(401).json({
-      success: false,
-      message: 'Email hoặc mật khẩu không chính xác'
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+    
+    const user = rows[0];
+    console.log('🔍 Tìm thấy user:', user ? 'Có' : 'Không');
+    
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      console.log('❌ Email hoặc mật khẩu không chính xác');
+      return res.status(401).json({
+        success: false,
+        message: 'Email hoặc mật khẩu không chính xác'
+      });
+    }
+    
+    if (user.status !== 'active') {
+      console.log('❌ Tài khoản không hoạt động:', user.status);
+      return res.status(401).json({
+        success: false,
+        message: 'Tài khoản của bạn đã bị khoá hoặc chưa kích hoạt'
+      });
+    }
+    
+    // Tạo JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE }
+    );
+    
+    const cookieOptions = {
+      expires: new Date(Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+      httpOnly: true
+    };
+    
+    // Xoá mật khẩu trước khi gửi về client
+    delete user.password;
+    
+    // Gửi cookie và thông tin phản hồi
+    res.cookie('token', token, cookieOptions);
+    console.log('✅ Đăng nhập thành công, đã tạo token');
+    
+    res.status(200).json({
+      success: true,
+      token,
+      user
     });
+  } catch (error) {
+    console.error('❌ Lỗi đăng nhập:', error.message);
+    throw error;
   }
-  
-  if (user.status !== 'active') {
-    return res.status(401).json({
-      success: false,
-      message: 'Tài khoản của bạn đã bị khoá hoặc chưa kích hoạt'
-    });
-  }
-  
-  const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE }
-  );
-  
-  const cookieOptions = {
-    expires: new Date(Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
-    httpOnly: true
-  };
-  
-  user.password = undefined;
-  
-  res.cookie('token', token, cookieOptions);
-  res.status(200).json({
-    success: true,
-    token,
-    user
-  });
 });
 
+// Các export khác giữ nguyên
 exports.logout = (req, res) => {
   res.cookie('token', 'none', {
     expires: new Date(Date.now() + 10 * 1000),

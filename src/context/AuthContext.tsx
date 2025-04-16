@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService, { User, LoginData, RegisterData, UpdateUserData, UpdatePasswordData } from '@/services/authService';
@@ -19,23 +20,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(authService.getStoredUser());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(authService.isAuthenticated());
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  // Kiểm tra trạng thái xác thực khi component mount
   useEffect(() => {
     const checkAuthStatus = async () => {
-      if (isAuthenticated) {
+      setIsLoading(true);
+      
+      if (isAuthenticated && !user) {
         try {
+          console.log('🔍 Đang kiểm tra thông tin người dùng từ token...');
           const { data } = await authService.getCurrentUser();
           setUser(data);
+          console.log('✅ Đã lấy thông tin người dùng thành công');
         } catch (error) {
-          // Nếu token không hợp lệ, xoá khỏi localStorage
+          console.error('❌ Token không hợp lệ hoặc hết hạn', error);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           setIsAuthenticated(false);
           setUser(null);
         }
       }
+      
       setIsLoading(false);
     };
 
@@ -45,15 +52,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (data: LoginData) => {
     setIsLoading(true);
     try {
+      console.log('🔄 AuthContext: Đang đăng nhập...');
       const response = await authService.login(data);
       setUser(response.user);
       setIsAuthenticated(true);
       toast.success('Đăng nhập thành công!');
       navigate('/');
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
-      toast.error(errorMessage);
-      throw error;
+      console.error('❌ AuthContext: Lỗi đăng nhập', error);
+      // Toast đã được xử lý trong authService
     } finally {
       setIsLoading(false);
     }
@@ -69,9 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       navigate('/login');
     } catch (error: any) {
       console.error('❌ AuthContext: Lỗi đăng ký', error);
-      const errorMessage = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
-      toast.error(errorMessage);
-      throw error;
+      // Toast đã được xử lý trong authService
     } finally {
       setIsLoading(false);
     }
@@ -83,10 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authService.logout();
       setUser(null);
       setIsAuthenticated(false);
-      toast.success('Đăng xuất thành công!');
       navigate('/login');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('❌ Logout error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -97,9 +101,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.updateUserDetails(data);
       setUser(prev => prev ? { ...prev, ...data } : null);
-      toast.success('Cập nhật thông tin thành công!');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Cập nhật thông tin thất bại');
+      // Toast đã được xử lý trong authService
       throw error;
     } finally {
       setIsLoading(false);
@@ -110,26 +113,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await authService.updatePassword(data);
-      toast.success('Đổi mật khẩu thành công!');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Đổi mật khẩu thất bại');
+      // Toast đã được xử lý trong authService
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
+  const value = {
+    user,
+    isAuthenticated,
+    isLoading,
+    login,
+    register,
+    logout,
+    updateUser,
+    updatePassword
+  };
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated,
-      isLoading,
-      login,
-      register,
-      logout,
-      updateUser,
-      updatePassword
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

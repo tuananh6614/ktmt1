@@ -1,6 +1,7 @@
 
 const mysql = require('mysql2/promise');
 
+// Hiển thị thông tin kết nối chi tiết
 console.log('🔌 Thông tin kết nối CSDL:', {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
@@ -45,16 +46,35 @@ const pool = mysql.createPool({
           status ENUM('active', 'inactive', 'banned') DEFAULT 'active',
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
       `);
       console.log('✅ Đã tạo bảng users thành công');
+      
+      // Thêm người dùng admin mặc định
+      const hashedPassword = require('bcryptjs').hashSync('admin123', 12);
+      try {
+        await conn.query(`
+          INSERT INTO users (email, password, full_name, role, status)
+          VALUES (?, ?, ?, ?, ?)
+        `, ['admin@dtktmt1.edu.vn', hashedPassword, 'Admin', 'admin', 'active']);
+        console.log('✅ Đã tạo tài khoản admin mặc định');
+      } catch (error) {
+        console.log('⚠️ Không thể tạo tài khoản admin mặc định:', error.message);
+      }
     } else {
       console.log('✅ Bảng users đã tồn tại');
+      
+      // Kiểm tra cấu trúc bảng users
+      const [columns] = await conn.query(`
+        SHOW COLUMNS FROM users
+      `);
+      console.log('📊 Cấu trúc bảng users:', columns.map(c => `${c.Field} (${c.Type})`).join(', '));
     }
     
     conn.release();
   } catch (err) {
     console.error('❌ Error connecting to database:', err);
+    console.error('Vui lòng kiểm tra thông tin kết nối CSDL trong file .env');
   }
 })();
 

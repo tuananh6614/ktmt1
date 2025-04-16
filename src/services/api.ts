@@ -2,8 +2,8 @@
 import axios from 'axios';
 import { toast } from 'sonner';
 
-// Sử dụng đường dẫn tương đối thay vì localhost
-const API_URL = '/api';
+// Sử dụng baseURL phù hợp với môi trường
+const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -11,15 +11,23 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // Timeout 10 giây
 });
 
 // Interceptor để thêm token vào header nếu có
 api.interceptors.request.use(
   (config) => {
+    console.log('🚀 Gửi request đến:', config.baseURL + config.url);
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    if (config.data) {
+      console.log('📦 Request data:', JSON.stringify(config.data));
+    }
+    
     return config;
   },
   (error) => {
@@ -32,6 +40,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     console.log('✅ API Response success:', response.config.url);
+    console.log('📦 Response data:', response.data);
     return response;
   },
   (error) => {
@@ -39,18 +48,18 @@ api.interceptors.response.use(
     
     // Hiển thị lỗi chi tiết hơn
     if (error.response) {
-      console.error('Response data:', error.response.data);
       console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
       
       // Hiển thị thông báo lỗi từ server nếu có
       const errorMessage = error.response.data?.message || 'Có lỗi xảy ra';
       toast.error(errorMessage);
     } else if (error.request) {
       console.error('Request made but no response:', error.request);
-      toast.error('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+      toast.error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc máy chủ đã khởi động chưa.');
     } else {
       console.error('Error setting up request:', error.message);
-      toast.error('Lỗi kết nối. Vui lòng thử lại sau.');
+      toast.error('Lỗi kết nối: ' + error.message);
     }
     
     // Xử lý lỗi 401 - Unauthorized
