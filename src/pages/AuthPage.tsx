@@ -1,22 +1,17 @@
-import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { useUniversities } from "@/hooks/useUniversities";
 
 const AuthPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
-
-  const { data: universities, isLoading: isLoadingUniversities } = useUniversities();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,32 +35,28 @@ const AuthPage = () => {
     }, 1500);
   };
 
-  const tabVariants: Variants = {
-    hidden: { 
-      opacity: 0,
-      x: 50,
-      scale: 0.95
-    },
+  // Tab transition variants
+  const tabVariants = {
+    hidden: { opacity: 0, y: 20 },
     visible: { 
-      opacity: 1,
-      x: 0,
-      scale: 1,
+      opacity: 1, 
+      y: 0,
       transition: {
         type: "spring",
-        stiffness: 350,
-        damping: 25
+        stiffness: 300,
+        damping: 30
       }
     },
     exit: { 
-      opacity: 0,
-      x: -50,
-      scale: 0.95,
+      opacity: 0, 
+      y: -20, 
       transition: {
         duration: 0.2
       }
     }
   };
 
+  // Decorative bubble animation - Fixed to properly type the variants
   const bubbleVariants: Variants = {
     initial: {
       opacity: 0.7,
@@ -87,6 +78,7 @@ const AuthPage = () => {
     }
   };
 
+  // Tab indicator animation
   const indicatorVariants = {
     login: { x: 0 },
     register: { x: "100%" },
@@ -94,6 +86,7 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row overflow-hidden">
+      {/* Left side - Decorative */}
       <motion.div 
         initial={{ x: -50, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -104,6 +97,7 @@ const AuthPage = () => {
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/20 to-transparent"></div>
           
+          {/* Animated floating bubbles - Fixed the TypeScript error with the transition property */}
           {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
@@ -241,6 +235,7 @@ const AuthPage = () => {
         </motion.div>
       </motion.div>
       
+      {/* Right side - Auth forms */}
       <div className="flex-1 flex items-center justify-center p-8 md:p-10 overflow-auto min-h-screen">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -298,6 +293,7 @@ const AuthPage = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="card-3d bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
           >
+            {/* Tabs with custom transition */}
             <div className="relative">
               <Tabs 
                 defaultValue="login" 
@@ -305,6 +301,7 @@ const AuthPage = () => {
                 onValueChange={(value) => setActiveTab(value)}
                 value={activeTab}
               >
+                {/* Custom tab list with sliding indicator */}
                 <div className="relative">
                   <TabsList className="grid w-full grid-cols-2 p-1 bg-gray-100/80 rounded-none">
                     <TabsTrigger 
@@ -325,6 +322,7 @@ const AuthPage = () => {
                     </TabsTrigger>
                   </TabsList>
                   
+                  {/* Animated background indicator */}
                   <motion.div 
                     className="absolute left-0 top-0 w-1/2 h-full bg-white rounded-md shadow-md"
                     variants={indicatorVariants}
@@ -491,26 +489,13 @@ const AuthPage = () => {
                           </div>
                           
                           <div className="relative">
-                            <Select name="university" required>
-                              <SelectTrigger 
-                                className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
-                              >
-                                <SelectValue placeholder="Chọn trường đại học" />
-                              </SelectTrigger>
-                              <SelectContent className="max-h-[300px]">
-                                {isLoadingUniversities ? (
-                                  <SelectItem value="loading" disabled>
-                                    Đang tải danh sách trường...
-                                  </SelectItem>
-                                ) : (
-                                  universities?.map((uni, index) => (
-                                    <SelectItem key={index} value={uni.name}>
-                                      {uni.name}
-                                    </SelectItem>
-                                  ))
-                                )}
-                              </SelectContent>
-                            </Select>
+                            <School className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <Input
+                              placeholder="Trường/Cơ quan"
+                              type="text"
+                              className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                              required
+                            />
                           </div>
                           
                           <div className="relative">
@@ -589,6 +574,7 @@ const AuthPage = () => {
             </div>
           </motion.div>
 
+          {/* Decorative elements */}
           <div className="absolute -z-10">
             <div className="absolute -bottom-10 -right-20 w-40 h-40 rounded-full bg-gradient-to-r from-dtktmt-blue-light/20 to-dtktmt-purple-light/20 blur-3xl"></div>
             <div className="absolute -top-10 -left-20 w-40 h-40 rounded-full bg-gradient-to-r from-dtktmt-purple-light/10 to-dtktmt-pink-light/10 blur-3xl"></div>

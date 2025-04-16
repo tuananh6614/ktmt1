@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -425,25 +426,5 @@
 
   .spotlight:hover::before {
     opacity: 1;
-  }
-
-  .select-content {
-    @apply bg-white/90 backdrop-blur-sm border border-gray-100 shadow-lg;
-    animation: selectContentShow 0.2s ease-out;
-  }
-
-  .select-item {
-    @apply relative flex w-full cursor-default select-none items-center rounded-sm py-2.5 pl-8 pr-4 text-sm outline-none transition-colors hover:bg-dtktmt-blue-light/20 hover:text-dtktmt-blue-dark focus:bg-dtktmt-blue-light/20 focus:text-dtktmt-blue-dark data-[disabled]:pointer-events-none data-[disabled]:opacity-50;
-  }
-
-  @keyframes selectContentShow {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
 }
