@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
@@ -164,7 +165,8 @@ const AuthPage = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-3xl font-bold mb-4 glowing-text">
+            className="text-3xl font-bold mb-4 glowing-text"
+          >
             Học liệu chất lượng cho sinh viên Điện Tử
           </motion.h2>
           
@@ -172,7 +174,8 @@ const AuthPage = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="mb-8">
+            className="mb-8"
+          >
             Tham gia ngay để truy cập vào kho tàng học liệu đa dạng và chất lượng cao về Điện tử và Kỹ thuật máy tính.
           </motion.p>
           
@@ -181,7 +184,8 @@ const AuthPage = () => {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.7 }}
-              className="flex items-center">
+              className="flex items-center"
+            >
               <div className="bg-white/20 p-2 rounded-full mr-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                   <path d="M15.5 9.5 12 6 8.5 9.5"></path>
@@ -204,7 +208,8 @@ const AuthPage = () => {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="flex items-center">
+              className="flex items-center"
+            >
               <div className="bg-white/20 p-2 rounded-full mr-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                   <circle cx="12" cy="12" r="10"></circle>
@@ -224,7 +229,8 @@ const AuthPage = () => {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.9 }}
-              className="flex items-center">
+              className="flex items-center"
+            >
               <div className="bg-white/20 p-2 rounded-full mr-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
@@ -533,3 +539,50 @@ const AuthPage = () => {
                           </div>
                           
                           <div className="flex items-center">
+                            <input
+                              id="agree-terms"
+                              name="agree-terms"
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-dtktmt-purple-medium focus:ring-dtktmt-purple-light"
+                              required
+                            />
+                            <label htmlFor="agree-terms" className="ml-2 text-sm text-gray-600">
+                              Tôi đồng ý với <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark">Điều khoản sử dụng</a> và <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark">Chính sách bảo mật</a>
+                            </label>
+                          </div>
+                          
+                          <Button
+                            className="w-full mt-2 bg-gradient-to-r from-dtktmt-purple-medium to-dtktmt-pink-medium hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1 text-white font-medium"
+                            disabled={isLoading}
+                            type="submit"
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Đang đăng ký...</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center gap-2">
+                                <UserPlus size={18} />
+                                <span>Đăng ký</span>
+                              </div>
+                            )}
+                          </Button>
+                        </form>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </Tabs>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default AuthPage;
