@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -185,6 +184,14 @@ export default {
                     '75%': {
                         transform: 'translateX(-1px) rotate(-1deg)'
                     }
+                },
+                "shimmer": {
+                    "0%": { transform: "translateX(-100%)" },
+                    "100%": { transform: "translateX(100%)" }
+                },
+                "gradient-slide": {
+                    "0%": { backgroundPosition: "0% 50%" },
+                    "100%": { backgroundPosition: "200% 50%" }
                 }
 			},
 			animation: {
@@ -199,6 +206,8 @@ export default {
                 'bounce-light': 'bounce-light 2s ease-in-out infinite',
                 'wave': 'wave 2s ease-in-out infinite',
                 'wobble': 'wobble 1s ease-in-out',
+                "shimmer": "shimmer 2s infinite",
+                "gradient-slide": "gradient-slide 3s linear infinite"
 			},
             fontFamily: {
                 'vietnam': ['Be Vietnam Pro', 'sans-serif'],

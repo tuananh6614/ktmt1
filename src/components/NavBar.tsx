@@ -27,7 +27,7 @@ const NavBar = () => {
               to="/" 
               className="flex items-center gap-2 group transition-all duration-300"
             >
-              <div className="bg-dtktmt-blue-medium rounded-full p-2 group-hover:shadow-lg group-hover:shadow-dtktmt-blue-light/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+              <div className="bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-blue-dark rounded-full p-2 group-hover:shadow-lg group-hover:shadow-dtktmt-blue-light/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full group-hover:before:animate-[shimmer_1s_ease-in-out_infinite] before:transition-transform">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   width="24" 
@@ -38,13 +38,13 @@ const NavBar = () => {
                   strokeWidth="2" 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
-                  className="text-white group-hover:animate-pulse-soft"
+                  className="text-white group-hover:animate-pulse-soft relative z-10"
                 >
                   <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
                   <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
                 </svg>
               </div>
-              <span className="font-montserrat font-bold text-xl text-dtktmt-blue-dark group-hover:text-dtktmt-blue-medium group-hover:scale-105 transition-all duration-300 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-dtktmt-blue-medium after:scale-x-0 after:origin-right after:transition-transform after:duration-300 group-hover:after:scale-x-100 group-hover:after:origin-left">
+              <span className="font-montserrat font-bold text-xl bg-gradient-to-r from-dtktmt-blue-dark via-dtktmt-blue-medium to-dtktmt-blue-dark bg-[length:200%_100%] group-hover:bg-[length:200%_100%] group-hover:animate-[gradient-slide_3s_linear_infinite] bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-gradient-to-r after:from-dtktmt-blue-medium after:to-dtktmt-blue-dark after:scale-x-0 after:origin-right after:transition-transform after:duration-300 group-hover:after:scale-x-100 after:hover:origin-left">
                 DT&KTMT1
               </span>
             </Link>
