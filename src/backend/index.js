@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
@@ -13,6 +14,14 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
+
+// Middleware để log request
+app.use((req, res, next) => {
+  console.log(`📝 ${req.method} ${req.url}`);
+  console.log('📦 Request body:', req.body);
+  next();
+});
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -24,7 +33,7 @@ app.get('/', (req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('❌ SERVER ERROR:', err.stack);
   res.status(500).json({
     success: false,
     message: 'Lỗi máy chủ',
@@ -34,4 +43,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`API endpoints available at http://localhost:${PORT}/api`);
 });
