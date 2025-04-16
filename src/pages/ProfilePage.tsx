@@ -1,338 +1,355 @@
 
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion } from "framer-motion";
-import { User, Phone, School, Lock, Save, LogOut, Mail } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import ChatBox from "@/components/ChatBox";
+import CourseCard from "@/components/CourseCard";
+import DocumentCard from "@/components/DocumentCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  User, Settings, Clock, BookOpen, FileText, Award, 
+  Edit, Save, LogOut, Star, Activity, Check, X 
+} from "lucide-react";
 
 const ProfilePage = () => {
-  const { user, updateUser, updatePassword, logout, isLoading } = useAuth();
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   
-  // Thông tin người dùng
-  const [fullName, setFullName] = useState(user?.full_name || "");
-  const [phoneNumber, setPhoneNumber] = useState(user?.phone_number || "");
-  const [school, setSchool] = useState(user?.school || "");
-  
-  // Mật khẩu
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  
-  const [activeTab, setActiveTab] = useState("profile");
-  
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await updateUser({
-        full_name: fullName,
-        phone_number: phoneNumber,
-        school: school
-      });
-    } catch (error) {
-      console.error("Error updating profile:", error);
-    }
+  // Sample user data
+  const user = {
+    name: "Nguyễn Văn Anh",
+    role: "Học sinh/ sinh viên",
+    email: "anhnguyen@example.com",
+    phone: "0987654321",
+    school: "Trường Đại học Bách Khoa TP.HCM",
+    image: "/placeholder.svg",
+    joined: "01/01/2023",
+    stats: {
+      coursesCompleted: 5,
+      coursesInProgress: 2,
+      documentsPurchased: 3,
+      avgScore: 85,
+    },
   };
   
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Kiểm tra mật khẩu xác nhận
-    if (newPassword !== confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
-      return;
-    }
-    
-    try {
-      await updatePassword({
-        currentPassword,
-        newPassword
-      });
-      
-      // Xoá form sau khi cập nhật thành công
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (error) {
-      console.error("Error updating password:", error);
-    }
-  };
+  // Sample courses data
+  const myCourses = [
+    {
+      id: "1",
+      title: "Vi điều khiển STM32",
+      description: "Lập trình vi điều khiển STM32 từ cơ bản đến nâng cao",
+      image: "/placeholder.svg",
+      lessons: 24,
+      duration: "12 tuần",
+      level: "Trung cấp",
+      progress: 75,
+    },
+    {
+      id: "2",
+      title: "Điện tử số",
+      description: "Tổng quan về kỹ thuật điện tử số và thiết kế mạch",
+      image: "/placeholder.svg",
+      lessons: 18,
+      duration: "8 tuần",
+      level: "Cơ bản",
+      progress: 100,
+    },
+    {
+      id: "3",
+      title: "Xử lý tín hiệu số",
+      description: "Các phương pháp xử lý tín hiệu số trong thực tế",
+      image: "/placeholder.svg",
+      lessons: 30,
+      duration: "16 tuần",
+      level: "Nâng cao",
+      progress: 35,
+    },
+  ];
   
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
-  
+  // Sample documents data
+  const myDocuments = [
+    {
+      id: "1",
+      title: "Cấu trúc máy tính",
+      description: "Tài liệu về kiến trúc và tổ chức máy tính",
+      image: "/placeholder.svg",
+      price: 150000,
+      fileType: "pdf",
+      preview: "https://arxiv.org/pdf/1511.06434.pdf",
+      isPurchased: true,
+    },
+    {
+      id: "2",
+      title: "Tài liệu thực hành VHDL",
+      description: "Bộ bài tập và giải pháp cho VHDL",
+      image: "/placeholder.svg",
+      price: 180000,
+      fileType: "docx",
+      preview: "https://arxiv.org/pdf/1511.06434.pdf",
+      isPurchased: true,
+    },
+    {
+      id: "3",
+      title: "Vi điều khiển ARM Cortex-M4",
+      description: "Tài liệu tham khảo cho lập trình ARM Cortex-M4",
+      image: "/placeholder.svg",
+      price: 200000,
+      fileType: "pdf",
+      preview: "https://arxiv.org/pdf/1511.06434.pdf",
+      isPurchased: true,
+    },
+  ];
+
+  // Sample test results
+  const testResults = [
+    {
+      id: "1",
+      title: "Kiểm tra Vi điều khiển STM32",
+      date: "20/05/2023",
+      score: 95,
+      total: 100,
+    },
+    {
+      id: "2",
+      title: "Kiểm tra Điện tử số - Chương 1",
+      date: "15/02/2023",
+      score: 88,
+      total: 100,
+    },
+    {
+      id: "3",
+      title: "Kiểm tra Điện tử số - Chương 2",
+      date: "02/03/2023",
+      score: 75,
+      total: 100,
+    },
+  ];
+
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <NavBar />
-      
-      <div className="container mx-auto px-4 py-10 min-h-[calc(100vh-200px)]">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-dtktmt-blue-dark mb-8">
-              Tài khoản của tôi
-            </h1>
+
+      <main className="flex-1 py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+            <div className="h-48 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium relative">
+              <div className="absolute -bottom-16 left-8 flex items-end">
+                <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden">
+                  <img
+                    src={user.image}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="ml-4 mb-4">
+                  <h1 className="text-2xl font-bold text-white">{user.name}</h1>
+                  <p className="text-white/90">{user.role}</p>
+                </div>
+              </div>
+              <div className="absolute top-4 right-4 flex gap-2">
+                <Button 
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm" 
+                  onClick={() => setIsEditingProfile(!isEditingProfile)}
+                >
+                  {isEditingProfile ? (
+                    <><X size={16} className="mr-1" /> Hủy</>
+                  ) : (
+                    <><Edit size={16} className="mr-1" /> Chỉnh sửa</>
+                  )}
+                </Button>
+                {isEditingProfile && (
+                  <Button 
+                    className="bg-dtktmt-blue-dark hover:bg-dtktmt-blue-dark/80"
+                    onClick={() => setIsEditingProfile(false)}
+                  >
+                    <Save size={16} className="mr-1" /> Lưu
+                  </Button>
+                )}
+                <Button variant="destructive">
+                  <LogOut size={16} className="mr-1" /> Đăng xuất
+                </Button>
+              </div>
+            </div>
             
-            <Card className="shadow-lg border border-gray-100">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-2xl">Thông tin cá nhân</CardTitle>
-                <CardDescription>
-                  Quản lý thông tin cá nhân và bảo mật tài khoản
-                </CardDescription>
-              </CardHeader>
-              
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full"
-              >
-                <TabsList className="grid grid-cols-2 max-w-[400px] mx-4">
-                  <TabsTrigger value="profile">Hồ sơ</TabsTrigger>
-                  <TabsTrigger value="security">Bảo mật</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="profile" className="p-4">
-                  <form onSubmit={handleUpdateProfile}>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="email"
-                          className="text-sm font-medium text-gray-700 mb-1 block"
-                        >
-                          Email
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="email"
-                            type="email"
-                            value={user?.email}
-                            disabled
-                            className="pl-10 bg-gray-50"
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Mail className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Email không thể thay đổi sau khi đăng ký
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="fullName"
-                          className="text-sm font-medium text-gray-700 mb-1 block"
-                        >
-                          Họ và tên
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="fullName"
-                            type="text"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <User className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="phoneNumber"
-                          className="text-sm font-medium text-gray-700 mb-1 block"
-                        >
-                          Số điện thoại
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="phoneNumber"
-                            type="tel"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Phone className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="school"
-                          className="text-sm font-medium text-gray-700 mb-1 block"
-                        >
-                          Trường/Cơ quan
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="school"
-                            type="text"
-                            value={school}
-                            onChange={(e) => setSchool(e.target.value)}
-                            className="pl-10"
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <School className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
+            <div className="pt-20 pb-6 px-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <h2 className="text-lg font-medium mb-4 flex items-center">
+                    <User size={18} className="text-dtktmt-blue-medium mr-2" />
+                    Thông tin cá nhân
+                  </h2>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm text-gray-500 block mb-1">Email</label>
+                      {isEditingProfile ? (
+                        <Input defaultValue={user.email} />
+                      ) : (
+                        <p>{user.email}</p>
+                      )}
+                    </div>
                     
-                    <CardFooter className="flex justify-between">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleLogout}
-                        className="flex items-center gap-2"
-                      >
-                        <LogOut size={16} />
-                        <span>Đăng xuất</span>
-                      </Button>
-                      
-                      <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="flex items-center gap-2 bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark"
-                      >
-                        {isLoading ? (
-                          <>
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Đang cập nhật...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Save size={16} />
-                            <span>Lưu thay đổi</span>
-                          </>
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </TabsContent>
-                
-                <TabsContent value="security" className="p-4">
-                  <form onSubmit={handleUpdatePassword}>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="currentPassword"
-                          className="text-sm font-medium text-gray-700 mb-1 block"
-                        >
-                          Mật khẩu hiện tại
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="currentPassword"
-                            type="password"
-                            value={currentPassword}
-                            onChange={(e) => setCurrentPassword(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Lock className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="newPassword"
-                          className="text-sm font-medium text-gray-700 mb-1 block"
-                        >
-                          Mật khẩu mới
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="newPassword"
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Lock className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <label
-                          htmlFor="confirmPassword"
-                          className="text-sm font-medium text-gray-700 mb-1 block"
-                        >
-                          Xác nhận mật khẩu mới
-                        </label>
-                        <div className="relative">
-                          <Input
-                            id="confirmPassword"
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Lock className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
+                    <div>
+                      <label className="text-sm text-gray-500 block mb-1">Số điện thoại</label>
+                      {isEditingProfile ? (
+                        <Input defaultValue={user.phone} />
+                      ) : (
+                        <p>{user.phone}</p>
+                      )}
+                    </div>
                     
-                    <CardFooter className="flex justify-end">
-                      <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="flex items-center gap-2 bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark"
-                      >
-                        {isLoading ? (
-                          <>
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Đang cập nhật...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Lock size={16} />
-                            <span>Đổi mật khẩu</span>
-                          </>
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </Card>
+                    <div>
+                      <label className="text-sm text-gray-500 block mb-1">Trường/Cơ quan</label>
+                      {isEditingProfile ? (
+                        <Input defaultValue={user.school} />
+                      ) : (
+                        <p>{user.school}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-gray-500 block mb-1">Ngày tham gia</label>
+                      <p>{user.joined}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h2 className="text-lg font-medium mb-4 flex items-center">
+                    <Activity size={18} className="text-dtktmt-pink-medium mr-2" />
+                    Thống kê học tập
+                  </h2>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-dtktmt-blue-light/30 p-4 rounded-lg flex flex-col items-center justify-center">
+                      <BookOpen size={24} className="text-dtktmt-blue-medium mb-2" />
+                      <p className="text-xl font-bold">{user.stats.coursesCompleted}</p>
+                      <p className="text-sm text-gray-600">Khóa học đã hoàn thành</p>
+                    </div>
+                    
+                    <div className="bg-dtktmt-pink-light/30 p-4 rounded-lg flex flex-col items-center justify-center">
+                      <Clock size={24} className="text-dtktmt-pink-medium mb-2" />
+                      <p className="text-xl font-bold">{user.stats.coursesInProgress}</p>
+                      <p className="text-sm text-gray-600">Khóa học đang học</p>
+                    </div>
+                    
+                    <div className="bg-dtktmt-purple-light/30 p-4 rounded-lg flex flex-col items-center justify-center">
+                      <FileText size={24} className="text-dtktmt-purple-medium mb-2" />
+                      <p className="text-xl font-bold">{user.stats.documentsPurchased}</p>
+                      <p className="text-sm text-gray-600">Tài liệu đã mua</p>
+                    </div>
+                    
+                    <div className="bg-dtktmt-yellow/30 p-4 rounded-lg flex flex-col items-center justify-center">
+                      <Award size={24} className="text-dtktmt-blue-dark mb-2" />
+                      <p className="text-xl font-bold">{user.stats.avgScore}</p>
+                      <p className="text-sm text-gray-600">Điểm trung bình</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </motion.div>
-      </div>
-      
+
+          <Tabs defaultValue="courses" className="w-full">
+            <TabsList className="w-full grid grid-cols-3 mb-8">
+              <TabsTrigger value="courses" className="flex items-center gap-2">
+                <BookOpen size={16} />
+                <span>Khóa học của tôi</span>
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="flex items-center gap-2">
+                <FileText size={16} />
+                <span>Tài liệu của tôi</span>
+              </TabsTrigger>
+              <TabsTrigger value="tests" className="flex items-center gap-2">
+                <Star size={16} />
+                <span>Kết quả kiểm tra</span>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="courses">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myCourses.map((course) => (
+                  <CourseCard key={course.id} {...course} />
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="documents">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myDocuments.map((document) => (
+                  <DocumentCard key={document.id} {...document} />
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="tests">
+              <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-dtktmt-blue-light/30">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Bài kiểm tra
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Ngày làm bài
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Điểm số
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Trạng thái
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Thao tác
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {testResults.map((test) => (
+                        <tr key={test.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-medium text-gray-900">{test.title}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-gray-700">{test.date}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-medium text-gray-900">{test.score}/{test.total}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {test.score >= 70 ? (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <Check size={12} className="mr-1" />
+                                Đạt
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <X size={12} className="mr-1" />
+                                Không đạt
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right">
+                            <Button variant="outline" size="sm">
+                              Xem chi tiết
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+
       <Footer />
-    </>
+      <ChatBox />
+    </div>
   );
 };
 

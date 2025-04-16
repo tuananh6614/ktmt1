@@ -1,64 +1,42 @@
-
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
 
 const AuthPage = () => {
-  // Form states
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [school, setSchool] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  
-  // UI states
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
-  
-  // Auth context
-  const { login, register, isLoading } = useAuth();
-  const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await login({ email, password });
-    } catch (error) {
-      console.error('Login error:', error);
-    }
+    setIsLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      toast.success("Đăng nhập thành công!");
+      setIsLoading(false);
+    }, 1500);
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
-    // Validate password match
-    if (password !== confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
-      return;
-    }
-    
-    try {
-      await register({
-        email,
-        password,
-        full_name: fullName,
-        phone_number: phoneNumber,
-        school
-      });
-    } catch (error) {
-      console.error('Register error:', error);
-    }
+    // Simulate API call
+    setTimeout(() => {
+      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
+      setIsLoading(false);
+    }, 1500);
   };
 
   // Tab transition variants
-  const tabVariants: Variants = {
+  const tabVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
@@ -78,7 +56,7 @@ const AuthPage = () => {
     }
   };
 
-  // Decorative bubble animation
+  // Decorative bubble animation - Fixed to properly type the variants
   const bubbleVariants: Variants = {
     initial: {
       opacity: 0.7,
@@ -297,7 +275,7 @@ const AuthPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              {activeTab === "login" ? "Chào mừng bạn quay trở lại" : "Đăng ký tài khoản mới"}
+              Chào mừng bạn quay trở lại
             </motion.h2>
             <motion.p 
               className="text-gray-600"
@@ -305,9 +283,7 @@ const AuthPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
-              {activeTab === "login" 
-                ? "Đăng nhập để trải nghiệm đầy đủ các tính năng" 
-                : "Điền thông tin để tạo tài khoản mới"}
+              Đăng nhập hoặc đăng ký để trải nghiệm đầy đủ
             </motion.p>
           </div>
           
@@ -383,8 +359,6 @@ const AuthPage = () => {
                               type="email"
                               className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
                               required
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
                             />
                           </div>
                           <div className="relative">
@@ -394,8 +368,6 @@ const AuthPage = () => {
                               type={showPassword ? "text" : "password"}
                               className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
                               required
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
                             />
                             <button
                               type="button"
@@ -493,8 +465,6 @@ const AuthPage = () => {
                               type="text"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
-                              value={fullName}
-                              onChange={(e) => setFullName(e.target.value)}
                             />
                           </div>
                           
@@ -505,8 +475,6 @@ const AuthPage = () => {
                               type="email"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
                             />
                           </div>
                           
@@ -517,8 +485,6 @@ const AuthPage = () => {
                               type="tel"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
-                              value={phoneNumber}
-                              onChange={(e) => setPhoneNumber(e.target.value)}
                             />
                           </div>
                           
@@ -529,8 +495,6 @@ const AuthPage = () => {
                               type="text"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
-                              value={school}
-                              onChange={(e) => setSchool(e.target.value)}
                             />
                           </div>
                           
@@ -541,8 +505,6 @@ const AuthPage = () => {
                               type={showPassword ? "text" : "password"}
                               className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
                             />
                             <button
                               type="button"
@@ -560,8 +522,6 @@ const AuthPage = () => {
                               type={showConfirmPassword ? "text" : "password"}
                               className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
                             />
                             <button
                               type="button"
