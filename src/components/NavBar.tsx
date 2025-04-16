@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Bell, Menu, X, LogIn, Home, Book, FileText, Info, User } from "lucide-react";
@@ -24,18 +23,33 @@ const NavBar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="bg-dtktmt-blue-medium rounded-full p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+            <Link 
+              to="/" 
+              className="flex items-center gap-2 group transition-all duration-300"
+            >
+              <div className="bg-dtktmt-blue-medium rounded-full p-2 group-hover:shadow-lg group-hover:shadow-dtktmt-blue-light/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="text-white group-hover:animate-pulse-soft"
+                >
                   <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
                   <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
                 </svg>
               </div>
-              <span className="font-montserrat font-bold text-xl text-dtktmt-blue-dark">DT&KTMT1</span>
+              <span className="font-montserrat font-bold text-xl text-dtktmt-blue-dark group-hover:text-dtktmt-blue-medium group-hover:scale-105 transition-all duration-300 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-dtktmt-blue-medium after:scale-x-0 after:origin-right after:transition-transform after:duration-300 group-hover:after:scale-x-100 group-hover:after:origin-left">
+                DT&KTMT1
+              </span>
             </Link>
           </div>
 
-          {/* Desktop menu */}
           <div className="hidden md:flex md:items-center md:space-x-4">
             {navLinks.map((link) => (
               <Link
@@ -73,7 +87,6 @@ const NavBar = () => {
             </Link>
           </div>
 
-          {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
             <Button variant="ghost" className="relative hover:bg-transparent">
               <Bell size={20} className="text-dtktmt-blue-medium" />
@@ -90,7 +103,6 @@ const NavBar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isOpen && (
         <div className="md:hidden bg-white/90 backdrop-blur-md shadow-lg rounded-b-2xl">
           <div className="px-2 pt-2 pb-3 space-y-1">
