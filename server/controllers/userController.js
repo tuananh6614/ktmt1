@@ -11,32 +11,34 @@ const catchAsync = (fn) => {
   };
 };
 
-// Đăng ký người dùng mới
 exports.register = catchAsync(async (req, res, next) => {
+  console.log('👤 Đang xử lý đăng ký người dùng mới:', req.body.email);
   const { email, password, full_name, phone_number, school } = req.body;
   
-  // Kiểm tra email đã tồn tại chưa
+  console.log('🔍 Kiểm tra email đã tồn tại:', email);
   const [existingUser] = await pool.query(
     'SELECT * FROM users WHERE email = ?',
     [email]
   );
   
   if (existingUser.length > 0) {
+    console.log('❌ Email đã tồn tại:', email);
     return res.status(400).json({
       success: false,
       message: 'Email này đã được đăng ký'
     });
   }
   
-  // Mã hoá mật khẩu
+  console.log('🔐 Đang mã hoá mật khẩu...');
   const hashedPassword = await bcrypt.hash(password, 12);
   
-  // Tạo người dùng mới
+  console.log('💾 Đang lưu thông tin người dùng mới vào CSDL...');
   await pool.query(
     'INSERT INTO users (email, password, full_name, phone_number, school) VALUES (?, ?, ?, ?, ?)',
     [email, hashedPassword, full_name, phone_number, school || null]
   );
   
+  console.log('✅ Đăng ký thành công:', email);
   res.status(201).json({
     success: true,
     message: 'Đăng ký thành công'

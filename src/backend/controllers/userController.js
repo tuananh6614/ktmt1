@@ -1,4 +1,3 @@
-
 const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -11,27 +10,33 @@ const catchAsync = (fn) => {
 };
 
 exports.register = catchAsync(async (req, res) => {
+  console.log('👤 Đang xử lý đăng ký người dùng mới:', req.body.email);
   const { email, password, full_name, phone_number, school } = req.body;
   
+  console.log('🔍 Kiểm tra email đã tồn tại:', email);
   const [existingUser] = await pool.query(
     'SELECT * FROM users WHERE email = ?',
     [email]
   );
   
   if (existingUser.length > 0) {
+    console.log('❌ Email đã tồn tại:', email);
     return res.status(400).json({
       success: false,
       message: 'Email này đã được đăng ký'
     });
   }
   
+  console.log('🔐 Đang mã hoá mật khẩu...');
   const hashedPassword = await bcrypt.hash(password, 12);
   
+  console.log('💾 Đang lưu thông tin người dùng mới vào CSDL...');
   await pool.query(
     'INSERT INTO users (email, password, full_name, phone_number, school) VALUES (?, ?, ?, ?, ?)',
     [email, hashedPassword, full_name, phone_number, school || null]
   );
   
+  console.log('✅ Đăng ký thành công:', email);
   res.status(201).json({
     success: true,
     message: 'Đăng ký thành công'
@@ -39,15 +44,18 @@ exports.register = catchAsync(async (req, res) => {
 });
 
 exports.login = catchAsync(async (req, res) => {
+  console.log('🔑 Đang xử lý đăng nhập:', req.body.email);
   const { email, password } = req.body;
   
   if (!email || !password) {
+    console.log('❌ Thiếu email hoặc mật khẩu');
     return res.status(400).json({
       success: false,
       message: 'Vui lòng cung cấp email và mật khẩu'
     });
   }
   
+  console.log('🔍 Đang tìm kiếm người dùng trong CSDL:', email);
   const [rows] = await pool.query(
     'SELECT * FROM users WHERE email = ?',
     [email]
@@ -55,7 +63,19 @@ exports.login = catchAsync(async (req, res) => {
   
   const user = rows[0];
   
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  if (!user) {
+    console.log('❌ Không tìm thấy người dùng:', email);
+    return res.status(401).json({
+      success: false,
+      message: 'Email hoặc mật khẩu không chính xác'
+    });
+  }
+
+  console.log('🔐 Đang kiểm tra mật khẩu...');
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+  if (!isPasswordValid) {
+    console.log('❌ Mật khẩu không chính xác:', email);
     return res.status(401).json({
       success: false,
       message: 'Email hoặc mật khẩu không chính xác'
@@ -63,12 +83,14 @@ exports.login = catchAsync(async (req, res) => {
   }
   
   if (user.status !== 'active') {
+    console.log('❌ Tài khoản không hoạt động:', email);
     return res.status(401).json({
       success: false,
       message: 'Tài khoản của bạn đã bị khoá hoặc chưa kích hoạt'
     });
   }
   
+  console.log('🎟️ Đang tạo token...');
   const token = jwt.sign(
     { id: user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET || 'your-secret-key',
@@ -77,6 +99,7 @@ exports.login = catchAsync(async (req, res) => {
   
   user.password = undefined;
   
+  console.log('✅ Đăng nhập thành công:', email);
   res.status(200).json({
     success: true,
     token,
