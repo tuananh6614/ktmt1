@@ -251,7 +251,7 @@ const AuthPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              Chào m��ng bạn quay trở lại
+              Chào mừng bạn quay trở lại
             </motion.h2>
             <motion.p 
               className="text-gray-600"
