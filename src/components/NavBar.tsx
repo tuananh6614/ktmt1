@@ -27,7 +27,7 @@ const NavBar = () => {
               to="/" 
               className="flex items-center gap-2 group transition-all duration-300"
             >
-              <div className="bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-blue-dark rounded-full p-2 group-hover:shadow-lg group-hover:shadow-dtktmt-blue-light/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full group-hover:before:animate-[shimmer_1s_ease-in-out_infinite] before:transition-transform">
+              <div className="bg-gradient-to-br from-[#8B5CF6] via-[#D946EF] to-[#0EA5E9] rounded-full p-2.5 group-hover:shadow-xl group-hover:shadow-blue-400/50 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent before:-translate-x-full group-hover:before:animate-[shimmer_1.5s_ease-in-out_infinite] before:transition-transform after:absolute after:inset-0 after:rounded-full after:bg-gradient-to-br after:from-white/20 after:to-transparent after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-500">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   width="24" 
@@ -35,16 +35,16 @@ const NavBar = () => {
                   viewBox="0 0 24 24" 
                   fill="none" 
                   stroke="currentColor" 
-                  strokeWidth="2" 
+                  strokeWidth="2.5" 
                   strokeLinecap="round" 
                   strokeLinejoin="round" 
-                  className="text-white group-hover:animate-pulse-soft relative z-10"
+                  className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] group-hover:animate-pulse-soft relative z-10"
                 >
-                  <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                  <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" className="group-hover:stroke-[#FFE29F]"></path>
+                  <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" className="group-hover:stroke-[#FFA99F]"></path>
                 </svg>
               </div>
-              <span className="font-montserrat font-bold text-xl bg-gradient-to-r from-dtktmt-blue-dark via-dtktmt-blue-medium to-dtktmt-blue-dark bg-[length:200%_100%] group-hover:bg-[length:200%_100%] group-hover:animate-[gradient-slide_3s_linear_infinite] bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-gradient-to-r after:from-dtktmt-blue-medium after:to-dtktmt-blue-dark after:scale-x-0 after:origin-right after:transition-transform after:duration-300 group-hover:after:scale-x-100 after:hover:origin-left">
+              <span className="font-montserrat font-bold text-xl bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#0EA5E9] bg-[length:200%_100%] group-hover:bg-[length:200%_100%] group-hover:animate-[gradient-slide_3s_linear_infinite] bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-gradient-to-r after:from-[#8B5CF6] after:to-[#0EA5E9] after:scale-x-0 after:origin-right after:transition-transform after:duration-500 group-hover:after:scale-x-100 after:hover:origin-left group-hover:drop-shadow-[0_2px_8px_rgba(139,92,246,0.5)]">
                 DT&KTMT1
               </span>
             </Link>
