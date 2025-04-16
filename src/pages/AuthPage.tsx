@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useUniversities } from "@/hooks/useUniversities";
 
 const AuthPage = () => {
@@ -39,20 +40,26 @@ const AuthPage = () => {
     }, 1500);
   };
 
-  const tabVariants = {
-    hidden: { opacity: 0, y: 20 },
+  const tabVariants: Variants = {
+    hidden: { 
+      opacity: 0,
+      x: 50,
+      scale: 0.95
+    },
     visible: { 
-      opacity: 1, 
-      y: 0,
+      opacity: 1,
+      x: 0,
+      scale: 1,
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 30
+        stiffness: 350,
+        damping: 25
       }
     },
     exit: { 
-      opacity: 0, 
-      y: -20, 
+      opacity: 0,
+      x: -50,
+      scale: 0.95,
       transition: {
         duration: 0.2
       }
