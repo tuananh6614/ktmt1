@@ -7,11 +7,11 @@ const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
+  withCredentials: false, // Changed to false to avoid CORS preflight issues
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // Timeout 10 giây
+  timeout: 15000, // Increased timeout to 15 seconds
 });
 
 // Interceptor để thêm token vào header nếu có

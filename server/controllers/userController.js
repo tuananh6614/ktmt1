@@ -19,48 +19,39 @@ const catchAsync = (fn) => {
   };
 };
 
-// Thêm log chi tiết hơn để kiểm tra lỗi
 exports.register = catchAsync(async (req, res, next) => {
   console.log('👤 Đang xử lý đăng ký người dùng mới:', req.body.email);
   console.log('📦 Dữ liệu nhận được:', JSON.stringify(req.body));
   
-  try {
-    const { email, password, full_name, phone_number, school } = req.body;
+  // Kiểm tra dữ liệu đầu vào
+  const { email, password, full_name, phone_number, school } = req.body;
 
-    // Kiểm tra dữ liệu đầu vào
-    if (!email || !password || !full_name) {
-      console.log('❌ Dữ liệu đầu vào không hợp lệ');
+  if (!email || !password || !full_name) {
+    console.log('❌ Dữ liệu đầu vào không hợp lệ');
+    return res.status(400).json({
+      success: false,
+      message: 'Vui lòng cung cấp đầy đủ thông tin bắt buộc: email, mật khẩu và họ tên'
+    });
+  }
+
+  console.log('🔍 Kiểm tra email đã tồn tại:', email);
+  
+  try {
+    // Kiểm tra email đã tồn tại chưa
+    const [existingUser] = await pool.query(
+      'SELECT * FROM users WHERE email = ?',
+      [email]
+    );
+
+    console.log('🔍 Kết quả kiểm tra email:', existingUser.length > 0 ? 'Email đã tồn tại' : 'Email chưa được sử dụng');
+
+    if (existingUser.length > 0) {
       return res.status(400).json({
         success: false,
-        message: 'Vui lòng cung cấp đầy đủ thông tin bắt buộc: email, mật khẩu và họ tên'
+        message: 'Email này đã được đăng ký'
       });
     }
-
-    console.log('🔍 Kiểm tra email đã tồn tại:', email);
     
-    try {
-      const [existingUser] = await pool.query(
-        'SELECT * FROM users WHERE email = ?',
-        [email]
-      );
-
-      console.log('✅ Kết quả kiểm tra:', existingUser.length > 0 ? 'Email đã tồn tại' : 'Email chưa được sử dụng');
-
-      if (existingUser.length > 0) {
-        console.log('❌ Email đã tồn tại:', email);
-        return res.status(400).json({
-          success: false,
-          message: 'Email này đã được đăng ký'
-        });
-      }
-    } catch (error) {
-      console.error('❌ Lỗi khi kiểm tra email:', error.message);
-      return res.status(500).json({
-        success: false,
-        message: 'Lỗi khi kiểm tra email: ' + error.message
-      });
-    }
-
     // Mã hoá mật khẩu
     console.log('🔐 Đang mã hoá mật khẩu...');
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -68,38 +59,33 @@ exports.register = catchAsync(async (req, res, next) => {
 
     // Lưu thông tin vào cơ sở dữ liệu
     console.log('💾 Đang lưu thông tin người dùng mới vào CSDL...');
-    try {
-      const [result] = await pool.query(
-        'INSERT INTO users (email, password, full_name, phone_number, school, status, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [email, hashedPassword, full_name, phone_number || null, school || null, 'active', 'user']
-      );
+    const [result] = await pool.query(
+      'INSERT INTO users (email, password, full_name, phone_number, school, status, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [email, hashedPassword, full_name, phone_number || null, school || null, 'active', 'user']
+    );
 
-      console.log('✅ Kết quả thêm người dùng:', result);
-      console.log('✅ Đăng ký thành công, user ID:', result.insertId);
+    console.log('✅ Đăng ký thành công, user ID:', result.insertId);
 
-      res.status(201).json({
-        success: true,
-        message: 'Đăng ký thành công',
-        userId: result.insertId
-      });
-    } catch (error) {
-      console.error('❌ LỖI KHI LƯU DỮ LIỆU:', error.message);
-      console.error('SQL state:', error.sqlState);
-      console.error('SQL code:', error.code);
-      throw error; // Ném lỗi để catchAsync xử lý
-    }
+    res.status(201).json({
+      success: true,
+      message: 'Đăng ký thành công',
+      userId: result.insertId
+    });
   } catch (error) {
-    console.error('❌ LỖI TỔNG THỂ:', error.message);
+    console.error('❌ LỖI KHI XỬ LÝ ĐĂNG KÝ:', error.message);
     console.error('Chi tiết lỗi:', error.stack);
-    console.error('SQL state (nếu có):', error.sqlState);
-    console.error('SQL code (nếu có):', error.code);
-    console.error('SQL errno (nếu có):', error.errno);
     
-    // Báo lỗi trực tiếp cho client để dễ debugging
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({
+        success: false,
+        message: 'Email này đã được đăng ký'
+      });
+    }
+    
     return res.status(500).json({
       success: false,
-      message: 'Đã xảy ra lỗi trong quá trình đăng ký: ' + error.message,
-      error: error.message
+      message: 'Đã xảy ra lỗi trong quá trình đăng ký',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -126,8 +112,17 @@ exports.login = catchAsync(async (req, res, next) => {
     const user = rows[0];
     console.log('🔍 Tìm thấy user:', user ? 'Có' : 'Không');
     
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      console.log('❌ Email hoặc mật khẩu không chính xác');
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Email hoặc mật khẩu không chính xác'
+      });
+    }
+    
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    
+    if (!isPasswordCorrect) {
+      console.log('❌ Mật khẩu không chính xác');
       return res.status(401).json({
         success: false,
         message: 'Email hoặc mật khẩu không chính xác'
@@ -145,26 +140,21 @@ exports.login = catchAsync(async (req, res, next) => {
     // Tạo JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE }
+      process.env.JWT_SECRET || 'dtktmt1_secret_key',
+      { expiresIn: process.env.JWT_EXPIRE || '24h' }
     );
     
-    const cookieOptions = {
-      expires: new Date(Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
-      httpOnly: true
-    };
-    
     // Xoá mật khẩu trước khi gửi về client
-    delete user.password;
+    const userWithoutPassword = { ...user };
+    delete userWithoutPassword.password;
     
-    // Gửi cookie và thông tin phản hồi
-    res.cookie('token', token, cookieOptions);
+    // Gửi response
     console.log('✅ Đăng nhập thành công, đã tạo token');
     
     res.status(200).json({
       success: true,
       token,
-      user
+      user: userWithoutPassword
     });
   } catch (error) {
     console.error('❌ Lỗi đăng nhập:', error.message);
@@ -174,11 +164,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
 // Các export khác giữ nguyên
 exports.logout = (req, res) => {
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
-  });
-  
   res.status(200).json({
     success: true,
     message: 'Đăng xuất thành công'
@@ -186,61 +171,97 @@ exports.logout = (req, res) => {
 };
 
 exports.getMe = catchAsync(async (req, res, next) => {
-  const [rows] = await pool.query(
-    'SELECT id, email, full_name, phone_number, school, role, status FROM users WHERE id = ?',
-    [req.user.id]
-  );
-  
-  const user = rows[0];
-  
-  res.status(200).json({
-    success: true,
-    data: user
-  });
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, email, full_name, phone_number, school, role, status FROM users WHERE id = ?',
+      [req.user.id]
+    );
+    
+    const user = rows[0];
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy thông tin người dùng'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    console.error('❌ Lỗi lấy thông tin người dùng:', error.message);
+    throw error;
+  }
 });
 
 exports.updateDetails = catchAsync(async (req, res, next) => {
   const { full_name, phone_number, school } = req.body;
   
-  await pool.query(
-    'UPDATE users SET full_name = ?, phone_number = ?, school = ? WHERE id = ?',
-    [full_name, phone_number, school, req.user.id]
-  );
-  
-  res.status(200).json({
-    success: true,
-    message: 'Cập nhật thông tin thành công'
-  });
+  try {
+    await pool.query(
+      'UPDATE users SET full_name = ?, phone_number = ?, school = ? WHERE id = ?',
+      [full_name, phone_number, school, req.user.id]
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: 'Cập nhật thông tin thành công'
+    });
+  } catch (error) {
+    console.error('❌ Lỗi cập nhật thông tin người dùng:', error.message);
+    throw error;
+  }
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const { currentPassword, newPassword } = req.body;
   
-  const [rows] = await pool.query(
-    'SELECT * FROM users WHERE id = ?',
-    [req.user.id]
-  );
-  
-  const user = rows[0];
-  
-  const isMatch = await bcrypt.compare(currentPassword, user.password);
-  
-  if (!isMatch) {
-    return res.status(401).json({
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
       success: false,
-      message: 'Mật khẩu hiện tại không chính xác'
+      message: 'Vui lòng cung cấp đầy đủ mật khẩu hiện tại và mật khẩu mới'
     });
   }
   
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
-  
-  await pool.query(
-    'UPDATE users SET password = ? WHERE id = ?',
-    [hashedPassword, req.user.id]
-  );
-  
-  res.status(200).json({
-    success: true,
-    message: 'Đổi mật khẩu thành công'
-  });
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM users WHERE id = ?',
+      [req.user.id]
+    );
+    
+    const user = rows[0];
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy thông tin người dùng'
+      });
+    }
+    
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Mật khẩu hiện tại không chính xác'
+      });
+    }
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    
+    await pool.query(
+      'UPDATE users SET password = ? WHERE id = ?',
+      [hashedPassword, req.user.id]
+    );
+    
+    res.status(200).json({
+      success: true,
+      message: 'Đổi mật khẩu thành công'
+    });
+  } catch (error) {
+    console.error('❌ Lỗi đổi mật khẩu:', error.message);
+    throw error;
+  }
 });

@@ -39,7 +39,7 @@ export interface User {
 const authService = {
   // Đăng ký tài khoản mới
   register: async (userData: RegisterData) => {
-    console.log('🔄 Đang gửi yêu cầu đăng ký:', userData.email);
+    console.log('🔄 authService: Đang gửi yêu cầu đăng ký:', userData.email);
     try {
       const response = await api.post('/users/register', userData);
       console.log('✅ Đăng ký thành công:', response.data);
@@ -102,7 +102,12 @@ const authService = {
       return response.data;
     } catch (error: any) {
       console.error('❌ Lỗi đăng xuất:', error);
-      toast.error('Đăng xuất thất bại!');
+      
+      // Vẫn xóa thông tin người dùng khỏi localStorage ngay cả khi API lỗi
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      toast.error('Có lỗi xảy ra khi đăng xuất!');
       throw error;
     }
   },
@@ -161,7 +166,13 @@ const authService = {
   getStoredUser: (): User | null => {
     const userString = localStorage.getItem('user');
     if (userString) {
-      return JSON.parse(userString);
+      try {
+        return JSON.parse(userString);
+      } catch (error) {
+        console.error('❌ Lỗi parse user data từ localStorage:', error);
+        localStorage.removeItem('user'); // Xóa dữ liệu không hợp lệ
+        return null;
+      }
     }
     return null;
   }

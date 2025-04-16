@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors({
   origin: '*', // Cho phép tất cả các origin trong môi trường phát triển
-  credentials: true,
+  credentials: false, // Changed to false to avoid CORS preflight issues
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
@@ -24,6 +24,17 @@ app.use((req, res, next) => {
   console.log(`📝 ${req.method} ${req.originalUrl}`);
   console.log('📦 Headers:', req.headers);
   console.log('📦 Request body:', req.body);
+  
+  // Add CORS headers to every response
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  
+  // Handle OPTIONS method
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   next();
 });
 
@@ -46,6 +57,14 @@ app.get('/api/test', (req, res) => {
 
 // Error handler middleware
 app.use(errorHandler);
+
+// Error handler for 404 - Not found
+app.use((req, res, next) => {
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.originalUrl}`
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);

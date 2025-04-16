@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (data: LoginData) => {
     setIsLoading(true);
     try {
-      console.log('🔄 AuthContext: Đang đăng nhập...');
+      console.log('🔄 AuthContext: Đang đăng nhập...', data);
       const response = await authService.login(data);
       setUser(response.user);
       setIsAuthenticated(true);
@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
-      console.log('🔄 AuthContext: Đang gửi yêu cầu đăng ký');
+      console.log('🔄 AuthContext: Đang gửi yêu cầu đăng ký', data);
       await authService.register(data);
       console.log('✅ AuthContext: Đăng ký thành công');
       toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
