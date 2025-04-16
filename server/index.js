@@ -12,10 +12,19 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors({
   origin: '*', // Cho phép tất cả các origin trong môi trường phát triển
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+// Log middleware để kiểm tra request
+app.use((req, res, next) => {
+  console.log(`📝 ${req.method} ${req.originalUrl}`);
+  console.log('📦 Request body:', req.body);
+  next();
+});
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -29,5 +38,7 @@ app.get('/', (req, res) => {
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`✅ Server is running on port ${PORT}`);
+  console.log(`🔗 API endpoint: http://localhost:${PORT}/api/users`);
 });
+

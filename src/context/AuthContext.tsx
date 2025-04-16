@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService, { User, LoginData, RegisterData, UpdateUserData, UpdatePasswordData } from '@/services/authService';
@@ -52,7 +51,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success('Đăng nhập thành công!');
       navigate('/');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Đăng nhập thất bại');
+      const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsLoading(false);
@@ -62,11 +62,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
+      console.log('🔄 AuthContext: Đang gửi yêu cầu đăng ký');
       await authService.register(data);
+      console.log('✅ AuthContext: Đăng ký thành công');
       toast.success('Đăng ký thành công! Vui lòng đăng nhập.');
       navigate('/login');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Đăng ký thất bại');
+      console.error('❌ AuthContext: Lỗi đăng ký', error);
+      const errorMessage = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsLoading(false);

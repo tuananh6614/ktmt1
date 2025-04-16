@@ -1,5 +1,5 @@
-
 import api from './api';
+import { toast } from 'sonner';
 
 export interface RegisterData {
   email: string;
@@ -38,20 +38,36 @@ export interface User {
 const authService = {
   // Đăng ký tài khoản mới
   register: async (userData: RegisterData) => {
-    const response = await api.post('/users/register', userData);
-    return response.data;
+    console.log('🔄 Đang gửi yêu cầu đăng ký:', userData.email);
+    try {
+      const response = await api.post('/users/register', userData);
+      console.log('✅ Đăng ký thành công:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Lỗi đăng ký:', error);
+      const errorMsg = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+      toast.error(errorMsg);
+      throw error;
+    }
   },
 
   // Đăng nhập
   login: async (loginData: LoginData) => {
-    const response = await api.post('/users/login', loginData);
-    const { token, user } = response.data;
-    
-    // Lưu token và thông tin user vào localStorage
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-    
-    return response.data;
+    console.log('🔄 Đang gửi yêu cầu đăng nhập:', loginData.email);
+    try {
+      const response = await api.post('/users/login', loginData);
+      const { token, user } = response.data;
+      
+      // Lưu token và thông tin user vào localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      console.log('✅ Đăng nhập thành công:', user.email);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Lỗi đăng nhập:', error);
+      throw error;
+    }
   },
 
   // Đăng xuất
