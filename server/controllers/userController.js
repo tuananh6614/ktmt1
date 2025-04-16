@@ -17,11 +17,12 @@ const catchAsync = (fn) => {
   };
 };
 
+// Thêm log chi tiết hơn để kiểm tra lỗi
 exports.register = catchAsync(async (req, res, next) => {
   console.log('👤 Đang xử lý đăng ký người dùng mới:', req.body.email);
   console.log('📦 Dữ liệu nhận được:', JSON.stringify(req.body));
   const { email, password, full_name, phone_number, school } = req.body;
-  
+
   if (!email || !password || !full_name) {
     console.log('❌ Dữ liệu đầu vào không hợp lệ');
     return res.status(400).json({
@@ -29,16 +30,16 @@ exports.register = catchAsync(async (req, res, next) => {
       message: 'Vui lòng cung cấp đầy đủ thông tin bắt buộc'
     });
   }
-  
+
   try {
     console.log('🔍 Kiểm tra email đã tồn tại:', email);
     const [existingUser] = await pool.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
-    
+
     console.log('✅ Kết quả kiểm tra:', existingUser.length > 0 ? 'Email đã tồn tại' : 'Email chưa được sử dụng');
-    
+
     if (existingUser.length > 0) {
       console.log('❌ Email đã tồn tại:', email);
       return res.status(400).json({
@@ -46,19 +47,19 @@ exports.register = catchAsync(async (req, res, next) => {
         message: 'Email này đã được đăng ký'
       });
     }
-    
+
     console.log('🔐 Đang mã hoá mật khẩu...');
     const hashedPassword = await bcrypt.hash(password, 12);
-    
+
     console.log('💾 Đang lưu thông tin người dùng mới vào CSDL...');
     const [result] = await pool.query(
       'INSERT INTO users (email, password, full_name, phone_number, school, status, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [email, hashedPassword, full_name, phone_number, school || null, 'active', 'user']
     );
-    
+
     console.log('✅ Kết quả thêm người dùng:', result);
     console.log('✅ Đăng ký thành công, user ID:', result.insertId);
-    
+
     res.status(201).json({
       success: true,
       message: 'Đăng ký thành công',
@@ -67,7 +68,12 @@ exports.register = catchAsync(async (req, res, next) => {
   } catch (error) {
     console.error('❌ LỖI ĐĂNG KÝ:', error.message);
     console.error('Chi tiết lỗi:', error.stack);
-    throw error;
+    // Thêm thông báo lỗi chi tiết hơn
+    res.status(500).json({
+      success: false,
+      message: 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
