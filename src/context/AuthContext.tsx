@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService, { User, LoginData, RegisterData, UpdateUserData, UpdatePasswordData } from '@/services/authService';
@@ -17,8 +16,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Separated the hook to its own named function
-function useAuth() {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -26,14 +24,12 @@ function useAuth() {
   return context;
 }
 
-// The Provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(authService.getStoredUser());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(authService.isAuthenticated());
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  // Kiểm tra trạng thái xác thực khi component mount
   useEffect(() => {
     const checkAuthStatus = async () => {
       setIsLoading(true);
@@ -148,6 +144,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-
-// Export the hook separately from the component
-export { useAuth };

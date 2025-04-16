@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: '*', // Cho phép tất cả các origin trong môi trường phát triển
-  credentials: false, // Changed to false to avoid CORS preflight issues
+  origin: ['http://localhost:5173', '*'], // Thêm cụ thể origin của frontend và wildcard
+  credentials: true, // Cho phép gửi cookies từ browser
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
@@ -29,6 +29,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
   
   // Handle OPTIONS method
   if (req.method === 'OPTIONS') {

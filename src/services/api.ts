@@ -7,11 +7,11 @@ const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  withCredentials: false, // Changed to false to avoid CORS preflight issues
+  withCredentials: false, // Tắt withCredentials để tránh lỗi CORS
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000, // Increased timeout to 15 seconds
+  timeout: 30000, // Tăng timeout lên 30 giây
 });
 
 // Interceptor để thêm token vào header nếu có
@@ -54,6 +54,9 @@ api.interceptors.response.use(
       // Hiển thị thông báo lỗi từ server nếu có
       const errorMessage = error.response.data?.message || 'Có lỗi xảy ra';
       toast.error(errorMessage);
+    } else if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout:', error.message);
+      toast.error('Yêu cầu bị quá thời gian. Vui lòng kiểm tra kết nối hoặc thử lại sau.');
     } else if (error.request) {
       console.error('Request made but no response:', error.request);
       toast.error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc máy chủ đã khởi động chưa.');

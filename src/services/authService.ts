@@ -1,4 +1,3 @@
-
 import api from './api';
 import { toast } from 'sonner';
 
@@ -36,9 +35,14 @@ export interface User {
   status: 'active' | 'inactive' | 'banned';
 }
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 2000; // 2 giây
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const authService = {
-  // Đăng ký tài khoản mới
-  register: async (userData: RegisterData) => {
+  // Đăng ký tài khoản mới với cơ chế thử lại
+  register: async (userData: RegisterData, retry = 0) => {
     console.log('🔄 authService: Đang gửi yêu cầu đăng ký:', userData.email);
     try {
       const response = await api.post('/users/register', userData);
@@ -48,6 +52,14 @@ const authService = {
     } catch (error: any) {
       console.error('❌ Lỗi đăng ký:', error);
       
+      // Nếu là lỗi mạng và chưa thử lại quá số lần cho phép
+      if ((error.code === 'ECONNABORTED' || !error.response) && retry < MAX_RETRIES) {
+        toast.warning(`Đang thử lại kết nối lần ${retry + 1}...`);
+        await sleep(RETRY_DELAY);
+        return authService.register(userData, retry + 1);
+      }
+      
+      // Xử lý thông báo lỗi
       let errorMsg = 'Đăng ký thất bại. Vui lòng thử lại.';
       
       if (error.response?.data?.message) {
@@ -61,8 +73,8 @@ const authService = {
     }
   },
 
-  // Đăng nhập
-  login: async (loginData: LoginData) => {
+  // Đăng nhập với cơ chế thử lại
+  login: async (loginData: LoginData, retry = 0) => {
     console.log('🔄 Đang gửi yêu cầu đăng nhập:', loginData.email);
     try {
       const response = await api.post('/users/login', loginData);
@@ -78,10 +90,20 @@ const authService = {
     } catch (error: any) {
       console.error('❌ Lỗi đăng nhập:', error);
       
+      // Nếu là lỗi mạng và chưa thử lại quá số lần cho phép
+      if ((error.code === 'ECONNABORTED' || !error.response) && retry < MAX_RETRIES) {
+        toast.warning(`Đang thử lại kết nối lần ${retry + 1}...`);
+        await sleep(RETRY_DELAY);
+        return authService.login(loginData, retry + 1);
+      }
+      
+      // Xử lý thông báo lỗi
       let errorMsg = 'Đăng nhập thất bại. Vui lòng thử lại.';
       
       if (error.response?.data?.message) {
         errorMsg = error.response.data.message;
+      } else if (error.message.includes('timeout')) {
+        errorMsg = 'Kết nối đến máy chủ quá thời gian. Vui lòng thử lại sau.';
       }
       
       toast.error(errorMsg);
