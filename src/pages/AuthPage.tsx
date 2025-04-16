@@ -129,14 +129,29 @@ const AuthPage = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="flex items-center mb-8">
-            <div className="bg-white rounded-full p-2 mr-2 shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-dtktmt-blue-medium">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
-              </svg>
+            className="flex items-center mb-8"
+          >
+            <div className="relative group">
+              <div className="bg-gradient-to-br from-[#8B5CF6] via-[#D946EF] to-[#0EA5E9] rounded-full p-2.5 group-hover:shadow-xl group-hover:shadow-blue-400/50 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/40 before:to-transparent before:-translate-x-full group-hover:before:animate-[shimmer_1.5s_ease-in-out_infinite] before:transition-transform after:absolute after:inset-0 after:rounded-full after:bg-gradient-to-br after:from-white/20 after:to-transparent after:opacity-0 group-hover:after:opacity-100 after:transition-opacity after:duration-500">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] group-hover:animate-pulse-soft relative z-10"
+                >
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" className="group-hover:stroke-[#FFE29F]"></path>
+                  <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" className="group-hover:stroke-[#FFA99F]"></path>
+                </svg>
+              </div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#8B5CF6] to-[#0EA5E9] rounded-full blur opacity-30 group-hover:opacity-70 transition duration-500"></div>
             </div>
-            <h1 className="text-3xl font-bold">DT&KTMT1</h1>
+            <h1 className="text-3xl font-bold ml-2 font-montserrat bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#0EA5E9] bg-[length:200%_100%] group-hover:bg-[length:200%_100%] group-hover:animate-[gradient-slide_3s_linear_infinite] bg-clip-text text-transparent">DT&KTMT1</h1>
           </motion.div>
           
           <motion.h2 
