@@ -10,6 +10,7 @@ interface FeaturedItem {
   description: string;
   image: string;
   link: string;
+  color: string;
 }
 
 const items: FeaturedItem[] = [
@@ -17,8 +18,9 @@ const items: FeaturedItem[] = [
     id: "1",
     title: "Lập trình nhúng với ARM Cortex-M",
     description: "Kiến thức chuyên sâu về lập trình nhúng sử dụng kiến trúc ARM Cortex-M",
-    image: "/lovable-uploads/47f9d951-4fcc-4c74-a8c6-618391ab6fcd.png",
+    image: "/lovable-uploads/c600ba6f-2c57-4adb-b321-0db6c6094a5f.png",
     link: "/khoa-hoc/vi-xu-ly",
+    color: "from-blue-500/80 to-purple-500/80",
   },
   {
     id: "2",
@@ -26,13 +28,15 @@ const items: FeaturedItem[] = [
     description: "Tất cả tài liệu bạn cần cho môn học Điện tử số",
     image: "/lovable-uploads/f747d1e0-acc6-4f25-ae71-e10a2c8015e7.png",
     link: "/tai-lieu/dien-tu-so",
+    color: "from-purple-500/80 to-pink-500/80",
   },
   {
     id: "3",
     title: "Bài kiểm tra năng lực",
     description: "Kiểm tra kiến thức của bạn với các bài kiểm tra chất lượng cao",
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/0ac03c84-f242-4aab-b5d7-712426f58932.png",
     link: "/kiem-tra",
+    color: "from-emerald-500/80 to-blue-500/80",
   },
 ];
 
@@ -78,12 +82,12 @@ const FeaturedSection = () => {
   const currentItem = items[currentIndex];
 
   return (
-    <div className="relative overflow-hidden rounded-xl shadow-lg h-[280px] bg-gradient-to-r from-dtktmt-blue-light via-dtktmt-blue-medium to-dtktmt-purple-medium">
+    <div className="relative overflow-hidden rounded-xl shadow-xl h-[350px] bg-gradient-to-r from-dtktmt-blue-light via-dtktmt-blue-medium to-dtktmt-purple-medium mb-8">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-dtktmt-blue-medium/80 to-dtktmt-purple-medium/80"></div>
+        <div className={`absolute inset-0 bg-gradient-to-r ${currentItem.color}`}></div>
       </div>
       
-      <AnimatePresence initial={false} custom={direction}>
+      <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
           key={currentItem.id}
           custom={direction}
@@ -95,9 +99,9 @@ const FeaturedSection = () => {
           className="absolute inset-0 flex items-center z-10"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 w-full h-full">
-            <div className="flex flex-col justify-center px-6 md:px-10">
+            <div className="flex flex-col justify-center px-8 md:px-12 space-y-4">
               <motion.h2 
-                className="text-xl md:text-2xl font-bold mb-2 text-white"
+                className="text-2xl md:text-3xl font-bold mb-2 text-white drop-shadow-md"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
@@ -105,7 +109,7 @@ const FeaturedSection = () => {
                 {currentItem.title}
               </motion.h2>
               <motion.p 
-                className="text-white/90 mb-5 text-sm"
+                className="text-white/90 mb-5 text-base max-w-md"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
@@ -119,10 +123,10 @@ const FeaturedSection = () => {
               >
                 <Link
                   to={currentItem.link}
-                  className="bg-white text-dtktmt-blue-dark px-5 py-2 rounded-full inline-flex items-center gap-2 font-medium transition-all hover:shadow-md hover:bg-dtktmt-blue-light hover:text-white text-sm"
+                  className="glass-card bg-white/20 text-white px-6 py-3 rounded-full inline-flex items-center gap-2 font-medium transition-all hover:bg-white hover:text-dtktmt-blue-dark hover:shadow-xl transform hover:-translate-y-1"
                 >
-                  Khám phá ngay
-                  <ArrowRight size={16} />
+                  <span>Khám phá ngay</span>
+                  <ArrowRight size={18} />
                 </Link>
               </motion.div>
             </div>
@@ -131,7 +135,7 @@ const FeaturedSection = () => {
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="w-full max-w-md rounded-xl overflow-hidden shadow-lg"
+                className="w-full max-w-md rounded-xl overflow-hidden shadow-2xl premium-card"
               >
                 <img
                   src={currentItem.image}
@@ -145,13 +149,13 @@ const FeaturedSection = () => {
       </AnimatePresence>
 
       {/* Indicators */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1.5 z-20">
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
         {items.map((_, index) => (
           <button
             key={index}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${
+            className={`w-3 h-3 rounded-full transition-all ${
               index === currentIndex
-                ? "bg-white w-6"
+                ? "bg-white w-8 shadow-lg"
                 : "bg-white/50 hover:bg-white/70"
             }`}
             onClick={() => {
@@ -164,17 +168,17 @@ const FeaturedSection = () => {
       
       {/* Navigation Buttons */}
       <button 
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-2 z-20"
+        className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-3 z-20 backdrop-blur-sm transition-all hover:scale-110"
         onClick={prevSlide}
       >
-        <ChevronLeft className="w-4 h-4 text-white" />
+        <ChevronLeft className="w-5 h-5 text-white" />
       </button>
       
       <button 
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-2 z-20"
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-3 z-20 backdrop-blur-sm transition-all hover:scale-110"
         onClick={nextSlide}
       >
-        <ChevronRight className="w-4 h-4 text-white" />
+        <ChevronRight className="w-5 h-5 text-white" />
       </button>
     </div>
   );
