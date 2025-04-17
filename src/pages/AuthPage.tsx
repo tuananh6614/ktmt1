@@ -17,6 +17,7 @@ interface LoginData {
 interface RegisterData {
   email: string;
   password: string;
+  confirm_password?: string;
   full_name: string;
   phone_number: string;
   school: string;
@@ -29,7 +30,6 @@ const AuthPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
 
-  // Form data states
   const [loginData, setLoginData] = useState<LoginData>({
     email: '',
     password: ''
@@ -62,12 +62,11 @@ const AuthPage = () => {
         throw new Error(data.error || 'Đăng nhập thất bại');
       }
 
-      // Lưu token vào localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
       toast.success("Đăng nhập thành công!");
-      navigate('/dashboard'); // Hoặc trang chính sau khi đăng nhập
+      navigate('/dashboard');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Đăng nhập thất bại');
     } finally {
@@ -94,14 +93,13 @@ const AuthPage = () => {
         throw new Error(data.error || 'Đăng ký thất bại');
       }
 
-      // Lưu token vào localStorage nếu API trả về
       if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
       }
 
       toast.success("Đăng ký thành công!");
-      setActiveTab("login"); // Chuyển về tab đăng nhập
+      setActiveTab("login");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Đăng ký thất bại');
     } finally {
@@ -125,7 +123,6 @@ const AuthPage = () => {
     }));
   };
 
-  // Tab transition variants
   const tabVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -146,7 +143,6 @@ const AuthPage = () => {
     }
   };
 
-  // Decorative bubble animation - Fixed to properly type the variants
   const bubbleVariants: Variants = {
     initial: {
       opacity: 0.7,
@@ -168,7 +164,6 @@ const AuthPage = () => {
     }
   };
 
-  // Tab indicator animation
   const indicatorVariants = {
     login: { x: 0 },
     register: { x: "100%" },
@@ -187,7 +182,6 @@ const AuthPage = () => {
           <div className="absolute inset-0 bg-black opacity-10"></div>
           <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/20 to-transparent"></div>
           
-          {/* Animated floating bubbles - Fixed the TypeScript error with the transition property */}
           {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
@@ -325,7 +319,6 @@ const AuthPage = () => {
         </motion.div>
       </motion.div>
       
-      {/* Right side - Auth forms */}
       <div className="flex-1 flex items-center justify-center p-8 md:p-10 overflow-auto min-h-screen">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -383,7 +376,6 @@ const AuthPage = () => {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="card-3d bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
           >
-            {/* Tabs with custom transition */}
             <div className="relative">
               <Tabs 
                 defaultValue="login" 
@@ -391,7 +383,6 @@ const AuthPage = () => {
                 onValueChange={(value) => setActiveTab(value)}
                 value={activeTab}
               >
-                {/* Custom tab list with sliding indicator */}
                 <div className="relative">
                   <TabsList className="grid w-full grid-cols-2 p-1 bg-gray-100/80 rounded-none">
                     <TabsTrigger 
@@ -412,7 +403,6 @@ const AuthPage = () => {
                     </TabsTrigger>
                   </TabsList>
                   
-                  {/* Animated background indicator */}
                   <motion.div 
                     className="absolute left-0 top-0 w-1/2 h-full bg-white rounded-md shadow-md"
                     variants={indicatorVariants}
@@ -655,7 +645,7 @@ const AuthPage = () => {
                               required
                             />
                             <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                              Tôi đồng ý với <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Điều khoản sử dụng</a> và <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Chính sách bảo mật</a>
+                              Tôi đ��ng ý với <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Điều khoản sử dụng</a> và <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Chính sách bảo mật</a>
                             </label>
                           </div>
                           
@@ -688,7 +678,6 @@ const AuthPage = () => {
             </div>
           </motion.div>
 
-          {/* Decorative elements */}
           <div className="absolute -z-10">
             <div className="absolute -bottom-10 -right-20 w-40 h-40 rounded-full bg-gradient-to-r from-dtktmt-blue-light/20 to-dtktmt-purple-light/20 blur-3xl"></div>
             <div className="absolute -top-10 -left-20 w-40 h-40 rounded-full bg-gradient-to-r from-dtktmt-purple-light/10 to-dtktmt-pink-light/10 blur-3xl"></div>

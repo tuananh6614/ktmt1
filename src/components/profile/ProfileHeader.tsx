@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Edit, Save, LogOut, X } from "lucide-react";
+import StatsSection from "./StatsSection";
 
 interface ProfileHeaderProps {
   user: {
@@ -13,6 +14,12 @@ interface ProfileHeaderProps {
     school: string;
     image: string;
     joined: string;
+    stats: {
+      coursesCompleted: number;
+      coursesInProgress: number;
+      documentsPurchased: number;
+      avgScore: number;
+    };
   };
 }
 
