@@ -9,6 +9,7 @@ import CourseCard from "@/components/CourseCard";
 import DocumentCard from "@/components/DocumentCard";
 import { motion } from "framer-motion";
 import FeaturedSection from "@/components/FeaturedSection";
+import CoursePromoBanner from "@/components/CoursePromoBanner";
 import {
   Carousel,
   CarouselContent,
@@ -183,6 +184,7 @@ const Index = () => {
         <div className="container mx-auto px-4 pt-6">
           <FeaturedSection />
 
+          {/* Khóa học nổi bật */}
           <motion.section 
             className="mb-16"
             initial="hidden"
@@ -238,6 +240,65 @@ const Index = () => {
             </div>
           </motion.section>
 
+          {/* Banner quảng cáo đầu tiên sau khóa học nổi bật */}
+          <CoursePromoBanner
+            title="Xây dựng hệ thống IoT từ A-Z"
+            description="Khóa học toàn diện giúp bạn làm chủ công nghệ IoT, từ thiết kế phần cứng đến lập trình phần mềm và kết nối đám mây. Tham gia ngay để nhận ưu đãi 20% học phí!"
+            image="/lovable-uploads/0ac03c84-f242-4aab-b5d7-712426f58932.png"
+            courseId="iot-az"
+            color="blue"
+            position="left"
+          />
+
+          {/* Tài liệu bán chạy */}
+          <motion.section
+            className="mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+          >
+            <div className="flex justify-between items-center mb-8">
+              <motion.div variants={fadeInUp}>
+                <h2 className="text-2xl md:text-3xl font-bold text-dtktmt-blue-dark mb-2">
+                  <span className="gradient-text">Tài liệu</span> bán chạy
+                </h2>
+                <p className="text-gray-500">Tài liệu chất lượng cao được nhiều sinh viên lựa chọn</p>
+              </motion.div>
+              <motion.div variants={fadeInUp}>
+                <Link
+                  to="/tai-lieu"
+                  className="neo-button text-white flex items-center gap-2 text-sm"
+                >
+                  <span>Xem tất cả</span>
+                  <ArrowRight size={16} />
+                </Link>
+              </motion.div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {topDocuments.map((doc, index) => (
+                <motion.div 
+                  key={doc.id} 
+                  variants={fadeInUp}
+                  custom={index}
+                >
+                  <DocumentCard {...doc} />
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* Banner quảng cáo thứ hai sau tài liệu bán chạy */}
+          <CoursePromoBanner
+            title="Khóa học Thiết kế mạch điện tử chuyên nghiệp"
+            description="Từ nguyên lý cơ bản đến thiết kế mạch phức tạp với Altium Designer. Tham gia ngay để nhận tài liệu độc quyền và sự hỗ trợ từ các kỹ sư với hơn 10 năm kinh nghiệm."
+            image="/lovable-uploads/f747d1e0-acc6-4f25-ae71-e10a2c8015e7.png"
+            courseId="thiet-ke-mach"
+            color="purple"
+            position="right"
+          />
+
+          {/* Đánh giá từ sinh viên */}
           <motion.section
             className="py-16 px-6 md:px-10 bg-gradient-to-r from-dtktmt-blue-light/20 to-dtktmt-purple-light/20 rounded-3xl mb-16 shadow-inner"
             initial="hidden"
@@ -290,45 +351,18 @@ const Index = () => {
             </div>
           </motion.section>
 
-          <motion.section
-            className="mb-16"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-          >
-            <div className="flex justify-between items-center mb-8">
-              <motion.div variants={fadeInUp}>
-                <h2 className="text-2xl md:text-3xl font-bold text-dtktmt-blue-dark mb-2">
-                  <span className="gradient-text">Tài liệu</span> bán chạy
-                </h2>
-                <p className="text-gray-500">Tài liệu chất lượng cao được nhiều sinh viên lựa chọn</p>
-              </motion.div>
-              <motion.div variants={fadeInUp}>
-                <Link
-                  to="/tai-lieu"
-                  className="neo-button text-white flex items-center gap-2 text-sm"
-                >
-                  <span>Xem tất cả</span>
-                  <ArrowRight size={16} />
-                </Link>
-              </motion.div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {topDocuments.map((doc, index) => (
-                <motion.div 
-                  key={doc.id} 
-                  variants={fadeInUp}
-                  custom={index}
-                >
-                  <DocumentCard {...doc} />
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
+          {/* Banner quảng cáo thứ ba cuối trang */}
+          <CoursePromoBanner
+            title="Khóa học Vi xử lý và Vi điều khiển"
+            description="Hệ thống kiến thức từ căn bản đến nâng cao về vi xử lý và vi điều khiển ARM Cortex. Thực hành trên các kit phát triển hiện đại và phổ biến nhất hiện nay."
+            image="/lovable-uploads/47f9d951-4fcc-4c74-a8c6-618391ab6fcd.png"
+            courseId="vi-xu-ly"
+            color="cyan"
+            position="left"
+          />
 
           <motion.section 
-            className="py-12 px-6 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium text-white rounded-3xl"
+            className="py-12 px-6 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium text-white rounded-3xl mt-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
