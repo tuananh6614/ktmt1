@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Edit, Save, LogOut, X } from "lucide-react";
+import { Edit2, Save, X, Key } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import StatsSection from "./StatsSection";
@@ -27,19 +27,64 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = ({ user }: ProfileHeaderProps) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const navigate = useNavigate();
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [newName, setNewName] = useState(user.name);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    toast.success("Đăng xuất thành công!");
-    navigate('/login');
+  const handleSaveProfile = async () => {
+    try {
+      // Gọi API để cập nhật tên
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/api/profile/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ full_name: newName })
+      });
+
+      if (!response.ok) throw new Error('Lỗi cập nhật thông tin');
+
+      toast.success("Đã cập nhật thông tin!");
+      setIsEditingProfile(false);
+    } catch (error) {
+      toast.error("Không thể cập nhật thông tin. Vui lòng thử lại!");
+    }
   };
-  
-  const handleSaveProfile = () => {
-    // Tại đây sau này có thể thêm logic để cập nhật thông tin người dùng lên server
-    toast.success("Đã lưu thông tin!");
-    setIsEditingProfile(false);
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Mật khẩu mới không khớp!");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3000/api/profile/change-password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword
+        })
+      });
+
+      if (!response.ok) throw new Error('Lỗi đổi mật khẩu');
+
+      toast.success("Đã đổi mật khẩu thành công!");
+      setIsEditingPassword(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    } catch (error) {
+      toast.error("Không thể đổi mật khẩu. Vui lòng thử lại!");
+    }
   };
 
   return (
@@ -72,7 +117,7 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
             {isEditingProfile ? (
               <><X size={16} className="mr-1" /> Hủy</>
             ) : (
-              <><Edit size={16} className="mr-1" /> Chỉnh sửa</>
+              <><Edit2 size={16} className="mr-1" /> Chỉnh sửa</>
             )}
           </Button>
           {isEditingProfile && (
@@ -83,12 +128,6 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
               <Save size={16} className="mr-1" /> Lưu
             </Button>
           )}
-          <Button 
-            variant="destructive"
-            onClick={handleLogout}
-          >
-            <LogOut size={16} className="mr-1" /> Đăng xuất
-          </Button>
         </div>
       </div>
       
@@ -97,28 +136,78 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
           <div className="space-y-4">
             <div>
               <label className="text-sm text-gray-500 block mb-1">Email</label>
-              {isEditingProfile ? (
-                <Input defaultValue={user.email} />
-              ) : (
-                <p>{user.email}</p>
-              )}
+              <Input defaultValue={user.email} disabled className="bg-gray-50" />
             </div>
             
             <div>
               <label className="text-sm text-gray-500 block mb-1">Số điện thoại</label>
-              {isEditingProfile ? (
-                <Input defaultValue={user.phone} />
-              ) : (
-                <p>{user.phone || "Chưa cập nhật"}</p>
-              )}
+              <Input defaultValue={user.phone} disabled className="bg-gray-50" />
             </div>
             
             <div>
-              <label className="text-sm text-gray-500 block mb-1">Trường/Cơ quan</label>
+              <label className="text-sm text-gray-500 block mb-1">Họ và tên</label>
               {isEditingProfile ? (
-                <Input defaultValue={user.school} />
+                <Input 
+                  value={newName} 
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Nhập tên mới"
+                />
               ) : (
-                <p>{user.school || "Chưa cập nhật"}</p>
+                <Input value={user.name} disabled className="bg-gray-50" />
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-500 block mb-1">Mật khẩu</label>
+              {!isEditingPassword ? (
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start" 
+                  onClick={() => setIsEditingPassword(true)}
+                >
+                  <Key size={16} className="mr-2" /> Đổi mật khẩu
+                </Button>
+              ) : (
+                <div className="space-y-3">
+                  <Input
+                    type="password"
+                    placeholder="Mật khẩu hiện tại"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Mật khẩu mới"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Xác nhận mật khẩu mới"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="default"
+                      onClick={handleChangePassword}
+                      className="flex-1"
+                    >
+                      <Save size={16} className="mr-1" /> Lưu mật khẩu
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditingPassword(false);
+                        setCurrentPassword('');
+                        setNewPassword('');
+                        setConfirmNewPassword('');
+                      }}
+                    >
+                      <X size={16} className="mr-1" /> Hủy
+                    </Button>
+                  </div>
+                </div>
               )}
             </div>
             
