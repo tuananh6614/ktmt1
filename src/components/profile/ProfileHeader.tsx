@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -165,6 +166,11 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
             <div>
               <label className="text-sm text-gray-500 block mb-1">Số điện thoại</label>
               <Input defaultValue={user.phone} disabled className="bg-gray-50" />
+            </div>
+            
+            <div>
+              <label className="text-sm text-gray-500 block mb-1">Trường học</label>
+              <Input defaultValue={user.school || 'Chưa cập nhật'} disabled className="bg-gray-50" />
             </div>
             
             <div>
