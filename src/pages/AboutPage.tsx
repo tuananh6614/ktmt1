@@ -78,31 +78,21 @@ const AboutPage = () => {
       description: "Luôn cập nhật và đổi mới nội dung theo xu hướng công nghệ mới nhất"
     }
   ];
-  
-  // Tech stack showcase
-  const techStack = [
-    { name: "React", logo: "/placeholder.svg", color: "from-blue-400 to-blue-600" },
-    { name: "TypeScript", logo: "/placeholder.svg", color: "from-blue-600 to-blue-800" },
-    { name: "Tailwind CSS", logo: "/placeholder.svg", color: "from-cyan-400 to-cyan-600" },
-    { name: "Framer Motion", logo: "/placeholder.svg", color: "from-purple-400 to-purple-600" },
-    { name: "Next.js", logo: "/placeholder.svg", color: "from-black to-gray-800" },
-    { name: "Node.js", logo: "/placeholder.svg", color: "from-green-500 to-green-700" },
-  ];
 
   const statsRef = useRef(null);
-  const techRef = useRef(null);
   const strengthsRef = useRef(null);
   const missionRef = useRef(null);
   const heroRef = useRef(null);
   const contactRef = useRef(null);
+  const teamRef = useRef(null);
   
   // Fix: Removed the threshold property from useInView options since it's not part of the type definition
   const statsInView = useInView(statsRef, { once: false });
-  const techInView = useInView(techRef, { once: false });
   const strengthsInView = useInView(strengthsRef, { once: false });
   const missionInView = useInView(missionRef, { once: false });
   const heroInView = useInView(heroRef, { once: true });
   const contactInView = useInView(contactRef, { once: false });
+  const teamInView = useInView(teamRef, { once: false });
 
   // Parallax effect
   const { scrollYProgress } = useScroll();
@@ -127,19 +117,6 @@ const AboutPage = () => {
     }
   }, [statsInView]);
 
-  // Dynamic gradient background for tech stack
-  const [gradientAngle, setGradientAngle] = useState(45);
-  
-  useEffect(() => {
-    if (techInView) {
-      const interval = setInterval(() => {
-        setGradientAngle(prev => (prev + 1) % 360);
-      }, 50);
-      
-      return () => clearInterval(interval);
-    }
-  }, [techInView]);
-
   // Mouse parallax effect for hero section
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
@@ -154,6 +131,11 @@ const AboutPage = () => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
+
+  // Xử lý cuộn đến phần Team khi click vào nút "Đội ngũ phát triển"
+  const scrollToTeam = () => {
+    teamRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -258,14 +240,14 @@ const AboutPage = () => {
                       <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
                     </motion.a>
                     
-                    <motion.a 
-                      href="#team" 
+                    <motion.button 
+                      onClick={scrollToTeam}
                       className="relative overflow-hidden bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-3 rounded-lg text-white font-medium hover:bg-white/20 transition-colors"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       Đội ngũ phát triển
-                    </motion.a>
+                    </motion.button>
                   </motion.div>
                 </motion.div>
               </div>
@@ -398,73 +380,6 @@ const AboutPage = () => {
               </svg>
             </div>
           </motion.div>
-        </section>
-
-        {/* Tech Stack Showcase */}
-        <section ref={techRef} className="py-16 px-4 bg-white relative overflow-hidden">
-          <div 
-            className="absolute inset-0 opacity-5"
-            style={{ 
-              backgroundImage: `linear-gradient(${gradientAngle}deg, rgba(93, 167, 232, 0.2) 0%, rgba(201, 169, 255, 0.2) 100%)`,
-              backgroundSize: '400% 400%',
-            }}
-          ></div>
-          
-          <div className="max-w-7xl mx-auto relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={techInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-10"
-            >
-              <h2 className="text-3xl font-bold text-dtktmt-blue-dark mb-4">
-                <span className="relative">
-                  Công nghệ hiện đại
-                  <span className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-dtktmt-purple-medium to-dtktmt-blue-medium"></span>
-                </span>
-              </h2>
-              <p className="text-gray-600 max-w-xl mx-auto">
-                Nền tảng của chúng tôi được phát triển với những công nghệ tiên tiến nhất
-              </p>
-            </motion.div>
-            
-            <div className="flex flex-wrap justify-center gap-4">
-              {techStack.map((tech, index) => (
-                <motion.div
-                  key={index}
-                  className={`w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden bg-gradient-to-br ${tech.color} shadow-lg relative`}
-                  initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-                  animate={techInView ? { 
-                    opacity: 1, 
-                    scale: 1,
-                    rotate: 0,
-                    transition: { delay: index * 0.1, duration: 0.5 }
-                  } : { 
-                    opacity: 0, 
-                    scale: 0.8,
-                    rotate: -5 
-                  }}
-                  whileHover={{ 
-                    scale: 1.05, 
-                    rotate: 5,
-                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <img 
-                      src={tech.logo} 
-                      alt={tech.name} 
-                      className="w-12 h-12 md:w-16 md:h-16 object-contain" 
-                    />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-center py-1 text-xs md:text-sm">
-                    {tech.name}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
         </section>
 
         {/* Stats Section with Counter Animation */}
@@ -753,20 +668,19 @@ const AboutPage = () => {
         </section>
 
         {/* Our Team with 3D Cards */}
-        <section id="team" className="py-20 px-4 bg-gradient-to-b from-white to-dtktmt-blue-light/20 relative overflow-hidden">
+        <section id="team" ref={teamRef} className="py-20 px-4 bg-gradient-to-b from-white to-dtktmt-blue-light/20 relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           
           <motion.div 
             className="max-w-7xl mx-auto relative z-10"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={teamInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ duration: 0.6 }}
           >
             <motion.div 
               className="text-center mb-16"
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              animate={teamInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-dtktmt-blue-dark inline-block relative">
@@ -774,8 +688,7 @@ const AboutPage = () => {
                 <motion.div 
                   className="h-1 w-24 bg-gradient-to-r from-dtktmt-purple-medium to-dtktmt-blue-medium mx-auto mt-2"
                   initial={{ width: 0 }}
-                  whileInView={{ width: 100 }}
-                  viewport={{ once: true }}
+                  animate={teamInView ? { width: 100 } : { width: 0 }}
                   transition={{ duration: 1, delay: 0.3 }}
                 ></motion.div>
               </h2>
@@ -791,12 +704,14 @@ const AboutPage = () => {
                   key={index} 
                   className="bg-white rounded-xl overflow-hidden transform-gpu shadow-xl perspective-1000 hover:shadow-2xl transition-all duration-500"
                   initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ 
+                  animate={teamInView ? { 
                     opacity: 1, 
                     y: 0,
                     transition: { delay: index * 0.1, duration: 0.5 }
+                  } : { 
+                    opacity: 0, 
+                    y: 50 
                   }}
-                  viewport={{ once: true, margin: "-50px" }}
                   whileHover={{ 
                     y: -15,
                     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
@@ -830,8 +745,7 @@ const AboutPage = () => {
                       <motion.div 
                         className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium rounded-full w-12 h-12 flex items-center justify-center border-4 border-white"
                         initial={{ scale: 0 }}
-                        whileInView={{ scale: 1 }}
-                        viewport={{ once: true }}
+                        animate={teamInView ? { scale: 1 } : { scale: 0 }}
                         transition={{ delay: 0.5 + index * 0.1, type: "spring" }}
                       >
                         <Award className="text-white" size={18} />
