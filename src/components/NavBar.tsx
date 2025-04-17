@@ -1,11 +1,22 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Bell, Menu, X, LogIn, Home, Book, FileText, Info, User } from "lucide-react";
+
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Bell, Menu, X, LogIn, Home, Book, FileText, Info, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
+interface UserData {
+  id: number;
+  email: string;
+  full_name: string;
+  role?: string;
+}
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<UserData | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { title: "Trang chủ", path: "/", icon: <Home size={18} /> },
@@ -14,8 +25,29 @@ const NavBar = () => {
     { title: "Giới thiệu", path: "/gioi-thieu", icon: <Info size={18} /> },
   ];
 
+  useEffect(() => {
+    // Kiểm tra user từ localStorage khi component mount
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
+      } catch (e) {
+        console.error('Failed to parse user data');
+      }
+    }
+  }, []);
+
   const isActive = (path: string) => {
     return location.pathname === path ? "bg-dtktmt-blue-medium text-white" : "text-dtktmt-blue-dark hover:bg-dtktmt-blue-light";
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+    toast.success("Đăng xuất thành công!");
+    navigate('/');
   };
 
   return (
@@ -68,23 +100,32 @@ const NavBar = () => {
               <Bell size={20} className="text-dtktmt-blue-medium" />
               <span className="absolute top-0 right-0 w-2 h-2 bg-dtktmt-pink-medium rounded-full"></span>
             </Button>
-            <Link to="/profile">
-              <Button variant="ghost" className="p-0 hover:bg-transparent">
-                <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-dtktmt-blue-medium">
-                  <img
-                    src="/placeholder.svg"
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-1">
-                <LogIn size={16} />
-                Đăng nhập
-              </Button>
-            </Link>
+            
+            {user ? (
+              <>
+                <Link to="/profile">
+                  <Button variant="ghost" className="p-0 hover:bg-transparent">
+                    <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-dtktmt-blue-medium flex items-center justify-center bg-dtktmt-blue-light text-white font-bold">
+                      {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  </Button>
+                </Link>
+                <Button 
+                  onClick={handleLogout}
+                  className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-1"
+                >
+                  <LogOut size={16} />
+                  Đăng xuất
+                </Button>
+              </>
+            ) : (
+              <Link to="/login">
+                <Button className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-1">
+                  <LogIn size={16} />
+                  Đăng nhập
+                </Button>
+              </Link>
+            )}
           </div>
 
           <div className="flex md:hidden items-center gap-2">
@@ -117,22 +158,38 @@ const NavBar = () => {
                 {link.title}
               </Link>
             ))}
-            <Link
-              to="/profile"
-              onClick={() => setIsOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 text-dtktmt-blue-dark hover:bg-dtktmt-blue-light"
-            >
-              <User size={18} />
-              Hồ sơ
-            </Link>
-            <Link
-              to="/login"
-              onClick={() => setIsOpen(false)}
-              className="block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 bg-dtktmt-blue-medium text-white"
-            >
-              <LogIn size={18} />
-              Đăng nhập
-            </Link>
+            
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 text-dtktmt-blue-dark hover:bg-dtktmt-blue-light"
+                >
+                  <User size={18} />
+                  Hồ sơ
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                  className="w-full block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 bg-dtktmt-blue-medium text-white"
+                >
+                  <LogOut size={18} />
+                  Đăng xuất
+                </button>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setIsOpen(false)}
+                className="block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 bg-dtktmt-blue-medium text-white"
+              >
+                <LogIn size={18} />
+                Đăng nhập
+              </Link>
+            )}
           </div>
         </div>
       )}

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
@@ -38,6 +39,7 @@ const AuthPage = () => {
   const [registerData, setRegisterData] = useState<RegisterData>({
     email: '',
     password: '',
+    confirm_password: '',
     full_name: '',
     phone_number: '',
     school: ''
@@ -66,7 +68,7 @@ const AuthPage = () => {
       localStorage.setItem('user', JSON.stringify(data.user));
 
       toast.success("Đăng nhập thành công!");
-      navigate('/dashboard');
+      navigate('/profile'); // Chuyển hướng đến trang profile thay vì dashboard
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Đăng nhập thất bại');
     } finally {

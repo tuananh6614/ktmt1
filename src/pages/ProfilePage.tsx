@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
@@ -8,25 +9,37 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import TestResults from "@/components/profile/TestResults";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText, Star } from "lucide-react";
+import { toast } from "sonner";
+
+interface UserData {
+  id: number;
+  email: string;
+  full_name: string;
+  phone_number?: string;
+  school?: string;
+  role?: string;
+}
+
+interface ProfileUser {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  school: string;
+  image: string;
+  joined: string;
+  stats: {
+    coursesCompleted: number;
+    coursesInProgress: number;
+    documentsPurchased: number;
+    avgScore: number;
+  };
+}
 
 const ProfilePage = () => {
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  
-  const user = {
-    name: "Nguyễn Văn Anh",
-    role: "Học sinh/ sinh viên",
-    email: "anhnguyen@example.com",
-    phone: "0987654321",
-    school: "Trường Đại học Bách Khoa TP.HCM",
-    image: "/placeholder.svg",
-    joined: "01/01/2023",
-    stats: {
-      coursesCompleted: 5,
-      coursesInProgress: 2,
-      documentsPurchased: 3,
-      avgScore: 85,
-    },
-  };
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   
   const myCourses = [
     {
@@ -118,13 +131,85 @@ const ProfilePage = () => {
     },
   ];
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    
+    if (!token || !storedUser) {
+      toast.error("Vui lòng đăng nhập để xem trang này");
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      const userData: UserData = JSON.parse(storedUser);
+      
+      setProfileUser({
+        name: userData.full_name || 'Người dùng',
+        role: userData.role || 'Học sinh/ sinh viên',
+        email: userData.email || '',
+        phone: userData.phone_number || '',
+        school: userData.school || '',
+        image: "/placeholder.svg",
+        joined: new Date().toLocaleDateString('vi-VN'),
+        stats: {
+          coursesCompleted: 0,
+          coursesInProgress: 0,
+          documentsPurchased: 0,
+          avgScore: 0,
+        }
+      });
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Failed to parse user data', error);
+      toast.error("Có lỗi xảy ra khi tải thông tin người dùng");
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <main className="flex-1 py-8 px-4 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-dtktmt-blue-medium border-t-transparent rounded-full mx-auto mb-4 animate-spin"></div>
+            <p className="text-dtktmt-blue-dark">Đang tải thông tin...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!profileUser) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <main className="flex-1 py-8 px-4 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-dtktmt-blue-dark text-xl">Không tìm thấy thông tin người dùng</p>
+            <button 
+              onClick={() => navigate('/login')} 
+              className="mt-4 px-4 py-2 bg-dtktmt-blue-medium text-white rounded-lg"
+            >
+              Quay lại đăng nhập
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
 
       <main className="flex-1 py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <ProfileHeader user={user} />
+          <ProfileHeader user={profileUser} />
 
           <Tabs defaultValue="courses" className="w-full">
             <TabsList className="w-full grid grid-cols-3 mb-8">
@@ -143,19 +228,47 @@ const ProfilePage = () => {
             </TabsList>
             
             <TabsContent value="courses">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myCourses.map((course) => (
-                  <CourseCard key={course.id} {...course} />
-                ))}
-              </div>
+              {myCourses.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {myCourses.map((course) => (
+                    <CourseCard key={course.id} {...course} />
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-gray-50 rounded-lg">
+                  <BookOpen size={48} className="text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có khóa học nào</h3>
+                  <p className="text-gray-500 mb-4">Bạn chưa đăng ký khóa học nào</p>
+                  <button 
+                    onClick={() => navigate('/khoa-hoc')} 
+                    className="px-4 py-2 bg-dtktmt-blue-medium text-white rounded-lg"
+                  >
+                    Khám phá khóa học
+                  </button>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="documents">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myDocuments.map((document) => (
-                  <DocumentCard key={document.id} {...document} />
-                ))}
-              </div>
+              {myDocuments.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {myDocuments.map((document) => (
+                    <DocumentCard key={document.id} {...document} />
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center bg-gray-50 rounded-lg">
+                  <FileText size={48} className="text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có tài liệu nào</h3>
+                  <p className="text-gray-500 mb-4">Bạn chưa mua tài liệu nào</p>
+                  <button 
+                    onClick={() => navigate('/tai-lieu')} 
+                    className="px-4 py-2 bg-dtktmt-blue-medium text-white rounded-lg"
+                  >
+                    Khám phá tài liệu
+                  </button>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="tests">
