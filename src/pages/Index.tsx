@@ -1,17 +1,16 @@
-
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Book, FileText, Award, ArrowRight, Sparkles, Search, BookOpen, Clock, Target, Star, Users, ChevronRight } from "lucide-react";
+import { Book, FileText, Award, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
 import CourseCard from "@/components/CourseCard";
 import DocumentCard from "@/components/DocumentCard";
 import { motion } from "framer-motion";
+import FeaturedSection from "@/components/FeaturedSection";
 
 const Index = () => {
   useEffect(() => {
-    // Animation for elements when they come into view
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -35,7 +34,6 @@ const Index = () => {
     };
   }, []);
 
-  // Sample courses data
   const popularCourses = [
     {
       id: "1",
@@ -93,7 +91,6 @@ const Index = () => {
     },
   ];
 
-  // Dữ liệu tài liệu mua nhiều
   const topDocuments = [
     {
       id: "1",
@@ -124,7 +121,6 @@ const Index = () => {
     }
   ];
 
-  // Phản hồi từ học viên
   const testimonials = [
     {
       id: "1",
@@ -176,62 +172,8 @@ const Index = () => {
       <NavBar />
 
       <main className="flex-1">
-        {/* Banner Section */}
-        <section className="relative py-10 bg-gradient-to-r from-blue-500 to-purple-600">
-          <div className="max-w-7xl mx-auto px-4">
-            <motion.div 
-              className="relative overflow-hidden rounded-2xl shadow-2xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-dtktmt-blue-medium/80 to-dtktmt-purple-medium/80 z-10"></div>
-              <div className="absolute inset-0">
-                <img 
-                  src="/lovable-uploads/f747d1e0-acc6-4f25-ae71-e10a2c8015e7.png" 
-                  className="w-full h-full object-cover"
-                  alt="Banner"
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 md:p-10 relative z-20">
-                <div className="text-white">
-                  <h2 className="text-xl md:text-2xl font-bold mb-1">Tài liệu điện tử số</h2>
-                  <p className="text-white/90 mb-4 text-sm">Tất cả tài liệu bạn cần cho môn học Điện tử số</p>
-                  <Link 
-                    to="/tai-lieu/dien-tu-so"
-                    className="bg-white text-dtktmt-blue-dark hover:bg-dtktmt-blue-light hover:text-white rounded-full px-6 py-2 inline-flex items-center gap-2 text-sm font-medium transition-colors shadow-lg"
-                  >
-                    <span>Khám phá ngay</span>
-                    <ChevronRight size={16} />
-                  </Link>
-                </div>
-                <div className="hidden md:flex items-center justify-center">
-                  <div className="w-full max-w-md relative">
-                    <div className="aspect-[4/3] bg-white/20 backdrop-blur-sm rounded-xl shadow-xl"></div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        <FeaturedSection />
 
-        {/* Search Section */}
-        <section className="py-8 px-4">
-          <div className="max-w-3xl mx-auto relative -mt-6 bg-white rounded-xl p-4 shadow-lg">
-            <div className="flex items-center">
-              <input 
-                type="text" 
-                placeholder="Tìm kiếm khóa học, tài liệu..."
-                className="flex-1 border-none py-3 px-4 bg-gray-50 rounded-l-lg focus:outline-none focus:ring-0"
-              />
-              <button className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark text-white p-3 rounded-r-lg">
-                <Search size={20} />
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Khóa học nổi bật */}
         <section className="py-8 px-4">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
@@ -282,7 +224,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Tài liệu bán chạy */}
         <section className="py-8 px-4 bg-gray-100">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
@@ -312,7 +253,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Đánh giá từ học viên */}
         <section className="py-8 px-4">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-xl md:text-2xl font-bold text-center mb-8 text-dtktmt-blue-dark">
@@ -357,7 +297,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
         <section className="py-8 px-4 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium text-white">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-xl md:text-2xl font-bold mb-4">
