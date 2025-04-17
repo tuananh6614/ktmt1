@@ -1,6 +1,7 @@
+
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Book, FileText, Award, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
+import { Book, FileText, Award, ArrowRight, Sparkles, ChevronRight, Star } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
