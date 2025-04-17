@@ -96,12 +96,13 @@ const AboutPage = () => {
   const heroRef = useRef(null);
   const contactRef = useRef(null);
   
-  const statsInView = useInView(statsRef, { once: false, threshold: 0.3 });
-  const techInView = useInView(techRef, { once: false, threshold: 0.3 });
-  const strengthsInView = useInView(strengthsRef, { once: false, threshold: 0.1 });
-  const missionInView = useInView(missionRef, { once: false, threshold: 0.3 });
+  // Fix: Removed the threshold property from useInView options since it's not part of the type definition
+  const statsInView = useInView(statsRef, { once: false });
+  const techInView = useInView(techRef, { once: false });
+  const strengthsInView = useInView(strengthsRef, { once: false });
+  const missionInView = useInView(missionRef, { once: false });
   const heroInView = useInView(heroRef, { once: true });
-  const contactInView = useInView(contactRef, { once: false, threshold: 0.3 });
+  const contactInView = useInView(contactRef, { once: false });
 
   // Parallax effect
   const { scrollYProgress } = useScroll();
@@ -1075,7 +1076,9 @@ const AboutPage = () => {
       <Footer />
       <ChatBox />
       
-      <style jsx global>{`
+      {/* Fix: Removed jsx and global props from style element */}
+      <style>
+        {`
         .glassmorphism {
           box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
           backdrop-filter: blur(8px);
@@ -1111,7 +1114,7 @@ const AboutPage = () => {
           animation: float 3s ease-in-out infinite;
         }
         
-        .bg-300\% {
+        .bg-300\\% {
           background-size: 300% 100%;
         }
         
@@ -1136,7 +1139,8 @@ const AboutPage = () => {
             transform: translateY(-10px);
           }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
