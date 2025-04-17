@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
+const db = require('./config/database');
 require('dotenv').config();
 
 const authController = require('./controllers/authController');
@@ -23,7 +25,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Routes
+// Auth routes
 app.post('/api/register', authController.register);
 app.post('/api/login', authController.login);
 
@@ -46,16 +48,27 @@ app.put('/api/profile/update', auth, async (req, res) => {
             return res.status(400).json({ error: 'Tên không được để trống' });
         }
 
+        console.log('Updating profile for user:', req.user.id);
+        console.log('New name:', full_name);
+
         const [result] = await db.execute(
             'UPDATE users SET full_name = ? WHERE id = ?',
             [full_name, req.user.id]
         );
 
+        console.log('Update result:', result);
+
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Không tìm thấy người dùng' });
         }
 
-        res.json({ message: 'Cập nhật thành công' });
+        res.json({ 
+            message: 'Cập nhật thành công',
+            user: {
+                ...req.user,
+                full_name
+            }
+        });
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).json({ error: 'Lỗi khi cập nhật thông tin' });
@@ -69,6 +82,8 @@ app.put('/api/profile/change-password', auth, async (req, res) => {
         if (!current_password || !new_password) {
             return res.status(400).json({ error: 'Vui lòng nhập đầy đủ thông tin' });
         }
+
+        console.log('Changing password for user:', req.user.id);
 
         // Kiểm tra mật khẩu hiện tại
         const isMatch = await bcrypt.compare(current_password, req.user.password);
@@ -84,6 +99,8 @@ app.put('/api/profile/change-password', auth, async (req, res) => {
             'UPDATE users SET password = ? WHERE id = ?',
             [hashedPassword, req.user.id]
         );
+
+        console.log('Password update result:', result);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Không tìm thấy người dùng' });

@@ -135,6 +135,15 @@ const ProfilePage = () => {
     },
   ];
 
+  const handleProfileUpdate = (updatedUser: any) => {
+    if (profileUser) {
+      setProfileUser({
+        ...profileUser,
+        name: updatedUser.full_name,
+      });
+    }
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem('token');
@@ -146,7 +155,6 @@ const ProfilePage = () => {
       }
 
       try {
-        // Gọi API để lấy thông tin profile
         const response = await fetch(`${API_URL}/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -160,7 +168,6 @@ const ProfilePage = () => {
 
         const userData: UserData = await response.json();
         
-        // Chuyển đổi dữ liệu từ API sang định dạng ProfileUser
         setProfileUser({
           name: userData.full_name,
           role: userData.role || 'Học sinh/ sinh viên',
@@ -182,7 +189,6 @@ const ProfilePage = () => {
         console.error('Error fetching profile:', error);
         toast.error("Có lỗi xảy ra khi tải thông tin người dùng");
         
-        // Nếu token hết hạn hoặc không hợp lệ, chuyển về trang đăng nhập
         if (error instanceof Error && error.message === 'Failed to fetch profile') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -235,7 +241,10 @@ const ProfilePage = () => {
 
       <main className="flex-1 py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <ProfileHeader user={profileUser} />
+          <ProfileHeader 
+            user={profileUser} 
+            onProfileUpdate={handleProfileUpdate}
+          />
 
           <Tabs defaultValue="courses" className="w-full">
             <TabsList className="w-full grid grid-cols-3 mb-8">

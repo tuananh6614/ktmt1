@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,9 +22,10 @@ interface ProfileHeaderProps {
       avgScore: number;
     };
   };
+  onProfileUpdate?: (updatedUser: any) => void;
 }
 
-const ProfileHeader = ({ user }: ProfileHeaderProps) => {
+const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [newName, setNewName] = useState(user.name);
@@ -35,7 +35,6 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
   
   const handleSaveProfile = async () => {
     try {
-      // Gọi API để cập nhật tên
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:3000/api/profile/update', {
         method: 'PUT',
@@ -46,12 +45,31 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
         body: JSON.stringify({ full_name: newName })
       });
 
-      if (!response.ok) throw new Error('Lỗi cập nhật thông tin');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Lỗi cập nhật thông tin');
+      }
+
+      // Cập nhật state và localStorage
+      if (onProfileUpdate) {
+        onProfileUpdate(data.user);
+      }
+      
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        localStorage.setItem('user', JSON.stringify({
+          ...userData,
+          full_name: newName
+        }));
+      }
 
       toast.success("Đã cập nhật thông tin!");
       setIsEditingProfile(false);
     } catch (error) {
-      toast.error("Không thể cập nhật thông tin. Vui lòng thử lại!");
+      console.error('Error updating profile:', error);
+      toast.error(error instanceof Error ? error.message : "Không thể cập nhật thông tin. Vui lòng thử lại!");
     }
   };
 
@@ -75,7 +93,11 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
         })
       });
 
-      if (!response.ok) throw new Error('Lỗi đổi mật khẩu');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Lỗi đổi mật khẩu');
+      }
 
       toast.success("Đã đổi mật khẩu thành công!");
       setIsEditingPassword(false);
@@ -83,7 +105,8 @@ const ProfileHeader = ({ user }: ProfileHeaderProps) => {
       setNewPassword('');
       setConfirmNewPassword('');
     } catch (error) {
-      toast.error("Không thể đổi mật khẩu. Vui lòng thử lại!");
+      console.error('Error changing password:', error);
+      toast.error(error instanceof Error ? error.message : "Không thể đổi mật khẩu. Vui lòng thử lại!");
     }
   };
 
