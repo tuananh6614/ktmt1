@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,32 +7,122 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 
+const API_URL = 'http://localhost:3000/api';
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface RegisterData {
+  email: string;
+  password: string;
+  full_name: string;
+  phone_number: string;
+  school: string;
+}
+
 const AuthPage = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Form data states
+  const [loginData, setLoginData] = useState<LoginData>({
+    email: '',
+    password: ''
+  });
+
+  const [registerData, setRegisterData] = useState<RegisterData>({
+    email: '',
+    password: '',
+    full_name: '',
+    phone_number: '',
+    school: ''
+  });
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Đăng nhập thất bại');
+      }
+
+      // Lưu token vào localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
       toast.success("Đăng nhập thành công!");
+      navigate('/dashboard'); // Hoặc trang chính sau khi đăng nhập
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Đăng nhập thất bại');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      toast.success("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
+
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registerData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Đăng ký thất bại');
+      }
+
+      // Lưu token vào localStorage nếu API trả về
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
+      toast.success("Đăng ký thành công!");
+      setActiveTab("login"); // Chuyển về tab đăng nhập
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Đăng ký thất bại');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
+  };
+
+  const handleLoginInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleRegisterInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setRegisterData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   // Tab transition variants
@@ -359,6 +449,9 @@ const AuthPage = () => {
                               type="email"
                               className="pl-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
                               required
+                              name="email"
+                              value={loginData.email}
+                              onChange={handleLoginInputChange}
                             />
                           </div>
                           <div className="relative">
@@ -368,6 +461,9 @@ const AuthPage = () => {
                               type={showPassword ? "text" : "password"}
                               className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-blue-medium focus:ring-dtktmt-blue-light transition-all duration-300"
                               required
+                              name="password"
+                              value={loginData.password}
+                              onChange={handleLoginInputChange}
                             />
                             <button
                               type="button"
@@ -465,6 +561,9 @@ const AuthPage = () => {
                               type="text"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
+                              name="full_name"
+                              value={registerData.full_name}
+                              onChange={handleRegisterInputChange}
                             />
                           </div>
                           
@@ -475,6 +574,9 @@ const AuthPage = () => {
                               type="email"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
+                              name="email"
+                              value={registerData.email}
+                              onChange={handleRegisterInputChange}
                             />
                           </div>
                           
@@ -485,6 +587,9 @@ const AuthPage = () => {
                               type="tel"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
+                              name="phone_number"
+                              value={registerData.phone_number}
+                              onChange={handleRegisterInputChange}
                             />
                           </div>
                           
@@ -495,6 +600,9 @@ const AuthPage = () => {
                               type="text"
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
+                              name="school"
+                              value={registerData.school}
+                              onChange={handleRegisterInputChange}
                             />
                           </div>
                           
@@ -505,6 +613,9 @@ const AuthPage = () => {
                               type={showPassword ? "text" : "password"}
                               className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
+                              name="password"
+                              value={registerData.password}
+                              onChange={handleRegisterInputChange}
                             />
                             <button
                               type="button"
@@ -522,6 +633,9 @@ const AuthPage = () => {
                               type={showConfirmPassword ? "text" : "password"}
                               className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
+                              name="confirm_password"
+                              value={registerData.confirm_password}
+                              onChange={handleRegisterInputChange}
                             />
                             <button
                               type="button"
