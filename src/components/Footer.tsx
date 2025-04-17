@@ -89,19 +89,19 @@ const Footer = () => {
                 <div className="bg-dtktmt-blue-light/30 p-2 rounded-full mt-0.5">
                   <MapPin size={18} className="text-dtktmt-blue-dark flex-shrink-0" />
                 </div>
-                <span className="text-gray-600">268 Lý Thường Kiệt, Phường 14, Quận 10, TP HCM</span>
+                <span className="text-gray-600">235 Hoàng Quốc Việt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội. </span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="bg-dtktmt-blue-light/30 p-2 rounded-full">
                   <Phone size={18} className="text-dtktmt-blue-dark flex-shrink-0" />
                 </div>
-                <span className="text-gray-600">+84 123 456 789</span>
+                <span className="text-gray-600">+84 33 943 5005 </span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="bg-dtktmt-blue-light/30 p-2 rounded-full">
                   <Mail size={18} className="text-dtktmt-blue-dark flex-shrink-0" />
                 </div>
-                <span className="text-gray-600">info@dtktmt1.edu.vn</span>
+                <span className="text-gray-600">tuananh6614@gmail.com </span>
               </li>
             </ul>
           </div>

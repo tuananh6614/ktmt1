@@ -1,55 +1,56 @@
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
-import { Mail, Phone, MapPin, Linkedin, Github, Award, BookOpen, Trophy, GraduationCap } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Github, Award, BookOpen, Trophy, GraduationCap } from "lucide-react";
 
 const AboutPage = () => {
   // Sample team members data
   const teamMembers = [
     {
-      name: "TS. Nguyễn Văn A",
+      name: "Phan Thị Thanh Ngọc ",
+      role: "Giáo viên hướng dẫn",
+      image: "/placeholder.svg",
+      bio: "Thạc sĩ khoa điện tử viễn thông trường Đại Học Điện Lực",
+      social: {
+        email: "",
+        Facebook: "https://www.facebook.com/pttngoc",
+        github: "#",
+      },
+    },
+    {
+      name: "Nguyễn Tuấn Anh",
       role: "Trưởng nhóm phát triển",
       image: "/placeholder.svg",
-      bio: "Tiến sĩ Điện tử Viễn thông với hơn 15 năm kinh nghiệm trong lĩnh vực Vi điều khiển và Hệ thống nhúng.",
+      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại Học Điện Lực.",
       social: {
-        email: "nguyenvana@dtktmt1.edu.vn",
-        linkedin: "#",
+        email: "tuananh6614@gmail.com",
+        Facebook: "https://www.facebook.com/boycantien/",
         github: "#",
       },
     },
     {
-      name: "ThS. Trần Thị B",
-      role: "Chuyên gia nội dung",
+      name: "Trần Đinh Dũng",
+      role: "Phó nhóm phát triển",
       image: "/placeholder.svg",
-      bio: "Thạc sĩ Kỹ thuật Máy tính với kinh nghiệm giảng dạy tại các trường đại học hàng đầu trong nước.",
+      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại Học Điện Lực.",
       social: {
-        email: "tranthib@dtktmt1.edu.vn",
-        linkedin: "#",
+        email: "https://www.facebook.com/inhdung.936915",
+        Facebook: "https://www.facebook.com/nguyen.van.phuong.658431",
         github: "#",
       },
     },
     {
-      name: "KS. Lê Văn C",
-      role: "Chuyên gia kỹ thuật",
+      name: "Nguyễn Văn Phương",
+      role: "Phó nhóm phát triển",
       image: "/placeholder.svg",
-      bio: "Kỹ sư Điện tử với nhiều năm kinh nghiệm làm việc trong lĩnh vực thiết kế mạch và hệ thống nhúng.",
+      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại Học Điện Lực.",
       social: {
         email: "levanc@dtktmt1.edu.vn",
-        linkedin: "#",
+        Facebook: "https://www.facebook.com/nguyen.van.phuong.658431",
         github: "#",
       },
     },
-    {
-      name: "ThS. Phạm Văn D",
-      role: "Quản lý dự án",
-      image: "/placeholder.svg",
-      bio: "Thạc sĩ Quản lý Công nghệ với kinh nghiệm quản lý các dự án công nghệ giáo dục quy mô lớn.",
-      social: {
-        email: "phamvand@dtktmt1.edu.vn",
-        linkedin: "#",
-        github: "#",
-      },
-    },
+    
   ];
 
   return (
@@ -151,8 +152,8 @@ const AboutPage = () => {
                       <a href={`mailto:${member.social.email}`} className="text-gray-500 hover:text-dtktmt-blue-medium">
                         <Mail size={18} />
                       </a>
-                      <a href={member.social.linkedin} className="text-gray-500 hover:text-dtktmt-blue-medium">
-                        <Linkedin size={18} />
+                      <a href={member.social.Facebook} className="text-gray-500 hover:text-dtktmt-blue-medium">
+                        <Facebook size={18} />
                       </a>
                       <a href={member.social.github} className="text-gray-500 hover:text-dtktmt-blue-medium">
                         <Github size={18} />
@@ -271,8 +272,7 @@ const AboutPage = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">Địa chỉ</h3>
                 <p className="text-gray-700">
-                  268 Lý Thường Kiệt, Phường 14, Quận 10,<br />
-                  Thành phố Hồ Chí Minh
+                235 Hoàng Quốc Việt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội<br />
                 </p>
               </div>
 
@@ -282,8 +282,8 @@ const AboutPage = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">Điện thoại</h3>
                 <p className="text-gray-700">
-                  +84 123 456 789<br />
-                  +84 987 654 321
+                  +84 339 435 005<br />
+                 
                 </p>
               </div>
 
@@ -293,8 +293,7 @@ const AboutPage = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">Email</h3>
                 <p className="text-gray-700">
-                  info@dtktmt1.edu.vn<br />
-                  support@dtktmt1.edu.vn
+                  tuananh6614@gmail.com<br />
                 </p>
               </div>
             </div>
