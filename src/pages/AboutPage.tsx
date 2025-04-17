@@ -86,7 +86,7 @@ const AboutPage = () => {
   const contactRef = useRef(null);
   const teamRef = useRef(null);
   
-  // Fix: Removed the threshold property from useInView options since it's not part of the type definition
+  // Fix: Removed the threshold property from useInView options
   const statsInView = useInView(statsRef, { once: false });
   const strengthsInView = useInView(strengthsRef, { once: false });
   const missionInView = useInView(missionRef, { once: false });
@@ -145,8 +145,9 @@ const AboutPage = () => {
         {/* Hero Section with Advanced Parallax Effect */}
         <section 
           ref={heroRef} 
-          className="relative overflow-hidden py-20 md:py-28 bg-gradient-to-b from-dtktmt-blue-dark to-dtktmt-blue-medium text-white"
+          className="relative overflow-hidden py-20 md:py-28 bg-gradient-to-br from-dtktmt-blue-dark via-dtktmt-blue-medium to-dtktmt-blue-light/70 text-white"
         >
+          {/* Background elements */}
           <div className="absolute inset-0 w-full h-full">
             {/* Animated grid background */}
             <div className="absolute inset-0 opacity-20">
@@ -187,34 +188,46 @@ const AboutPage = () => {
             <div className="absolute inset-0 bg-circuit-pattern opacity-5"></div>
           </div>
           
-          <motion.div 
-            className="max-w-7xl mx-auto px-4 relative z-10"
-            style={{ y: textY }}
-            initial={{ opacity: 0 }}
-            animate={heroInView ? { opacity: 1 } : { opacity: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex flex-col md:flex-row items-center">
-              <div className="md:w-1/2 mb-10 md:mb-0">
+          <div className="max-w-7xl mx-auto px-4 relative z-10">
+            <motion.div 
+              className="flex flex-col md:flex-row items-center justify-between"
+              style={{ y: textY }}
+              initial={{ opacity: 0 }}
+              animate={heroInView ? { opacity: 1 } : { opacity: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="md:w-1/2 mb-12 md:mb-0">
                 <motion.div
                   initial={{ opacity: 0, y: -50 }}
                   animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -50 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
+                  className="max-w-xl"
                 >
-                  <div className="inline-block mb-2 bg-dtktmt-purple-medium/20 px-3 py-1 rounded-full">
-                    <span className="text-dtktmt-pink-light font-medium text-sm">Đổi mới công nghệ giáo dục</span>
+                  <div className="inline-block mb-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-white/20">
+                    <span className="text-white font-medium text-sm">Đổi mới công nghệ giáo dục</span>
                   </div>
                   
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                    <span className="block">Đổi mới cách học</span>
-                    <div className="relative inline-block">
-                      <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-dtktmt-pink-light via-white to-dtktmt-purple-light animate-gradient-slide bg-300%">Điện tử & KTMT</span>
-                      <span className="absolute -bottom-1 left-0 w-full h-[4px] bg-gradient-to-r from-dtktmt-pink-medium to-dtktmt-purple-medium rounded-full"></span>
+                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight tracking-tight">
+                    <span className="block mb-2">Đổi mới cách học</span>
+                    <div className="relative inline-block overflow-hidden">
+                      <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white via-dtktmt-pink-light to-dtktmt-purple-light animate-gradient-slide bg-300%">Điện tử & KTMT</span>
+                      <motion.span 
+                        className="absolute -bottom-1 left-0 w-full h-[6px] bg-gradient-to-r from-dtktmt-pink-light to-dtktmt-purple-light rounded-full"
+                        animate={{ 
+                          width: ['0%', '100%'],
+                          opacity: [0, 1]
+                        }}
+                        transition={{ 
+                          duration: 1.5, 
+                          delay: 0.8,
+                          ease: "easeOut"
+                        }}
+                      ></motion.span>
                     </div>
                   </h1>
                   
                   <motion.p 
-                    className="text-lg md:text-xl text-gray-100 mb-8 max-w-lg"
+                    className="text-xl md:text-2xl text-white/90 mb-10 max-w-lg font-light leading-relaxed"
                     initial={{ opacity: 0 }}
                     animate={heroInView ? { opacity: 1 } : { opacity: 0 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
@@ -224,95 +237,149 @@ const AboutPage = () => {
                   </motion.p>
                   
                   <motion.div
-                    className="flex flex-wrap gap-4"
+                    className="flex flex-wrap gap-5"
                     initial={{ opacity: 0, y: 20 }}
                     animate={heroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
                   >
                     <motion.a 
                       href="/khoa-hoc" 
-                      className="relative overflow-hidden bg-gradient-to-r from-dtktmt-pink-medium to-dtktmt-purple-medium px-6 py-3 rounded-lg text-white font-medium flex items-center gap-2 group"
-                      whileHover={{ scale: 1.05 }}
+                      className="relative overflow-hidden bg-gradient-to-r from-dtktmt-pink-light to-dtktmt-purple-medium px-8 py-4 rounded-xl text-white font-medium flex items-center gap-2 group shadow-lg hover:shadow-xl transition-all duration-300"
+                      whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <span className="relative z-10">Khám phá khóa học</span>
-                      <ArrowRight size={16} className="relative z-10 group-hover:translate-x-1 transition-transform" />
-                      <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></span>
+                      <span className="relative z-10 text-lg">Khám phá khóa học</span>
+                      <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                      <motion.span 
+                        className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"
+                        animate={{
+                          background: [
+                            'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+                            'linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 100%)',
+                            'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)'
+                          ],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      ></motion.span>
                     </motion.a>
                     
                     <motion.button 
                       onClick={scrollToTeam}
-                      className="relative overflow-hidden bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-3 rounded-lg text-white font-medium hover:bg-white/20 transition-colors"
-                      whileHover={{ scale: 1.05 }}
+                      className="relative overflow-hidden bg-white/15 backdrop-blur-md border-2 border-white/30 px-8 py-4 rounded-xl text-white font-medium hover:bg-white/25 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      whileHover={{ scale: 1.05, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      Đội ngũ phát triển
+                      <span className="relative z-10 text-lg">Đội ngũ phát triển</span>
                     </motion.button>
                   </motion.div>
                 </motion.div>
               </div>
               
-              <div className="md:w-1/2">
+              <div className="md:w-1/2 md:flex md:justify-end">
                 <motion.div
-                  className="relative"
+                  className="relative w-full max-w-md mx-auto"
                   style={{ 
                     x: mousePosition.x * 20, 
                     y: mousePosition.y * 20
                   }}
                   initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
                   animate={heroInView ? { opacity: 1, scale: 1, rotate: 0 } : { opacity: 0, scale: 0.9, rotate: -5 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
+                  transition={{ duration: 0.8, delay: 0.4, type: "spring" }}
                 >
                   <div className="relative">
-                    <div className="h-72 md:h-96 w-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 relative backdrop-blur-sm">
-                      <div className="absolute inset-0 bg-circuit-pattern opacity-5"></div>
+                    {/* Main visual element */}
+                    <div className="h-80 md:h-[450px] w-full rounded-2xl overflow-hidden shadow-2xl border-2 border-white/30 relative backdrop-blur-sm">
+                      {/* Background gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-dtktmt-blue-dark/80 to-dtktmt-purple-medium/80"></div>
                       
-                      {/* 3D-like tech code visualization */}
-                      <div className="absolute inset-0 bg-gradient-to-b from-dtktmt-blue-dark/80 to-dtktmt-purple-medium/80"></div>
-                      
+                      {/* Animated visual content */}
                       <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                         <div className="technology-code w-full h-full opacity-30"></div>
                         <motion.div 
                           className="absolute inset-0 flex items-center justify-center"
                           animate={{ 
                             rotateY: [0, 360], 
-                            rotateX: [10, -10, 10]
+                            rotateX: [5, -5, 5]
                           }}
                           transition={{ 
-                            duration: 20, 
+                            duration: 25, 
                             repeat: Infinity, 
                             ease: "linear" 
                           }}
                         >
-                          <div className="w-32 h-32 md:w-48 md:h-48 relative">
+                          <div className="w-40 h-40 md:w-60 md:h-60 relative">
                             {/* 3D Floating cube */}
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <motion.img
-                                src="/placeholder.svg" 
-                                alt="DT&KTMT1" 
-                                className="w-full h-full object-contain"
+                              <motion.div
+                                className="relative w-full h-full"
                                 animate={{ 
-                                  scale: [1, 1.05, 1],
-                                  opacity: [0.8, 1, 0.8],
+                                  rotateY: [0, 360],
+                                  rotateX: [20, -20, 20]
                                 }}
                                 transition={{ 
-                                  duration: 4, 
+                                  duration: 20, 
                                   repeat: Infinity, 
-                                  ease: "easeInOut" 
+                                  ease: "linear" 
                                 }}
-                              />
+                              >
+                                {/* Logo or image */}
+                                <motion.img
+                                  src="/lovable-uploads/edbc5529-0211-47c7-81df-4adf5f381a48.png" 
+                                  alt="DT&KTMT1" 
+                                  className="w-full h-full object-contain rounded-full"
+                                  animate={{ 
+                                    scale: [1, 1.05, 1],
+                                    opacity: [0.9, 1, 0.9],
+                                    rotateZ: [0, 5, 0, -5, 0]
+                                  }}
+                                  transition={{ 
+                                    duration: 8, 
+                                    repeat: Infinity, 
+                                    ease: "easeInOut" 
+                                  }}
+                                />
+                              </motion.div>
                             </div>
                           </div>
                         </motion.div>
+                        
+                        {/* Animated rings around logo */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <motion.div 
+                            className="w-48 h-48 md:w-72 md:h-72 border-2 border-white/10 rounded-full"
+                            animate={{ 
+                              rotate: [0, 360],
+                              scale: [0.9, 1.1, 0.9]
+                            }}
+                            transition={{ 
+                              rotate: { duration: 15, repeat: Infinity, ease: "linear" },
+                              scale: { duration: 8, repeat: Infinity, ease: "easeInOut" }
+                            }}
+                          />
+                          <motion.div 
+                            className="absolute w-60 h-60 md:w-80 md:h-80 border border-white/5 rounded-full"
+                            animate={{ rotate: [360, 0] }}
+                            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                          />
+                        </div>
                       </div>
                     </div>
                     
-                    <div className="absolute -top-4 -left-4 text-xs bg-dtktmt-pink-medium text-white px-3 py-1 rounded-full shadow-xl z-20 animate-float">
-                      Công nghệ tương tác
+                    {/* Floating badge */}
+                    <div className="absolute -top-4 -left-4 text-sm bg-gradient-to-r from-dtktmt-pink-light to-dtktmt-pink-medium text-white px-4 py-2 rounded-lg shadow-xl z-20 animate-float">
+                      <motion.span
+                        animate={{ 
+                          scale: [1, 1.05, 1],
+                        }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        Công nghệ tương tác
+                      </motion.span>
                     </div>
                     
+                    {/* Year badge */}
                     <motion.div 
-                      className="absolute -bottom-6 -right-6 bg-gradient-to-br from-dtktmt-pink-medium to-dtktmt-purple-medium rounded-full w-24 h-24 flex items-center justify-center shadow-xl"
+                      className="absolute -bottom-6 -right-6 bg-gradient-to-br from-dtktmt-pink-medium to-dtktmt-purple-medium rounded-full w-28 h-28 flex items-center justify-center shadow-xl"
                       animate={{ 
                         scale: [1, 1.05, 1],
                         rotate: [0, 5, 0, -5, 0]
@@ -324,7 +391,7 @@ const AboutPage = () => {
                       }}
                     >
                       <div className="text-white font-bold">
-                        <span className="block text-2xl">5</span>
+                        <span className="block text-3xl">5</span>
                         <span className="text-sm">năm</span>
                       </div>
                     </motion.div>
@@ -332,33 +399,33 @@ const AboutPage = () => {
                   
                   {/* Floating tech elements */}
                   <motion.div 
-                    className="absolute -top-10 right-20 w-16 h-16 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20"
+                    className="absolute -top-10 right-20 w-20 h-20 bg-white/15 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg"
                     animate={{ 
-                      y: [0, -10, 0],
+                      y: [0, -15, 0],
                       rotate: [0, -5, 0]
                     }}
                     transition={{ 
-                      duration: 3, 
+                      duration: 4, 
                       repeat: Infinity, 
                       ease: "easeInOut",
                       delay: 0.5
                     }}
                     style={{ 
                       x: mousePosition.x * -15, 
-                      y: mousePosition.y * -15
+                      y: mousePosition.y * -15 + -10
                     }}
                   >
-                    <Cpu className="text-dtktmt-pink-light w-8 h-8" />
+                    <Cpu className="text-dtktmt-pink-light w-10 h-10" />
                   </motion.div>
                   
                   <motion.div 
-                    className="absolute bottom-20 -left-10 w-16 h-16 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/20"
+                    className="absolute bottom-20 -left-10 w-20 h-20 bg-white/15 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-lg"
                     animate={{ 
-                      y: [0, 10, 0],
+                      y: [0, 15, 0],
                       rotate: [0, 5, 0]
                     }}
                     transition={{ 
-                      duration: 4, 
+                      duration: 5, 
                       repeat: Infinity, 
                       ease: "easeInOut" 
                     }}
@@ -367,19 +434,19 @@ const AboutPage = () => {
                       y: mousePosition.y * 15
                     }}
                   >
-                    <Code className="text-dtktmt-purple-light w-8 h-8" />
+                    <Code className="text-dtktmt-purple-light w-10 h-10" />
                   </motion.div>
                 </motion.div>
               </div>
-            </div>
+            </motion.div>
             
             {/* Animated wave divider */}
-            <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
-              <svg className="relative block w-full h-12 md:h-16" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20">
+              <svg className="relative block w-full h-16 md:h-24" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
                 <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-white"></path>
               </svg>
             </div>
-          </motion.div>
+          </div>
         </section>
 
         {/* Stats Section with Counter Animation */}
