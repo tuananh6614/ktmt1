@@ -1,6 +1,7 @@
+
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Book, FileText, Award, ArrowRight, Sparkles } from "lucide-react";
+import { Book, FileText, Award, ArrowRight, Sparkles, Search, BookOpen, Clock, Target } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
@@ -34,7 +35,7 @@ const Index = () => {
     };
   }, []);
 
-  // Sample courses data
+  // Sample courses data - expanded with more courses
   const popularCourses = [
     {
       id: "1",
@@ -72,6 +73,39 @@ const Index = () => {
       duration: "10 tuần",
       level: "Trung cấp",
     },
+    {
+      id: "5",
+      title: "Lập trình nhúng C/C++",
+      description: "Lập trình ngôn ngữ C/C++ chuyên sâu cho hệ thống nhúng",
+      image: "/placeholder.svg",
+      lessons: 28,
+      duration: "14 tuần",
+      level: "Trung cấp",
+    },
+    {
+      id: "6",
+      title: "Thiết kế PCB",
+      description: "Học thiết kế mạch in chuyên nghiệp với Altium Designer",
+      image: "/placeholder.svg",
+      lessons: 20,
+      duration: "10 tuần",
+      level: "Cơ bản",
+    },
+  ];
+
+  // Thêm dữ liệu về danh mục phổ biến
+  const popularCategories = [
+    { id: 1, name: "Vi điều khiển", count: 12, icon: <BookOpen className="w-5 h-5" /> },
+    { id: 2, name: "Điện tử số", count: 8, icon: <Book className="w-5 h-5" /> },
+    { id: 3, name: "IoT", count: 15, icon: <Sparkles className="w-5 h-5" /> },
+    { id: 4, name: "Lập trình nhúng", count: 10, icon: <Target className="w-5 h-5" /> }
+  ];
+
+  // Dữ liệu về giảng viên 
+  const instructors = [
+    { id: 1, name: "TS. Nguyễn Văn A", specialty: "Vi điều khiển", courses: 8, img: "/placeholder.svg" },
+    { id: 2, name: "PGS.TS. Trần Thị B", specialty: "IoT", courses: 6, img: "/placeholder.svg" },
+    { id: 3, name: "ThS. Lê Văn C", specialty: "Điện tử số", courses: 5, img: "/placeholder.svg" },
   ];
 
   const fadeInUp = {
@@ -98,24 +132,39 @@ const Index = () => {
       <NavBar />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="py-12 md:py-20 px-4 overflow-hidden relative">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center">
+        {/* Hero Section - Compact và focused */}
+        <section className="py-6 md:py-10 px-4">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             <motion.div 
-              className="md:w-1/2 mb-8 md:mb-0"
+              className="md:col-span-6 lg:col-span-5"
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight">
                 <span className="text-dtktmt-blue-dark text-3d">Học liệu </span>
                 <span className="gradient-text font-extrabold">chất lượng</span>
                 <span className="text-dtktmt-blue-dark text-3d"> cho sinh viên Điện Tử</span>
               </h1>
-              <p className="text-lg text-gray-600 mb-8 animated-underline inline-block">
-                DT&KTMT1 cung cấp các khóa học, tài liệu chất lượng cao cho sinh viên ngành Điện tử và Kỹ thuật máy tính.
+              <p className="text-base md:text-lg text-gray-600 mb-5 animated-underline inline-block">
+                DT&KTMT1 cung cấp các khóa học, tài liệu chất lượng cao cho sinh viên.
               </p>
-              <div className="flex flex-wrap gap-4">
+              
+              {/* Tìm kiếm khóa học */}
+              <div className="relative max-w-xl mb-6">
+                <div className="flex items-center glass-input rounded-full overflow-hidden pr-1">
+                  <input 
+                    type="text" 
+                    placeholder="Tìm khóa học, tài liệu..." 
+                    className="flex-1 bg-transparent border-none py-3 pl-5 pr-3 focus:outline-none focus:ring-0" 
+                  />
+                  <button className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark text-white p-2 rounded-full">
+                    <Search size={20} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-3 mb-6">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Link
                     to="/khoa-hoc"
@@ -138,7 +187,7 @@ const Index = () => {
                 </motion.div>
               </div>
 
-              <div className="mt-12 flex items-center">
+              <div className="flex items-center">
                 <div className="flex -space-x-4">
                   {[...Array(4)].map((_, i) => (
                     <motion.div
@@ -177,17 +226,16 @@ const Index = () => {
                 </motion.div>
               </div>
             </motion.div>
+            
             <motion.div 
-              className="md:w-1/2 md:pl-8 flex justify-center"
+              className="md:col-span-6 lg:col-span-7 flex justify-center relative"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <div className="relative w-full max-w-sm mx-auto">
-                <div className="w-64 h-64 md:w-80 md:h-80 bg-dtktmt-blue-medium rounded-full absolute -top-5 -left-5 -z-10 animate-pulse-soft opacity-60"></div>
-                <div className="w-48 h-48 md:w-64 md:h-64 bg-dtktmt-pink-medium rounded-full absolute -bottom-5 -right-5 -z-10 animate-pulse-soft opacity-60" style={{ animationDelay: "1s" }}></div>
+              <div className="relative w-full max-w-xl mx-auto">
                 <motion.div 
-                  className="bg-white p-3 rounded-2xl shadow-lg relative z-10 mt-10"
+                  className="bg-white p-3 rounded-2xl shadow-lg relative z-10"
                   whileHover={{ 
                     scale: 1.03, 
                     rotateY: 5, 
@@ -198,7 +246,7 @@ const Index = () => {
                   <img
                     src="/lovable-uploads/4ec8d887-3792-433e-bb58-7792ac0a36ea.png"
                     alt="Course example"
-                    className="w-full rounded-xl"
+                    className="w-full h-auto rounded-xl"
                   />
                 </motion.div>
                 <motion.div 
@@ -223,53 +271,62 @@ const Index = () => {
               </div>
             </motion.div>
           </div>
-
-          {/* Decorative elements */}
-          <motion.div 
-            animate={{ 
-              y: [0, -15, 0],
-              opacity: [0.5, 0.8, 0.5]
-            }}
-            transition={{ 
-              duration: 4,
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
-            className="hidden md:block absolute top-1/4 left-10 w-12 h-12 bg-dtktmt-yellow rounded-full opacity-50"
-          ></motion.div>
-          <motion.div 
-            animate={{ 
-              y: [0, 15, 0],
-              opacity: [0.5, 0.8, 0.5]
-            }}
-            transition={{ 
-              duration: 5,
-              repeat: Infinity,
-              repeatType: "reverse",
-              delay: 1
-            }}
-            className="hidden md:block absolute bottom-1/4 right-10 w-8 h-8 bg-dtktmt-purple-medium rounded-full opacity-50"
-          ></motion.div>
         </section>
 
-        {/* Featured Content */}
-        <section className="py-12 px-4 animate-on-scroll opacity-0">
+        {/* Danh mục phổ biến - Thêm mới */}
+        <section className="py-6 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-xl md:text-2xl font-bold text-dtktmt-blue-dark">Danh mục phổ biến</h2>
+              <Link to="/khoa-hoc" className="text-dtktmt-blue-medium hover:text-dtktmt-blue-dark flex items-center gap-1 text-sm animated-underline">
+                Xem tất cả
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {popularCategories.map((category) => (
+                <motion.div 
+                  key={category.id}
+                  whileHover={{ y: -5, scale: 1.03 }}
+                  className="glass-card p-4 flex items-center gap-3 justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dtktmt-blue-light to-dtktmt-blue-medium flex items-center justify-center text-white">
+                      {category.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{category.name}</h3>
+                      <p className="text-xs text-gray-500">{category.count} khóa học</p>
+                    </div>
+                  </div>
+                  <Link to={`/khoa-hoc?category=${category.id}`} className="text-dtktmt-blue-medium hover:text-dtktmt-blue-dark">
+                    <ArrowRight size={18} />
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Content - Chuyển lên cao hơn và làm gọn lại */}
+        <section className="py-6 px-4">
           <div className="max-w-7xl mx-auto">
             <FeaturedSection />
           </div>
         </section>
 
-        {/* Popular Courses */}
+        {/* Popular Courses - Nhiều khóa học hơn, hiển thị đẹp mắt hơn */}
         <motion.section 
-          className="py-12 px-4 bg-white/50 backdrop-blur-sm"
+          className="py-8 px-4 bg-white/50 backdrop-blur-sm"
           variants={fadeInUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-dtktmt-blue-dark glowing-text">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-dtktmt-blue-dark">
                 <span className="gradient-text">Khóa học</span> nổi bật
               </h2>
               <motion.div whileHover={{ x: 5 }}>
@@ -284,24 +341,76 @@ const Index = () => {
             </div>
 
             <motion.div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5"
               variants={staggerContainer}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.1 }}
             >
-              {popularCourses.map((course) => (
+              {popularCourses.slice(0, 6).map((course) => (
                 <motion.div key={course.id} variants={fadeInUp}>
                   <CourseCard {...course} />
                 </motion.div>
               ))}
             </motion.div>
+            
+            <div className="mt-8 text-center">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link to="/khoa-hoc" className="btn-primary inline-flex items-center gap-2">
+                  <span>Khám phá tất cả khóa học</span>
+                  <ArrowRight size={18} />
+                </Link>
+              </motion.div>
+            </div>
           </div>
         </motion.section>
 
-        {/* Features */}
+        {/* Giới thiệu giảng viên - Mới */}
+        <motion.section
+          className="py-8 px-4"
+          variants={fadeInUp}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-dtktmt-blue-dark">
+                <span className="gradient-text">Giảng viên</span> hàng đầu
+              </h2>
+              <Link to="/gioi-thieu" className="text-dtktmt-blue-medium hover:text-dtktmt-blue-dark flex items-center gap-1 animated-underline">
+                Xem tất cả
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {instructors.map(instructor => (
+                <motion.div 
+                  key={instructor.id}
+                  className="card-3d p-5 flex flex-col sm:flex-row items-center gap-4"
+                  whileHover={{ y: -5 }}
+                >
+                  <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-dtktmt-blue-light">
+                    <img src={instructor.img} alt={instructor.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="text-center sm:text-left">
+                    <h3 className="font-bold text-dtktmt-blue-dark">{instructor.name}</h3>
+                    <p className="text-sm text-gray-600">{instructor.specialty}</p>
+                    <div className="mt-2 flex items-center justify-center sm:justify-start gap-2 text-sm">
+                      <Book size={16} className="text-dtktmt-blue-medium" />
+                      <span>{instructor.courses} khóa học</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Tại sao chọn chúng tôi - Rút gọn */}
         <motion.section 
-          className="py-16 px-4"
+          className="py-8 px-4"
           variants={fadeInUp}
           initial="hidden"
           whileInView="visible"
@@ -309,7 +418,7 @@ const Index = () => {
         >
           <div className="max-w-7xl mx-auto">
             <motion.h2 
-              className="text-2xl md:text-3xl font-bold text-center mb-12 gradient-text"
+              className="text-xl md:text-2xl font-bold text-center mb-8 gradient-text"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -319,72 +428,72 @@ const Index = () => {
             </motion.h2>
 
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
               variants={staggerContainer}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.1 }}
             >
-              <motion.div className="text-center" variants={fadeInUp}>
+              <motion.div className="text-center glass-card p-6" variants={fadeInUp}>
                 <motion.div 
-                  className="icon-circle w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-white to-dtktmt-blue-light"
+                  className="icon-circle w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-white to-dtktmt-blue-light"
                   whileHover={{ 
                     scale: 1.1,
                     boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                   }}
                 >
-                  <Book size={32} className="text-dtktmt-blue-medium" />
+                  <Book size={28} className="text-dtktmt-blue-medium" />
                 </motion.div>
-                <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">
+                <h3 className="text-lg font-bold mb-2 text-dtktmt-blue-dark">
                   Nội dung chất lượng
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   Tài liệu và bài giảng được biên soạn tỉ mỉ bởi các giảng viên hàng đầu.
                 </p>
               </motion.div>
 
-              <motion.div className="text-center" variants={fadeInUp}>
+              <motion.div className="text-center glass-card p-6" variants={fadeInUp}>
                 <motion.div 
-                  className="icon-circle w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-white to-dtktmt-pink-light"
+                  className="icon-circle w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-white to-dtktmt-pink-light"
                   whileHover={{ 
                     scale: 1.1,
                     boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                   }}
                 >
-                  <Award size={32} className="text-dtktmt-pink-medium" />
+                  <Award size={28} className="text-dtktmt-pink-medium" />
                 </motion.div>
-                <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">
+                <h3 className="text-lg font-bold mb-2 text-dtktmt-blue-dark">
                   Chứng chỉ giá trị
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-sm">
                   Nhận chứng chỉ được công nhận rộng rãi sau khi hoàn thành khóa học.
                 </p>
               </motion.div>
 
-              <motion.div className="text-center" variants={fadeInUp}>
+              <motion.div className="text-center glass-card p-6" variants={fadeInUp}>
                 <motion.div 
-                  className="icon-circle w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-white to-dtktmt-purple-light"
+                  className="icon-circle w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-white to-dtktmt-purple-light"
                   whileHover={{ 
                     scale: 1.1,
                     boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                   }}
                 >
-                  <Sparkles size={32} className="text-dtktmt-purple-medium" />
+                  <Clock size={28} className="text-dtktmt-purple-medium" />
                 </motion.div>
-                <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">
-                  Trải nghiệm học tập
+                <h3 className="text-lg font-bold mb-2 text-dtktmt-blue-dark">
+                  Học bất cứ lúc nào
                 </h3>
-                <p className="text-gray-600">
-                  Giao diện trực quan, học liệu đa dạng giúp việc học trở nên thú vị.
+                <p className="text-gray-600 text-sm">
+                  Truy cập không giới hạn vào nội dung khoá học mọi lúc, mọi nơi.
                 </p>
               </motion.div>
             </motion.div>
           </div>
         </motion.section>
 
-        {/* CTA Section */}
+        {/* CTA Section - Rút gọn */}
         <motion.section 
-          className="py-12 px-4 mb-8"
+          className="py-8 px-4 mb-6"
           variants={fadeInUp}
           initial="hidden"
           whileInView="visible"
@@ -397,12 +506,10 @@ const Index = () => {
               style={{ overflow: "hidden" }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-dtktmt-blue-medium/70 to-dtktmt-purple-medium/70 z-0"></div>
-              <div className="absolute -bottom-16 -right-16 w-64 h-64 bg-white/10 rounded-full"></div>
-              <div className="absolute -top-16 -left-16 w-64 h-64 bg-white/10 rounded-full"></div>
               
-              <div className="p-8 md:p-12 text-white text-center relative z-10">
+              <div className="p-6 sm:p-8 text-white text-center relative z-10">
                 <motion.h2 
-                  className="text-2xl md:text-3xl font-bold mb-4 glowing-text"
+                  className="text-xl md:text-2xl font-bold mb-3 glowing-text"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
@@ -410,7 +517,7 @@ const Index = () => {
                   Sẵn sàng bắt đầu hành trình học tập?
                 </motion.h2>
                 <motion.p 
-                  className="text-white/90 mb-8 max-w-xl mx-auto"
+                  className="text-white/90 mb-6 max-w-xl mx-auto text-sm md:text-base"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
