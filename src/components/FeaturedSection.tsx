@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronRight, ChevronLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface FeaturedItem {
   id: string;
@@ -14,16 +15,16 @@ interface FeaturedItem {
 const items: FeaturedItem[] = [
   {
     id: "1",
-    title: "Khóa học mới về Vi xử lý",
-    description: "Tìm hiểu về kiến trúc và lập trình vi điều khiển hiện đại",
-    image: "/placeholder.svg",
+    title: "Lập trình nhúng với ARM Cortex-M",
+    description: "Kiến thức chuyên sâu về lập trình nhúng sử dụng kiến trúc ARM Cortex-M",
+    image: "/lovable-uploads/47f9d951-4fcc-4c74-a8c6-618391ab6fcd.png",
     link: "/khoa-hoc/vi-xu-ly",
   },
   {
     id: "2",
     title: "Tài liệu điện tử số",
     description: "Tất cả tài liệu bạn cần cho môn học Điện tử số",
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/f747d1e0-acc6-4f25-ae71-e10a2c8015e7.png",
     link: "/tai-lieu/dien-tu-so",
   },
   {
@@ -61,7 +62,7 @@ const FeaturedSection = () => {
 
   const variants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
+      x: direction > 0 ? 500 : -500,
       opacity: 0,
     }),
     center: {
@@ -69,7 +70,7 @@ const FeaturedSection = () => {
       opacity: 1,
     },
     exit: (direction: number) => ({
-      x: direction < 0 ? 1000 : -1000,
+      x: direction < 0 ? 500 : -500,
       opacity: 0,
     }),
   };
@@ -77,10 +78,9 @@ const FeaturedSection = () => {
   const currentItem = items[currentIndex];
 
   return (
-    <div className="relative overflow-hidden rounded-xl shadow-lg h-[320px] bg-gradient-to-r from-dtktmt-blue-light via-dtktmt-blue-medium to-dtktmt-purple-medium border-2 border-white/30">
+    <div className="relative overflow-hidden rounded-xl shadow-lg h-[280px] bg-gradient-to-r from-dtktmt-blue-light via-dtktmt-blue-medium to-dtktmt-purple-medium">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -inset-[10px] bg-[url('/placeholder.svg')] opacity-20 blur-sm" style={{backgroundSize: "cover", backgroundPosition: "center"}}></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-dtktmt-blue-light/80 via-dtktmt-blue-medium/80 to-dtktmt-purple-medium/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-dtktmt-blue-medium/80 to-dtktmt-purple-medium/80"></div>
       </div>
       
       <AnimatePresence initial={false} custom={direction}>
@@ -97,53 +97,47 @@ const FeaturedSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 w-full h-full">
             <div className="flex flex-col justify-center px-6 md:px-10">
               <motion.h2 
+                className="text-xl md:text-2xl font-bold mb-2 text-white"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl md:text-2xl font-bold mb-3 text-white glowing-text relative"
               >
-                <span className="absolute -left-4 top-1/2 transform -translate-y-1/2 w-1 h-10 bg-white/70 rounded-full"></span>
                 {currentItem.title}
               </motion.h2>
               <motion.p 
+                className="text-white/90 mb-5 text-sm"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-white/80 mb-5 text-sm md:text-base"
               >
                 {currentItem.description}
               </motion.p>
-              <motion.a
+              <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                href={currentItem.link}
-                className="bg-white text-dtktmt-blue-dark hover:bg-dtktmt-blue-light hover:text-white px-5 py-2 rounded-full inline-flex items-center gap-2 font-medium transition-all w-fit shadow-lg hover:shadow-xl transform hover:translate-x-1 text-sm md:text-base"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
-                Khám phá ngay
-                <ArrowRight size={16} className="animate-bounce-light" />
-              </motion.a>
+                <Link
+                  to={currentItem.link}
+                  className="bg-white text-dtktmt-blue-dark px-5 py-2 rounded-full inline-flex items-center gap-2 font-medium transition-all hover:shadow-md hover:bg-dtktmt-blue-light hover:text-white text-sm"
+                >
+                  Khám phá ngay
+                  <ArrowRight size={16} />
+                </Link>
+              </motion.div>
             </div>
             <div className="hidden md:flex items-center justify-center p-6">
               <motion.div
-                initial={{ scale: 0.8, opacity: 0, rotateY: -15 }}
-                animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-                transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
-                className="w-full max-w-md aspect-video rounded-xl overflow-hidden shadow-2xl transform hover:rotate-0 transition-transform duration-500"
-                style={{ 
-                  transformStyle: "preserve-3d",
-                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)",
-                  transform: "perspective(1000px) rotateX(5deg) rotateY(-5deg)"
-                }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="w-full max-w-md rounded-xl overflow-hidden shadow-lg"
               >
                 <img
                   src={currentItem.image}
                   alt={currentItem.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-dtktmt-blue-dark/50 to-transparent"></div>
               </motion.div>
             </div>
           </div>
@@ -157,7 +151,7 @@ const FeaturedSection = () => {
             key={index}
             className={`w-2.5 h-2.5 rounded-full transition-all ${
               index === currentIndex
-                ? "bg-white w-6 shadow-lg shadow-white/30"
+                ? "bg-white w-6"
                 : "bg-white/50 hover:bg-white/70"
             }`}
             onClick={() => {
@@ -169,36 +163,19 @@ const FeaturedSection = () => {
       </div>
       
       {/* Navigation Buttons */}
-      <motion.button 
-        whileHover={{ scale: 1.1, x: -2 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-1.5 backdrop-blur-sm z-20"
+      <button 
+        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-2 z-20"
         onClick={prevSlide}
       >
-        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </motion.button>
+        <ChevronLeft className="w-4 h-4 text-white" />
+      </button>
       
-      <motion.button 
-        whileHover={{ scale: 1.1, x: 2 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-1.5 backdrop-blur-sm z-20"
+      <button 
+        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-2 z-20"
         onClick={nextSlide}
       >
-        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </motion.button>
-      
-      {/* Decorative elements */}
-      <div className="absolute bottom-0 left-0 w-full">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-14">
-          <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="rgba(255,255,255,0.1)"></path>
-          <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="rgba(255,255,255,0.2)"></path>
-          <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="rgba(255,255,255,0.3)"></path>
-        </svg>
-      </div>
+        <ChevronRight className="w-4 h-4 text-white" />
+      </button>
     </div>
   );
 };
