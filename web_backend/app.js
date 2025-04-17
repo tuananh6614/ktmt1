@@ -43,17 +43,18 @@ app.get('/api/profile', auth, async (req, res) => {
 
 app.put('/api/profile/update', auth, async (req, res) => {
     try {
-        const { full_name } = req.body;
+        const { full_name, school } = req.body;
         if (!full_name) {
             return res.status(400).json({ error: 'Tên không được để trống' });
         }
 
         console.log('Updating profile for user:', req.user.id);
         console.log('New name:', full_name);
+        console.log('New school:', school);
 
         const [result] = await db.execute(
-            'UPDATE users SET full_name = ? WHERE id = ?',
-            [full_name, req.user.id]
+            'UPDATE users SET full_name = ?, school = ? WHERE id = ?',
+            [full_name, school, req.user.id]
         );
 
         console.log('Update result:', result);
@@ -66,7 +67,8 @@ app.put('/api/profile/update', auth, async (req, res) => {
             message: 'Cập nhật thành công',
             user: {
                 ...req.user,
-                full_name
+                full_name,
+                school
             }
         });
     } catch (error) {

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +29,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [newName, setNewName] = useState(user.name);
+  const [newSchool, setNewSchool] = useState(user.school);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -43,7 +43,10 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ full_name: newName })
+        body: JSON.stringify({ 
+          full_name: newName,
+          school: newSchool
+        })
       });
 
       const data = await response.json();
@@ -62,7 +65,8 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
         const userData = JSON.parse(storedUser);
         localStorage.setItem('user', JSON.stringify({
           ...userData,
-          full_name: newName
+          full_name: newName,
+          school: newSchool
         }));
       }
 
@@ -170,7 +174,15 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
             
             <div>
               <label className="text-sm text-gray-500 block mb-1">Trường học</label>
-              <Input defaultValue={user.school || 'Chưa cập nhật'} disabled className="bg-gray-50" />
+              {isEditingProfile ? (
+                <Input 
+                  value={newSchool} 
+                  onChange={(e) => setNewSchool(e.target.value)}
+                  placeholder="Nhập tên trường"
+                />
+              ) : (
+                <Input value={user.school || 'Chưa cập nhật'} disabled className="bg-gray-50" />
+              )}
             </div>
             
             <div>

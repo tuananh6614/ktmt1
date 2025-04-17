@@ -140,6 +140,7 @@ const ProfilePage = () => {
       setProfileUser({
         ...profileUser,
         name: updatedUser.full_name,
+        school: updatedUser.school || '',
       });
     }
   };
