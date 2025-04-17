@@ -324,9 +324,9 @@ const AboutPage = () => {
                                   ease: "linear" 
                                 }}
                               >
-                                {/* Logo hoặc hình ảnh - đã thay thế bằng logo của trang web */}
+                                {/* Logo or image */}
                                 <motion.img
-                                  src="/lovable-uploads/62599728-dd80-41c9-80ea-ed479b3c2173.png" 
+                                  src="" 
                                   alt="DT&KTMT1" 
                                   className="w-full h-full object-contain rounded-full"
                                   animate={{ 
@@ -629,4 +629,496 @@ const AboutPage = () => {
                     
                     <img 
                       src="/placeholder.svg" 
-                      alt="Sứ mệnh DT&KTMT1"
+                      alt="Sứ mệnh DT&KTMT1" 
+                      className="relative z-10 w-full object-cover h-[400px]"
+                    />
+                    
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
+                      <div className="p-6">
+                        <motion.h3 
+                          className="text-white text-2xl font-bold mb-2"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={missionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                          transition={{ delay: 0.5 }}
+                        >
+                          Công nghệ tương lai
+                        </motion.h3>
+                        <motion.p 
+                          className="text-white/80"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={missionInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                          transition={{ delay: 0.7 }}
+                        >
+                          Đột phá giới hạn của giáo dục truyền thống
+                        </motion.p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Our Strengths */}
+        <section ref={strengthsRef} className="py-20 px-4 bg-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          
+          <motion.div 
+            className="max-w-7xl mx-auto relative z-10"
+            initial={{ opacity: 0 }}
+            animate={strengthsInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div 
+              className="text-center mb-16"
+              initial={{ opacity: 0, y: 20 }}
+              animate={strengthsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-dtktmt-blue-dark inline-block relative">
+                Điểm mạnh của chúng tôi
+                <motion.div 
+                  className="h-1 w-24 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-pink-medium mx-auto mt-2"
+                  initial={{ width: 0 }}
+                  animate={strengthsInView ? { width: 100 } : { width: 0 }}
+                  transition={{ duration: 1, delay: 0.3 }}
+                ></motion.div>
+              </h2>
+              <p className="text-gray-700 max-w-2xl mx-auto">
+                Những yếu tố tạo nên sự khác biệt của nền tảng DT&KTMT1 trong lĩnh vực đào tạo Điện tử & Kỹ thuật máy tính
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {strengths.map((strength, index) => (
+                <motion.div 
+                  key={index} 
+                  className="glassmorphism bg-white/80 backdrop-blur-lg p-6 rounded-xl border border-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={strengthsInView ? { 
+                    opacity: 1, 
+                    y: 0,
+                    transition: { delay: index * 0.1 + 0.3, duration: 0.6 }
+                  } : { 
+                    opacity: 0, 
+                    y: 50 
+                  }}
+                  whileHover={{ 
+                    y: -10,
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+                    background: "rgba(255, 255, 255, 0.95)"
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <motion.div 
+                      className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-dtktmt-blue-light/20 to-dtktmt-purple-light/20 rounded-2xl flex items-center justify-center shadow-inner"
+                      whileHover={{ rotate: [0, 10, -10, 0], transition: { duration: 0.5 } }}
+                    >
+                      {strength.icon}
+                      <div className="absolute w-16 h-16 bg-gradient-to-br from-dtktmt-blue-light/10 to-dtktmt-purple-light/10 rounded-2xl animate-pulse"></div>
+                    </motion.div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">{strength.title}</h3>
+                      <p className="text-gray-700">{strength.description}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Our Team with 3D Cards */}
+        <section id="team" ref={teamRef} className="py-20 px-4 bg-gradient-to-b from-white to-dtktmt-blue-light/20 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          
+          <motion.div 
+            className="max-w-7xl mx-auto relative z-10"
+            initial={{ opacity: 0 }}
+            animate={teamInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div 
+              className="text-center mb-16"
+              initial={{ opacity: 0, y: 20 }}
+              animate={teamInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-dtktmt-blue-dark inline-block relative">
+                Đội ngũ phát triển
+                <motion.div 
+                  className="h-1 w-24 bg-gradient-to-r from-dtktmt-purple-medium to-dtktmt-blue-medium mx-auto mt-2"
+                  initial={{ width: 0 }}
+                  animate={teamInView ? { width: 100 } : { width: 0 }}
+                  transition={{ duration: 1, delay: 0.3 }}
+                ></motion.div>
+              </h2>
+              <p className="text-gray-700 max-w-2xl mx-auto">
+                Gặp gỡ những chuyên gia đã xây dựng nên DT&KTMT1 - những người đam mê công nghệ 
+                và giáo dục, với sứ mệnh đưa kiến thức chuyên ngành đến gần hơn với mọi người.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {teamMembers.map((member, index) => (
+                <motion.div 
+                  key={index} 
+                  className="bg-white rounded-xl overflow-hidden transform-gpu shadow-xl perspective-1000 hover:shadow-2xl transition-all duration-500"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={teamInView ? { 
+                    opacity: 1, 
+                    y: 0,
+                    transition: { delay: index * 0.1, duration: 0.5 }
+                  } : { 
+                    opacity: 0, 
+                    y: 50 
+                  }}
+                  whileHover={{ 
+                    y: -15,
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                  }}
+                >
+                  <motion.div 
+                    className="transform-3d"
+                    whileHover={{ rotateY: 5, rotateX: -5 }}
+                  >
+                    <div className="relative">
+                      <div className="aspect-square overflow-hidden bg-gradient-to-br from-dtktmt-blue-light to-dtktmt-purple-light">
+                        <motion.img
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ duration: 0.5 }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-80"></div>
+                        
+                        <motion.div 
+                          className="absolute top-4 right-4 bg-white/20 backdrop-blur-md rounded-full w-12 h-12 flex items-center justify-center"
+                          whileHover={{ 
+                            rotate: 360,
+                            transition: { duration: 0.7, ease: "easeInOut" }
+                          }}
+                        >
+                          <GraduationCap className="text-white" size={20} />
+                        </motion.div>
+                      </div>
+                      <motion.div 
+                        className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium rounded-full w-12 h-12 flex items-center justify-center border-4 border-white"
+                        initial={{ scale: 0 }}
+                        animate={teamInView ? { scale: 1 } : { scale: 0 }}
+                        transition={{ delay: 0.5 + index * 0.1, type: "spring" }}
+                      >
+                        <Award className="text-white" size={18} />
+                      </motion.div>
+                    </div>
+                    <div className="p-6 pt-8 bg-white">
+                      <h3 className="text-xl font-bold mb-1 text-dtktmt-blue-dark text-center">{member.name}</h3>
+                      <p className="text-dtktmt-pink-medium font-medium mb-3 text-center">{member.role}</p>
+                      <p className="text-gray-600 text-sm mb-4 text-center">{member.bio}</p>
+                      <div className="flex items-center justify-center gap-3 pt-2">
+                        <motion.a 
+                          href={`mailto:${member.social.email}`} 
+                          className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-dtktmt-blue-medium hover:text-white transition-all duration-300"
+                          whileHover={{ y: -5, rotate: 10 }}
+                        >
+                          <Mail size={15} />
+                        </motion.a>
+                        <motion.a 
+                          href={member.social.Facebook} 
+                          className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-dtktmt-blue-medium hover:text-white transition-all duration-300"
+                          whileHover={{ y: -5, rotate: -10 }}
+                        >
+                          <Facebook size={15} />
+                        </motion.a>
+                        <motion.a 
+                          href={member.social.github} 
+                          className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-dtktmt-blue-medium hover:text-white transition-all duration-300"
+                          whileHover={{ y: -5, rotate: 10 }}
+                        >
+                          <Github size={15} />
+                        </motion.a>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        {/* Contact Us with Animated Form */}
+        <section ref={contactRef} className="py-20 px-4 bg-gradient-to-br from-dtktmt-blue-medium/10 to-dtktmt-purple-medium/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-circuit-pattern opacity-5"></div>
+          
+          <motion.div 
+            className="max-w-7xl mx-auto relative z-10"
+            initial={{ opacity: 0 }}
+            animate={contactInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <motion.div 
+              className="text-center mb-16"
+              initial={{ opacity: 0, y: 20 }}
+              animate={contactInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-dtktmt-blue-dark inline-block relative">
+                Liên hệ với chúng tôi
+                <motion.div 
+                  className="h-1 w-24 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-pink-medium mx-auto mt-2"
+                  initial={{ width: 0 }}
+                  animate={contactInView ? { width: 100 } : { width: 0 }}
+                  transition={{ duration: 1, delay: 0.3 }}
+                ></motion.div>
+              </h2>
+              <p className="text-gray-700 max-w-2xl mx-auto">
+                Bạn có câu hỏi hoặc đề xuất? Hãy liên hệ với chúng tôi qua các kênh sau
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              <motion.div 
+                className="glassmorphism bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg flex flex-col items-center text-center"
+                initial={{ opacity: 0, y: 50 }}
+                animate={contactInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                whileHover={{ 
+                  y: -10,
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-dtktmt-blue-light to-dtktmt-blue-medium rounded-full flex items-center justify-center mb-4 shadow-lg">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <MapPin size={24} className="text-white" />
+                  </motion.div>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">Địa chỉ</h3>
+                <p className="text-gray-700">
+                  235 Hoàng Quốc Việt, Phường Cổ Nhuế 1, Quận Bắc Từ Liêm, Hà Nội
+                </p>
+              </motion.div>
+
+              <motion.div 
+                className="glassmorphism bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg flex flex-col items-center text-center"
+                initial={{ opacity: 0, y: 50 }}
+                animate={contactInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                whileHover={{ 
+                  y: -10,
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-dtktmt-pink-light to-dtktmt-pink-medium rounded-full flex items-center justify-center mb-4 shadow-lg">
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Phone size={24} className="text-white" />
+                  </motion.div>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">Điện thoại</h3>
+                <motion.p 
+                  className="text-gray-700"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  +84 339 435 005
+                </motion.p>
+              </motion.div>
+
+              <motion.div 
+                className="glassmorphism bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg flex flex-col items-center text-center"
+                initial={{ opacity: 0, y: 50 }}
+                animate={contactInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                whileHover={{ 
+                  y: -10,
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-dtktmt-purple-light to-dtktmt-purple-medium rounded-full flex items-center justify-center mb-4 shadow-lg">
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Mail size={24} className="text-white" />
+                  </motion.div>
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-dtktmt-blue-dark">Email</h3>
+                <motion.p 
+                  className="text-gray-700"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  tuananh6614@gmail.com
+                </motion.p>
+              </motion.div>
+            </div>
+
+            <motion.div 
+              className="glassmorphism bg-white/90 backdrop-blur-lg p-8 rounded-xl shadow-2xl"
+              initial={{ opacity: 0, y: 50 }}
+              animate={contactInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              <h3 className="text-2xl font-bold mb-6 text-center text-dtktmt-blue-dark">Gửi tin nhắn cho chúng tôi</h3>
+              <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={contactInView ? { x: 0, opacity: 1 } : { x: -50, opacity: 0 }}
+                  transition={{ delay: 0.9 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <label className="block text-gray-700 mb-2 font-medium">Họ và tên</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dtktmt-blue-medium focus:border-transparent transition-all duration-300" 
+                    placeholder="Nhập họ và tên"
+                  />
+                </motion.div>
+                <motion.div
+                  initial={{ x: 50, opacity: 0 }}
+                  animate={contactInView ? { x: 0, opacity: 1 } : { x: 50, opacity: 0 }}
+                  transition={{ delay: 0.9 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <label className="block text-gray-700 mb-2 font-medium">Email</label>
+                  <input 
+                    type="email" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dtktmt-blue-medium focus:border-transparent transition-all duration-300" 
+                    placeholder="Nhập địa chỉ email"
+                  />
+                </motion.div>
+                <motion.div 
+                  className="md:col-span-2"
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={contactInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+                  transition={{ delay: 1.1 }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                >
+                  <label className="block text-gray-700 mb-2 font-medium">Chủ đề</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dtktmt-blue-medium focus:border-transparent transition-all duration-300" 
+                    placeholder="Nhập chủ đề"
+                  />
+                </motion.div>
+                <motion.div 
+                  className="md:col-span-2"
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={contactInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+                  transition={{ delay: 1.3 }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                >
+                  <label className="block text-gray-700 mb-2 font-medium">Nội dung</label>
+                  <textarea 
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dtktmt-blue-medium focus:border-transparent h-36 transition-all duration-300" 
+                    placeholder="Nhập nội dung tin nhắn"
+                  ></textarea>
+                </motion.div>
+                <div className="md:col-span-2 text-center">
+                  <motion.button 
+                    type="submit"
+                    className="relative overflow-hidden bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium text-white font-bold py-3 px-8 rounded-lg shadow-lg"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={{ opacity: 0 }}
+                    animate={contactInView ? { opacity: 1 } : { opacity: 0 }}
+                    transition={{ delay: 1.5 }}
+                  >
+                    <span className="relative z-10">Gửi tin nhắn</span>
+                    <motion.span 
+                      className="absolute inset-0 bg-gradient-to-r from-dtktmt-pink-medium to-dtktmt-blue-medium opacity-0 hover:opacity-100 transition-opacity"
+                      animate={{
+                        background: ['linear-gradient(to right, #5da7e8, #c9a9ff)', 'linear-gradient(to right, #c9a9ff, #5da7e8)'],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+                    ></motion.span>
+                  </motion.button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        </section>
+      </main>
+
+      <Footer />
+      <ChatBox />
+      
+      {/* Fix: Removed jsx and global props from style element */}
+      <style>
+        {`
+        .glassmorphism {
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .transform-3d {
+          transform-style: preserve-3d;
+        }
+        
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        
+        .grid-bg {
+          background-size: 50px 50px;
+          background-image: 
+            linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+        }
+        
+        .bg-circuit-pattern {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .technology-code {
+          background: linear-gradient(rgba(43, 120, 194, 0.7), rgba(201, 169, 255, 0.7)),
+                      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 800 800'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='1'%3E%3Cpath d='M769 229L1037 260.9M927 880L731 737 520 660 309 538 40 599 295 764 126.5 879.5 40 599-197 493 102 382-31 229 126.5 79.5-69-63'/%3E%3Cpath d='M-31 229L237 261 390 382 603 493 308.5 537.5 101.5 381.5M370 905L295 764'/%3E%3Cpath d='M520 660L578 842 731 737 840 599 603 493 520 660 295 764 309 538 390 382 539 269 769 229 577.5 41.5 370 105 295 -36 126.5 79.5 237 261 102 382 40 599 -69 737 127 880'/%3E%3Cpath d='M520-140L578.5 42.5 731-63M603 493L539 269 237 261 370 105M902 382L539 269M390 382L102 382'/%3E%3Cpath d='M-222 42L126.5 79.5 370 105 539 269 577.5 41.5 927 80 769 229 902 382 603 493 731 737M295-36L577.5 41.5M578 842L295 764M40-201L127 80M102 382L-261 269'/%3E%3C/g%3E%3Cg fill='%23FFFFFF'%3E%3Ccircle cx='769' cy='229' r='5'/%3E%3Ccircle cx='539' cy='269' r='5'/%3E%3Ccircle cx='603' cy='493' r='5'/%3E%3Ccircle cx='731' cy='737' r='5'/%3E%3Ccircle cx='520' cy='660' r='5'/%3E%3Ccircle cx='309' cy='538' r='5'/%3E%3Ccircle cx='295' cy='764' r='5'/%3E%3Ccircle cx='40' cy='599' r='5'/%3E%3Ccircle cx='102' cy='382' r='5'/%3E%3Ccircle cx='127' cy='80' r='5'/%3E%3Ccircle cx='370' cy='105' r='5'/%3E%3Ccircle cx='578' cy='42' r='5'/%3E%3Ccircle cx='237' cy='261' r='5'/%3E%3Ccircle cx='390' cy='382' r='5'/%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        
+        .bg-300\\% {
+          background-size: 300% 100%;
+        }
+        
+        .animate-gradient-slide {
+          animation: gradient-slide 3s linear infinite;
+        }
+        
+        @keyframes gradient-slide {
+          0% {
+            background-position: 0% 50%;
+          }
+          100% {
+            background-position: 300% 50%;
+          }
+        }
+        
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+        `}
+      </style>
+    </div>
+  );
+};
+
+export default AboutPage;
