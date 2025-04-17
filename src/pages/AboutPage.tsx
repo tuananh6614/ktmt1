@@ -326,7 +326,7 @@ const AboutPage = () => {
                               >
                                 {/* Logo or image */}
                                 <motion.img
-                                  src="/lovable-uploads/edbc5529-0211-47c7-81df-4adf5f381a48.png" 
+                                  src="" 
                                   alt="DT&KTMT1" 
                                   className="w-full h-full object-contain rounded-full"
                                   animate={{ 
@@ -393,8 +393,8 @@ const AboutPage = () => {
                       }}
                     >
                       <div className="text-white font-bold">
-                        <span className="block text-3xl">5</span>
-                        <span className="text-sm">năm</span>
+                        <span className="block text-3xl"></span>
+                        <span className="text-center"> Thông minh</span>
                       </div>
                     </motion.div>
                   </div>
