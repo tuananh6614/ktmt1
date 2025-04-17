@@ -1,22 +1,17 @@
-
 import { useState } from "react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
 import CourseCard from "@/components/CourseCard";
 import DocumentCard from "@/components/DocumentCard";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import TestResults from "@/components/profile/TestResults";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  User, Settings, Clock, BookOpen, FileText, Award, 
-  Edit, Save, LogOut, Star, Activity, Check, X 
-} from "lucide-react";
+import { BookOpen, FileText, Star } from "lucide-react";
 
 const ProfilePage = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   
-  // Sample user data
   const user = {
     name: "Nguyễn Văn Anh",
     role: "Học sinh/ sinh viên",
@@ -33,7 +28,6 @@ const ProfilePage = () => {
     },
   };
   
-  // Sample courses data
   const myCourses = [
     {
       id: "1",
@@ -67,7 +61,6 @@ const ProfilePage = () => {
     },
   ];
   
-  // Sample documents data
   const myDocuments = [
     {
       id: "1",
@@ -101,7 +94,6 @@ const ProfilePage = () => {
     },
   ];
 
-  // Sample test results
   const testResults = [
     {
       id: "1",
@@ -132,124 +124,7 @@ const ProfilePage = () => {
 
       <main className="flex-1 py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
-            <div className="h-48 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium relative">
-              <div className="absolute -bottom-16 left-8 flex items-end">
-                <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden">
-                  <img
-                    src={user.image}
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="ml-4 mb-4">
-                  <h1 className="text-2xl font-bold text-white">{user.name}</h1>
-                  <p className="text-white/90">{user.role}</p>
-                </div>
-              </div>
-              <div className="absolute top-4 right-4 flex gap-2">
-                <Button 
-                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm" 
-                  onClick={() => setIsEditingProfile(!isEditingProfile)}
-                >
-                  {isEditingProfile ? (
-                    <><X size={16} className="mr-1" /> Hủy</>
-                  ) : (
-                    <><Edit size={16} className="mr-1" /> Chỉnh sửa</>
-                  )}
-                </Button>
-                {isEditingProfile && (
-                  <Button 
-                    className="bg-dtktmt-blue-dark hover:bg-dtktmt-blue-dark/80"
-                    onClick={() => setIsEditingProfile(false)}
-                  >
-                    <Save size={16} className="mr-1" /> Lưu
-                  </Button>
-                )}
-                <Button variant="destructive">
-                  <LogOut size={16} className="mr-1" /> Đăng xuất
-                </Button>
-              </div>
-            </div>
-            
-            <div className="pt-20 pb-6 px-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h2 className="text-lg font-medium mb-4 flex items-center">
-                    <User size={18} className="text-dtktmt-blue-medium mr-2" />
-                    Thông tin cá nhân
-                  </h2>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm text-gray-500 block mb-1">Email</label>
-                      {isEditingProfile ? (
-                        <Input defaultValue={user.email} />
-                      ) : (
-                        <p>{user.email}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm text-gray-500 block mb-1">Số điện thoại</label>
-                      {isEditingProfile ? (
-                        <Input defaultValue={user.phone} />
-                      ) : (
-                        <p>{user.phone}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm text-gray-500 block mb-1">Trường/Cơ quan</label>
-                      {isEditingProfile ? (
-                        <Input defaultValue={user.school} />
-                      ) : (
-                        <p>{user.school}</p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm text-gray-500 block mb-1">Ngày tham gia</label>
-                      <p>{user.joined}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h2 className="text-lg font-medium mb-4 flex items-center">
-                    <Activity size={18} className="text-dtktmt-pink-medium mr-2" />
-                    Thống kê học tập
-                  </h2>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-dtktmt-blue-light/30 p-4 rounded-lg flex flex-col items-center justify-center">
-                      <BookOpen size={24} className="text-dtktmt-blue-medium mb-2" />
-                      <p className="text-xl font-bold">{user.stats.coursesCompleted}</p>
-                      <p className="text-sm text-gray-600">Khóa học đã hoàn thành</p>
-                    </div>
-                    
-                    <div className="bg-dtktmt-pink-light/30 p-4 rounded-lg flex flex-col items-center justify-center">
-                      <Clock size={24} className="text-dtktmt-pink-medium mb-2" />
-                      <p className="text-xl font-bold">{user.stats.coursesInProgress}</p>
-                      <p className="text-sm text-gray-600">Khóa học đang học</p>
-                    </div>
-                    
-                    <div className="bg-dtktmt-purple-light/30 p-4 rounded-lg flex flex-col items-center justify-center">
-                      <FileText size={24} className="text-dtktmt-purple-medium mb-2" />
-                      <p className="text-xl font-bold">{user.stats.documentsPurchased}</p>
-                      <p className="text-sm text-gray-600">Tài liệu đã mua</p>
-                    </div>
-                    
-                    <div className="bg-dtktmt-yellow/30 p-4 rounded-lg flex flex-col items-center justify-center">
-                      <Award size={24} className="text-dtktmt-blue-dark mb-2" />
-                      <p className="text-xl font-bold">{user.stats.avgScore}</p>
-                      <p className="text-sm text-gray-600">Điểm trung bình</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ProfileHeader user={user} />
 
           <Tabs defaultValue="courses" className="w-full">
             <TabsList className="w-full grid grid-cols-3 mb-8">
@@ -284,64 +159,7 @@ const ProfilePage = () => {
             </TabsContent>
             
             <TabsContent value="tests">
-              <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-dtktmt-blue-light/30">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                          Bài kiểm tra
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                          Ngày làm bài
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                          Điểm số
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                          Trạng thái
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                          Thao tác
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {testResults.map((test) => (
-                        <tr key={test.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="font-medium text-gray-900">{test.title}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-gray-700">{test.date}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="font-medium text-gray-900">{test.score}/{test.total}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {test.score >= 70 ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <Check size={12} className="mr-1" />
-                                Đạt
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                <X size={12} className="mr-1" />
-                                Không đạt
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
-                            <Button variant="outline" size="sm">
-                              Xem chi tiết
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <TestResults results={testResults} />
             </TabsContent>
           </Tabs>
         </div>
