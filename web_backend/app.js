@@ -28,16 +28,19 @@ app.post('/api/register', authController.register);
 app.post('/api/login', authController.login);
 
 // Protected route example
-app.get('/api/profile', auth, (req, res) => {
-    console.log('Accessing profile for user:', req.user.id);
-    res.json({
-        user: {
-            id: req.user.id,
-            email: req.user.email,
-            full_name: req.user.full_name,
-            role: req.user.role
-        }
-    });
+app.get('/api/profile', auth, async (req, res) => {
+    try {
+        // req.user đã được set trong middleware auth
+        const user = req.user;
+        
+        // Loại bỏ password trước khi gửi về client
+        const { password, ...userWithoutPassword } = user;
+        
+        res.json(userWithoutPassword);
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy thông tin profile' });
+    }
 });
 
 // Error handling

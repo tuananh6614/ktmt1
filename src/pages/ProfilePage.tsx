@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 
+const API_URL = 'http://localhost:3000/api';
+
 interface UserData {
   id: number;
   email: string;
@@ -18,6 +20,8 @@ interface UserData {
   phone_number?: string;
   school?: string;
   role?: string;
+  status?: string;
+  created_at?: string;
 }
 
 interface ProfileUser {
@@ -132,40 +136,62 @@ const ProfilePage = () => {
   ];
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (!token || !storedUser) {
-      toast.error("Vui lòng đăng nhập để xem trang này");
-      navigate('/login');
-      return;
-    }
-    
-    try {
-      const userData: UserData = JSON.parse(storedUser);
+    const fetchUserProfile = async () => {
+      const token = localStorage.getItem('token');
       
-      setProfileUser({
-        name: userData.full_name || 'Người dùng',
-        role: userData.role || 'Học sinh/ sinh viên',
-        email: userData.email || '',
-        phone: userData.phone_number || '',
-        school: userData.school || '',
-        image: "/placeholder.svg",
-        joined: new Date().toLocaleDateString('vi-VN'),
-        stats: {
-          coursesCompleted: 0,
-          coursesInProgress: 0,
-          documentsPurchased: 0,
-          avgScore: 0,
+      if (!token) {
+        toast.error("Vui lòng đăng nhập để xem trang này");
+        navigate('/login');
+        return;
+      }
+
+      try {
+        // Gọi API để lấy thông tin profile
+        const response = await fetch(`${API_URL}/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
         }
-      });
-      
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Failed to parse user data', error);
-      toast.error("Có lỗi xảy ra khi tải thông tin người dùng");
-      navigate('/login');
-    }
+
+        const userData: UserData = await response.json();
+        
+        // Chuyển đổi dữ liệu từ API sang định dạng ProfileUser
+        setProfileUser({
+          name: userData.full_name,
+          role: userData.role || 'Học sinh/ sinh viên',
+          email: userData.email,
+          phone: userData.phone_number || '',
+          school: userData.school || '',
+          image: "/placeholder.svg",
+          joined: new Date(userData.created_at || Date.now()).toLocaleDateString('vi-VN'),
+          stats: {
+            coursesCompleted: 0,
+            coursesInProgress: 0,
+            documentsPurchased: 0,
+            avgScore: 0,
+          }
+        });
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        toast.error("Có lỗi xảy ra khi tải thông tin người dùng");
+        
+        // Nếu token hết hạn hoặc không hợp lệ, chuyển về trang đăng nhập
+        if (error instanceof Error && error.message === 'Failed to fetch profile') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          navigate('/login');
+        }
+      }
+    };
+
+    fetchUserProfile();
   }, [navigate]);
 
   if (isLoading) {
