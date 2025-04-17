@@ -30,13 +30,13 @@ const CoursePromoBanner = ({
 
   return (
     <motion.div 
-      className={`w-full rounded-2xl overflow-hidden shadow-xl mb-8`}
+      className={`w-full rounded-2xl overflow-hidden shadow-xl mb-16`}
       whileInView={{ y: [20, 0], opacity: [0, 1] }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
     >
-      <div className={`bg-gradient-to-r ${bgGradient} p-6 md:p-8`}>
-        <div className={`flex flex-col ${position === "left" ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-6`}>
+      <div className={`bg-gradient-to-r ${bgGradient} p-8 md:p-10`}>
+        <div className={`flex flex-col ${position === "left" ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-8`}>
           <div className={`w-full md:w-1/2 ${position === "right" ? "md:pl-6" : "md:pr-6"}`}>
             <motion.h3 
               className="text-2xl md:text-3xl font-bold text-white mb-4 drop-shadow-md"
@@ -48,7 +48,7 @@ const CoursePromoBanner = ({
               {title}
             </motion.h3>
             <motion.p 
-              className="text-white/90 mb-6"
+              className="text-white/90 mb-6 leading-relaxed"
               initial={{ y: 20, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
@@ -64,10 +64,10 @@ const CoursePromoBanner = ({
             >
               <Link to={`/khoa-hoc/${courseId}`}>
                 <Button 
-                  className="bg-white hover:bg-gray-100 text-dtktmt-blue-dark hover:text-dtktmt-blue-medium px-6 py-5 h-auto rounded-full group"
+                  className="bg-white hover:bg-gray-100 text-dtktmt-blue-dark hover:text-dtktmt-blue-medium px-8 py-6 h-auto rounded-full group shadow-lg hover:shadow-xl"
                   size="lg"
                 >
-                  <span>Đăng ký ngay</span>
+                  <span className="font-medium">Đăng ký ngay</span>
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
                 </Button>
               </Link>
@@ -78,21 +78,25 @@ const CoursePromoBanner = ({
               className="relative w-full max-w-md"
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
               viewport={{ once: true }}
             >
-              <div className="premium-card rounded-xl overflow-hidden shadow-2xl aspect-[16/10]">
+              <div className="premium-card rounded-xl overflow-hidden shadow-2xl aspect-[16/10] bg-white p-2">
                 <img
                   src={image}
                   alt={title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-lg"
                 />
               </div>
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-full p-4 shadow-lg">
+              <motion.div 
+                className="absolute -bottom-4 -right-4 bg-white rounded-full p-4 shadow-lg"
+                animate={{ y: [0, -5, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
                 <div className="text-dtktmt-blue-dark font-bold flex items-center text-lg">
-                  <span className="animate-pulse">Mở ngay</span>
+                  <span>Mở ngay</span>
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
           </div>
         </div>
