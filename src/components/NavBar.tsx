@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Menu, X, LogIn, Home, Book, FileText, Info, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import LogoutConfirmDialog from "./profile/LogoutConfirmDialog";
 
 interface UserData {
   id: number;
@@ -47,6 +49,7 @@ const NavBar = () => {
     setUser(null);
     toast.success("Đăng xuất thành công!");
     navigate('/');
+    setShowLogoutDialog(false);
   };
 
   return (
@@ -170,8 +173,8 @@ const NavBar = () => {
                 </Link>
                 <button
                   onClick={() => {
-                    handleLogout();
                     setIsOpen(false);
+                    setShowLogoutDialog(true);
                   }}
                   className="w-full block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 bg-dtktmt-blue-medium text-white"
                 >
@@ -192,6 +195,13 @@ const NavBar = () => {
           </div>
         </div>
       )}
+
+      {/* Hộp thoại xác nhận đăng xuất */}
+      <LogoutConfirmDialog 
+        open={showLogoutDialog}
+        onOpenChange={setShowLogoutDialog}
+        onConfirm={handleLogout}
+      />
     </nav>
   );
 };
