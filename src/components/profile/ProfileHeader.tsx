@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Edit2, Save, X, Key, School, Mail, Phone, User, LogOut } from "lucide-react";
+import { Edit2, Save, X, Key, School, Mail, Phone, User, Camera, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import StatsSection from "./StatsSection";
 import { Card } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import LogoutConfirmDialog from "./LogoutConfirmDialog";
 
 interface ProfileHeaderProps {
@@ -28,7 +29,6 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
-  const navigate = useNavigate();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
@@ -37,6 +37,9 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const handleSaveProfile = async () => {
     try {
@@ -125,26 +128,55 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
     navigate('/login');
   };
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Kích thước ảnh không được vượt quá 5MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setAvatarUrl(e.target?.result as string);
+        toast.success("Đã cập nhật ảnh đại diện");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="relative h-48 rounded-3xl overflow-hidden bg-gradient-to-r from-dtktmt-blue-medium via-dtktmt-purple-medium to-dtktmt-pink-medium">
         <div className="absolute inset-0 bg-black/10 backdrop-blur-sm"></div>
         
         <div className="absolute bottom-0 left-0 w-full p-4 flex items-end space-x-4">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-              {user.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-dtktmt-blue-light to-dtktmt-blue-dark flex items-center justify-center text-white text-2xl font-bold">
+          <div className="relative group">
+            <div 
+              onClick={handleAvatarClick}
+              className="w-20 h-20 rounded-2xl border-4 border-white shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer relative"
+            >
+              <Avatar className="w-full h-full">
+                <AvatarImage src={avatarUrl || user.image} />
+                <AvatarFallback className="bg-gradient-to-br from-dtktmt-blue-light to-dtktmt-blue-dark text-white text-2xl font-bold">
                   {user.name.charAt(0)}
-                </div>
-              )}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <Camera className="text-white w-6 h-6" />
+              </div>
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
           </div>
           
           <div className="flex-1 text-white">
