@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Menu, X, LogIn, Home, Book, FileText, Info, User, LogOut } from "lucide-react";
@@ -15,6 +14,7 @@ interface UserData {
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<UserData | null>(null);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -26,7 +26,6 @@ const NavBar = () => {
   ];
 
   useEffect(() => {
-    // Kiểm tra user từ localStorage khi component mount
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
@@ -111,7 +110,7 @@ const NavBar = () => {
                   </Button>
                 </Link>
                 <Button 
-                  onClick={handleLogout}
+                  onClick={() => setShowLogoutDialog(true)}
                   className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-1"
                 >
                   <LogOut size={16} />

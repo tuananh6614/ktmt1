@@ -38,6 +38,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
@@ -132,20 +133,35 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
     fileInputRef.current?.click();
   };
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Kích thước ảnh không được vượt quá 5MB");
-        return;
-      }
+    if (!file) return;
 
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Kích thước ảnh không được vượt quá 5MB");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setAvatarUrl(e.target?.result as string);
+      
+      reader.onload = async (e) => {
+        const result = e.target?.result as string;
+        setAvatarUrl(result);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Giả lập upload
         toast.success("Đã cập nhật ảnh đại diện");
       };
+
+      reader.onerror = () => {
+        toast.error("Có lỗi xảy ra khi đọc file");
+      };
+
       reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi cập nhật ảnh đại diện");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -158,7 +174,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
           <div className="relative group">
             <div 
               onClick={handleAvatarClick}
-              className="w-20 h-20 rounded-2xl border-4 border-white shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer relative"
+              className="relative w-20 h-20 rounded-2xl border-4 border-white shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer"
             >
               <Avatar className="w-full h-full">
                 <AvatarImage src={avatarUrl || user.image} />
@@ -167,7 +183,11 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
                 </AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Camera className="text-white w-6 h-6" />
+                {isUploading ? (
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera className="text-white w-6 h-6" />
+                )}
               </div>
             </div>
             <input
@@ -176,6 +196,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
               accept="image/*"
               className="hidden"
               onChange={handleAvatarChange}
+              disabled={isUploading}
             />
           </div>
           
