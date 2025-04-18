@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -214,13 +214,6 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
             <Button 
               variant="secondary"
               className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30"
-              onClick={() => setShowLogoutDialog(true)}
-            >
-              <LogOut size={16} className="mr-2" /> Đăng xuất
-            </Button>
-            <Button 
-              variant="secondary"
-              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30"
               onClick={() => setIsEditingProfile(!isEditingProfile)}
             >
               {isEditingProfile ? (
@@ -296,7 +289,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
                 <Input 
                   value={newSchool}
                   onChange={(e) => setNewSchool(e.target.value)}
-                  placeholder="Nh��p tên trường"
+                  placeholder="Nhập tên trường"
                   className="pl-10 border-dtktmt-blue-medium focus:ring-dtktmt-blue-light text-sm"
                 />
               ) : (
