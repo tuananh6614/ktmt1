@@ -7,7 +7,37 @@ require('dotenv').config();
 const authController = require('./controllers/authController');
 const auth = require('./middleware/auth');
 
+// Thêm multer để xử lý upload file
+const multer = require('multer');
+const path = require('path');
+
+// Cấu hình multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/avatars/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // Giới hạn 5MB
+  },
+  fileFilter: function (req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error('Chỉ chấp nhận file ảnh'));
+    }
+    cb(null, true);
+  }
+});
+
+// Thêm middleware để phục vụ file tĩnh
 const app = express();
+app.use('/uploads', express.static('uploads'));
 
 // Middleware
 app.use(cors());
@@ -113,6 +143,36 @@ app.put('/api/profile/change-password', auth, async (req, res) => {
         console.error('Error changing password:', error);
         res.status(500).json({ error: 'Lỗi khi đổi mật khẩu' });
     }
+});
+
+// API cập nhật ảnh đại diện
+app.put('/api/profile/avatar', auth, upload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Không có file được tải lên' });
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    const fullAvatarUrl = `http://localhost:3000${avatarUrl}`;
+    
+    const [result] = await db.execute(
+      'UPDATE users SET avatar_url = ? WHERE id = ?',
+      [avatarUrl, req.user.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+    }
+
+    res.json({ 
+      message: 'Cập nhật ảnh đại diện thành công',
+      avatar_url: avatarUrl,
+      full_avatar_url: fullAvatarUrl
+    });
+  } catch (error) {
+    console.error('Error updating avatar:', error);
+    res.status(500).json({ error: 'Lỗi khi cập nhật ảnh đại diện' });
+  }
 });
 
 // Error handling

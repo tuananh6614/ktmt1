@@ -8,6 +8,7 @@ import StatsSection from "./StatsSection";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import LogoutConfirmDialog from "./LogoutConfirmDialog";
+import { API_BASE_URL } from "@/config/config";
 
 interface ProfileHeaderProps {
   user: {
@@ -37,11 +38,11 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user.image || null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-
+  
   const handleSaveProfile = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -133,6 +134,12 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
     fileInputRef.current?.click();
   };
 
+  const getFullAvatarUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${API_BASE_URL}${url}`;
+  };
+
   const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -144,22 +151,65 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
 
     try {
       setIsUploading(true);
-      const reader = new FileReader();
+
+      // Tạo URL tạm thời cho preview
+      const tempUrl = URL.createObjectURL(file);
+      setAvatarUrl(tempUrl);
       
-      reader.onload = async (e) => {
-        const result = e.target?.result as string;
-        setAvatarUrl(result);
-        await new Promise(resolve => setTimeout(resolve, 500)); // Giả lập upload
-        toast.success("Đã cập nhật ảnh đại diện");
-      };
+      const formData = new FormData();
+      formData.append('avatar', file);
 
-      reader.onerror = () => {
-        toast.error("Có lỗi xảy ra khi đọc file");
-      };
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_BASE_URL}/api/profile/avatar`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
 
-      reader.readAsDataURL(file);
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Nếu lỗi, quay lại ảnh cũ
+        setAvatarUrl(user.image);
+        throw new Error(data.error || 'Lỗi cập nhật ảnh đại diện');
+      }
+
+      // Cập nhật avatar URL với URL đầy đủ
+      const fullAvatarUrl = `${API_BASE_URL}${data.avatar_url}`;
+      setAvatarUrl(fullAvatarUrl);
+      
+      // Cập nhật localStorage và trigger sự kiện storage
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        const newUserData = {
+          ...userData,
+          avatar_url: data.avatar_url,
+          image: fullAvatarUrl
+        };
+        localStorage.setItem('user', JSON.stringify(newUserData));
+        
+        // Trigger storage event để NavBar cập nhật
+        window.dispatchEvent(new Event('storage'));
+      }
+
+      // Cập nhật props user
+      if (onProfileUpdate) {
+        onProfileUpdate({
+          ...user,
+          image: fullAvatarUrl
+        });
+      }
+
+      toast.success("Đã cập nhật ảnh đại diện!");
+
+      // Xóa URL tạm thời
+      URL.revokeObjectURL(tempUrl);
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi cập nhật ảnh đại diện");
+      console.error('Error updating avatar:', error);
+      toast.error(error instanceof Error ? error.message : "Không thể cập nhật ảnh đại diện. Vui lòng thử lại!");
     } finally {
       setIsUploading(false);
     }
@@ -177,7 +227,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
               className="relative w-20 h-20 rounded-2xl border-4 border-white shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer"
             >
               <Avatar className="w-full h-full">
-                <AvatarImage src={avatarUrl || user.image} />
+                <AvatarImage src={getFullAvatarUrl(avatarUrl)} />
                 <AvatarFallback className="bg-gradient-to-br from-dtktmt-blue-light to-dtktmt-blue-dark text-white text-2xl font-bold">
                   {user.name.charAt(0)}
                 </AvatarFallback>
@@ -211,29 +261,29 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
           </div>
 
           <div className="flex gap-2">
-            <Button 
+          <Button 
               variant="secondary"
               className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30"
-              onClick={() => setIsEditingProfile(!isEditingProfile)}
-            >
-              {isEditingProfile ? (
+            onClick={() => setIsEditingProfile(!isEditingProfile)}
+          >
+            {isEditingProfile ? (
                 <><X size={16} className="mr-2" /> Hủy</>
-              ) : (
+            ) : (
                 <><Edit2 size={16} className="mr-2" /> Chỉnh sửa</>
-              )}
-            </Button>
-            {isEditingProfile && (
-              <Button 
-                className="bg-dtktmt-blue-dark hover:bg-dtktmt-blue-dark/90 text-white"
-                onClick={handleSaveProfile}
-              >
-                <Save size={16} className="mr-2" /> Lưu
-              </Button>
             )}
+          </Button>
+          {isEditingProfile && (
+            <Button 
+                className="bg-dtktmt-blue-dark hover:bg-dtktmt-blue-dark/90 text-white"
+              onClick={handleSaveProfile}
+            >
+                <Save size={16} className="mr-2" /> Lưu
+            </Button>
+          )}
           </div>
         </div>
       </div>
-
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-4 space-y-4 bg-white/70 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300">
           <h2 className="text-lg font-semibold text-gray-800">Thông tin cá nhân</h2>
@@ -249,7 +299,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
                 className="pl-10 bg-gray-50 border-gray-200 text-sm"
               />
             </div>
-
+            
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Phone className="h-4 w-4 text-gray-400" />
@@ -260,14 +310,14 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
                 className="pl-10 bg-gray-50 border-gray-200 text-sm"
               />
             </div>
-
+            
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <User className="h-4 w-4 text-gray-400" />
               </div>
               {isEditingProfile ? (
                 <Input 
-                  value={newName}
+                  value={newName} 
                   onChange={(e) => setNewName(e.target.value)}
                   placeholder="Nhập tên mới"
                   className="pl-10 border-dtktmt-blue-medium focus:ring-dtktmt-blue-light text-sm"
@@ -301,64 +351,64 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
               )}
             </div>
 
-            {!isEditingPassword ? (
-              <Button 
-                variant="outline" 
+              {!isEditingPassword ? (
+                <Button 
+                  variant="outline" 
                 className="w-full justify-start text-sm hover:bg-dtktmt-blue-light/10"
-                onClick={() => setIsEditingPassword(true)}
-              >
-                <Key size={16} className="mr-2" /> Đổi mật khẩu
-              </Button>
-            ) : (
+                  onClick={() => setIsEditingPassword(true)}
+                >
+                  <Key size={16} className="mr-2" /> Đổi mật khẩu
+                </Button>
+              ) : (
               <div className="space-y-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <Input
-                  type="password"
-                  placeholder="Mật khẩu hiện tại"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  <Input
+                    type="password"
+                    placeholder="Mật khẩu hiện tại"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
                   className="border-gray-200 focus:border-dtktmt-blue-medium text-sm"
-                />
-                <Input
-                  type="password"
-                  placeholder="Mật khẩu mới"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Mật khẩu mới"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                   className="border-gray-200 focus:border-dtktmt-blue-medium text-sm"
-                />
-                <Input
-                  type="password"
-                  placeholder="Xác nhận mật khẩu mới"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Xác nhận mật khẩu mới"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
                   className="border-gray-200 focus:border-dtktmt-blue-medium text-sm"
-                />
-                <div className="flex gap-2">
-                  <Button 
-                    variant="default"
-                    onClick={handleChangePassword}
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="default"
+                      onClick={handleChangePassword}
                     className="flex-1 bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-blue-dark text-sm"
-                  >
+                    >
                     <Save size={16} className="mr-2" /> Lưu mật khẩu
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setIsEditingPassword(false);
-                      setCurrentPassword('');
-                      setNewPassword('');
-                      setConfirmNewPassword('');
-                    }}
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditingPassword(false);
+                        setCurrentPassword('');
+                        setNewPassword('');
+                        setConfirmNewPassword('');
+                      }}
                     className="text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-                  >
+                    >
                     <X size={16} className="mr-2" /> Hủy
-                  </Button>
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
         </Card>
-
-        <StatsSection stats={user.stats} />
+          
+          <StatsSection stats={user.stats} />
       </div>
 
       <LogoutConfirmDialog

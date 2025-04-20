@@ -1,16 +1,24 @@
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Menu, X, LogIn, Home, Book, FileText, Info, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import LogoutConfirmDialog from "./profile/LogoutConfirmDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { API_BASE_URL } from "@/config/config";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface UserData {
   id: number;
   email: string;
   full_name: string;
   role?: string;
+  image?: string;
 }
 
 const NavBar = () => {
@@ -37,6 +45,19 @@ const NavBar = () => {
         console.error('Failed to parse user data');
       }
     }
+
+    const handleStorageChange = () => {
+      const updatedUser = localStorage.getItem('user');
+      if (updatedUser) {
+        setUser(JSON.parse(updatedUser));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const isActive = (path: string) => {
@@ -50,6 +71,12 @@ const NavBar = () => {
     toast.success("Đăng xuất thành công!");
     navigate('/');
     setShowLogoutDialog(false);
+  };
+
+  const getFullAvatarUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `${API_BASE_URL}${url}`;
   };
 
   return (
@@ -104,14 +131,31 @@ const NavBar = () => {
             </Button>
             
             {user ? (
-              <>
-                <Link to="/profile">
-                  <Button variant="ghost" className="p-0 hover:bg-transparent">
-                    <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-dtktmt-blue-medium flex items-center justify-center bg-dtktmt-blue-light text-white font-bold">
-                      {user.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                  </Button>
-                </Link>
+              <div className="flex items-center space-x-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={getFullAvatarUrl(user.image)} />
+                        <AvatarFallback className="bg-dtktmt-blue-light text-white">
+                          {user.full_name?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <Link to="/profile">
+                      <DropdownMenuItem>
+                        Trang cá nhân
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link to="/settings">
+                      <DropdownMenuItem>
+                        Cài đặt
+                      </DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button 
                   onClick={() => setShowLogoutDialog(true)}
                   className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-1"
@@ -119,7 +163,7 @@ const NavBar = () => {
                   <LogOut size={16} />
                   Đăng xuất
                 </Button>
-              </>
+              </div>
             ) : (
               <Link to="/login">
                 <Button className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-1">
@@ -162,15 +206,31 @@ const NavBar = () => {
             ))}
             
             {user ? (
-              <>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 text-dtktmt-blue-dark hover:bg-dtktmt-blue-light"
-                >
-                  <User size={18} />
-                  Hồ sơ
-                </Link>
+              <div className="flex items-center space-x-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={getFullAvatarUrl(user.image)} />
+                        <AvatarFallback className="bg-dtktmt-blue-light text-white">
+                          {user.full_name?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <Link to="/profile">
+                      <DropdownMenuItem>
+                        Trang cá nhân
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link to="/settings">
+                      <DropdownMenuItem>
+                        Cài đặt
+                      </DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <button
                   onClick={() => {
                     setIsOpen(false);
@@ -181,7 +241,7 @@ const NavBar = () => {
                   <LogOut size={18} />
                   Đăng xuất
                 </button>
-              </>
+              </div>
             ) : (
               <Link
                 to="/login"

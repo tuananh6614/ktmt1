@@ -7,8 +7,9 @@ import ProfileHeader from "@/components/profile/ProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/config/config";
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = `${API_BASE_URL}/api`;
 
 interface UserData {
   id: number;
@@ -19,6 +20,7 @@ interface UserData {
   role?: string;
   status?: string;
   created_at?: string;
+  avatar_url?: string;
 }
 
 interface ProfileUser {
@@ -82,7 +84,7 @@ const ProfilePage = () => {
           email: userData.email,
           phone: userData.phone_number || '',
           school: userData.school || '',
-          image: "/placeholder.svg",
+          image: userData.avatar_url ? `http://localhost:3000${userData.avatar_url}` : "/placeholder.svg",
           joined: new Date(userData.created_at || Date.now()).toLocaleDateString('vi-VN'),
           stats: {
             coursesCompleted: 0,
@@ -91,6 +93,11 @@ const ProfilePage = () => {
             avgScore: 0,
           }
         });
+
+        localStorage.setItem('user', JSON.stringify({
+          ...userData,
+          image: userData.avatar_url ? `http://localhost:3000${userData.avatar_url}` : "/placeholder.svg"
+        }));
 
         setIsLoading(false);
       } catch (error) {
