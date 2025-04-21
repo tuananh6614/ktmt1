@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Search, SortAsc, SortDesc, FileText } from "lucide-react";
 import NavBar from "@/components/NavBar";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
+// Hiện tại không có dữ liệu tài liệu mẫu, chờ lấy data thật từ backend/service
 const DocsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -32,90 +34,8 @@ const DocsPage = () => {
       });
   }, []);
 
-  const allDocuments = [
-    {
-      id: "1",
-      title: "Cấu trúc máy tính",
-      description: "Tài liệu về kiến trúc và tổ chức máy tính",
-      image: "/placeholder.svg",
-      price: 150000,
-      fileType: "pdf",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "giao-trinh",
-      isPurchased: true,
-    },
-    {
-      id: "2",
-      title: "Lập trình vi điều khiển",
-      description: "Hướng dẫn toàn diện về lập trình STM32",
-      image: "/placeholder.svg",
-      price: 200000,
-      fileType: "pdf",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "tai-lieu-tham-khao",
-    },
-    {
-      id: "3",
-      title: "Tài liệu thực hành VHDL",
-      description: "Bộ bài tập và giải pháp cho VHDL",
-      image: "/placeholder.svg",
-      price: 180000,
-      fileType: "docx",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "de-cuong",
-      isPurchased: true,
-    },
-    {
-      id: "4",
-      title: "Đề cương ôn tập Điện tử số",
-      description: "Tổng hợp lý thuyết và bài tập Điện tử số",
-      image: "/placeholder.svg",
-      price: 120000,
-      fileType: "pdf",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "de-cuong",
-    },
-    {
-      id: "5",
-      title: "Mô phỏng mạch với LTspice",
-      description: "Hướng dẫn sử dụng LTspice để mô phỏng và phân tích mạch điện",
-      image: "/placeholder.svg",
-      price: 150000,
-      fileType: "pdf",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "tai-lieu-tham-khao",
-    },
-    {
-      id: "6",
-      title: "Lập trình ARM Cortex-M4",
-      description: "Tài liệu chuyên sâu về lập trình ARM Cortex-M4",
-      image: "/placeholder.svg",
-      price: 250000,
-      fileType: "pdf",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "giao-trinh",
-    },
-    {
-      id: "7",
-      title: "Bài giảng Xử lý tín hiệu số",
-      description: "Slides bài giảng về xử lý tín hiệu số cho kỹ sư điện tử",
-      image: "/placeholder.svg",
-      price: 180000,
-      fileType: "pptx",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "tai-lieu-tham-khao",
-    },
-    {
-      id: "8",
-      title: "Thiết kế PCB với Altium Designer",
-      description: "Hướng dẫn thiết kế mạch in chuyên nghiệp với Altium Designer",
-      image: "/placeholder.svg",
-      price: 220000,
-      fileType: "pdf",
-      preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "khac",
-    },
-  ];
+  // Dữ liệu tài liệu hiện tại rỗng, chỉ sẵn sàng cho fetch sau này
+  const allDocuments: any[] = [];
 
   const filteredDocuments = allDocuments
     .filter((doc) => {
@@ -265,3 +185,4 @@ const DocsPage = () => {
 };
 
 export default DocsPage;
+
