@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Search, SortAsc, SortDesc, FileText } from "lucide-react";
 import NavBar from "@/components/NavBar";
@@ -20,7 +19,6 @@ const DocsPage = () => {
   const [categories, setCategories] = useState<DocumentCategory[]>([]);
   const [catMap, setCatMap] = useState<Record<string, string>>({});
 
-  // Fetch categories
   useEffect(() => {
     fetch("/api/document-categories")
       .then((res) => res.json())
@@ -267,4 +265,3 @@ const DocsPage = () => {
 };
 
 export default DocsPage;
-
