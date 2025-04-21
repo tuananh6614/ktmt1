@@ -1,5 +1,5 @@
 
-import { FileText, Download, Eye, CheckCircle, X } from "lucide-react";
+import { FileText, Download, Eye, CheckCircle, X, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ interface DocumentCardProps {
   fileType: string;
   preview: string;
   isPurchased?: boolean;
+  categoryName?: string; // Thêm prop này!
 }
 
 const DocumentCard = ({
@@ -24,6 +25,7 @@ const DocumentCard = ({
   fileType,
   preview,
   isPurchased = false,
+  categoryName = "",
 }: DocumentCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -79,6 +81,13 @@ const DocumentCard = ({
             <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
               <CheckCircle size={12} />
               <span>Đã mua</span>
+            </div>
+          )}
+          {/* Hiển thị danh mục ở bottom left */}
+          {categoryName && (
+            <div className="absolute bottom-2 left-2 bg-white/90 border text-dtktmt-blue-medium px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow">
+              <Folder size={12} className="mr-1" />
+              {categoryName}
             </div>
           )}
         </div>
@@ -149,3 +158,4 @@ const DocumentCard = ({
 };
 
 export default DocumentCard;
+

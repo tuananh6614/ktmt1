@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 export type DocumentCategory = {
@@ -15,13 +16,10 @@ interface DocumentCategoriesProps {
 }
 
 const fetchCategories = async (): Promise<DocumentCategory[]> => {
-  // TODO: Replace with real API (currently mocked)
-  return [
-    { id: "1", name: "Giáo trình", slug: "giao-trinh" },
-    { id: "2", name: "Tài liệu tham khảo", slug: "tai-lieu-tham-khao" },
-    { id: "3", name: "Đề cương", slug: "de-cuong" },
-    { id: "4", name: "Tài liệu khác", slug: "khac" },
-  ];
+  // Lấy từ API (ví dụ: /api/document-categories)
+  const res = await fetch("/api/document-categories");
+  if (!res.ok) throw new Error("Không thể lấy danh mục");
+  return res.json();
 };
 
 const DocumentCategories = ({
@@ -30,27 +28,42 @@ const DocumentCategories = ({
 }: DocumentCategoriesProps) => {
   const [categories, setCategories] = useState<DocumentCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchCategories().then(data => {
-      setCategories(data);
-      setLoading(false);
-    });
+    fetchCategories()
+      .then((data) => {
+        setCategories(data);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
+  // Tìm kiếm danh mục theo tên
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="max-w-xs mx-auto mb-8">
+    <div className="max-w-lg mx-auto mb-8">
+      <div className="mb-2 flex items-center gap-2 px-1">
+        <Search className="h-5 w-5 text-dtktmt-blue-medium" />
+        <Input
+          placeholder="Tìm kiếm danh mục tài liệu..."
+          className="w-full border-dtktmt-blue-light/40 rounded-xl shadow text-base"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
       <Select
         onValueChange={(value) => onSelectCategory(value === "all" ? null : value)}
         value={selectedCategory || "all"}
       >
-        <SelectTrigger className="w-full border-dtktmt-blue-light/40 rounded-xl shadow">
-          <Search className="mr-2 h-4 w-4 text-dtktmt-blue-medium" />
+        <SelectTrigger className="w-full border-dtktmt-blue-light/40 rounded-xl shadow bg-white text-base">
           <SelectValue placeholder="Chọn danh mục" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Tất cả danh mục</SelectItem>
-          {categories.map((cat) => (
+          {filteredCategories.map((cat) => (
             <SelectItem value={cat.slug} key={cat.id}>
               {cat.name}
             </SelectItem>
@@ -58,8 +71,12 @@ const DocumentCategories = ({
         </SelectContent>
       </Select>
       {loading && <div className="mt-2 text-gray-400 text-xs text-center">Đang tải danh mục...</div>}
+      {!loading && filteredCategories.length === 0 && (
+        <div className="mt-2 text-gray-400 text-xs text-center">Không tìm thấy danh mục phù hợp</div>
+      )}
     </div>
   );
 };
 
 export default DocumentCategories;
+

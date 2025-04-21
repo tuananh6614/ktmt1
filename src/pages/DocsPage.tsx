@@ -1,10 +1,11 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Search, SortAsc, SortDesc, FileText } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
 import DocumentCard from "@/components/DocumentCard";
-import DocumentCategories from "@/components/DocumentCategories";
+import DocumentCategories, { DocumentCategory } from "@/components/DocumentCategories";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +17,23 @@ const DocsPage = () => {
   const [fileTypeFilter, setFileTypeFilter] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  const [categories, setCategories] = useState<DocumentCategory[]>([]);
+  const [catMap, setCatMap] = useState<Record<string, string>>({});
+
+  // Fetch categories
+  useEffect(() => {
+    fetch("/api/document-categories")
+      .then((res) => res.json())
+      .then((data: DocumentCategory[]) => {
+        setCategories(data);
+        const mapping: Record<string, string> = {};
+        data.forEach((cat) => {
+          mapping[cat.slug] = cat.name;
+        });
+        setCatMap(mapping);
+      });
+  }, []);
+
   const allDocuments = [
     {
       id: "1",
@@ -25,7 +43,7 @@ const DocsPage = () => {
       price: 150000,
       fileType: "pdf",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "kien-truc",
+      category: "giao-trinh",
       isPurchased: true,
     },
     {
@@ -36,7 +54,7 @@ const DocsPage = () => {
       price: 200000,
       fileType: "pdf",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "vi-dieu-khien",
+      category: "tai-lieu-tham-khao",
     },
     {
       id: "3",
@@ -46,7 +64,7 @@ const DocsPage = () => {
       price: 180000,
       fileType: "docx",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "dien-tu-so",
+      category: "de-cuong",
       isPurchased: true,
     },
     {
@@ -57,7 +75,7 @@ const DocsPage = () => {
       price: 120000,
       fileType: "pdf",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "dien-tu-so",
+      category: "de-cuong",
     },
     {
       id: "5",
@@ -67,7 +85,7 @@ const DocsPage = () => {
       price: 150000,
       fileType: "pdf",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "mo-phong",
+      category: "tai-lieu-tham-khao",
     },
     {
       id: "6",
@@ -77,7 +95,7 @@ const DocsPage = () => {
       price: 250000,
       fileType: "pdf",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "vi-dieu-khien",
+      category: "giao-trinh",
     },
     {
       id: "7",
@@ -87,7 +105,7 @@ const DocsPage = () => {
       price: 180000,
       fileType: "pptx",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "xu-ly-tin-hieu",
+      category: "tai-lieu-tham-khao",
     },
     {
       id: "8",
@@ -97,19 +115,20 @@ const DocsPage = () => {
       price: 220000,
       fileType: "pdf",
       preview: "https://arxiv.org/pdf/1511.06434.pdf",
-      category: "thiet-ke",
+      category: "khac",
     },
   ];
 
   const filteredDocuments = allDocuments
     .filter((doc) => {
-      const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          doc.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
+      const matchesSearch =
+        doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.description.toLowerCase().includes(searchTerm.toLowerCase());
+
       const matchesFileType = !fileTypeFilter || doc.fileType === fileTypeFilter;
-      
+
       const matchesCategory = !selectedCategory || doc.category === selectedCategory;
-      
+
       return matchesSearch && matchesFileType && matchesCategory;
     })
     .sort((a, b) => {
@@ -226,7 +245,7 @@ const DocsPage = () => {
                     duration: 0.3
                   }}
                 >
-                  <DocumentCard {...doc} />
+                  <DocumentCard {...doc} categoryName={catMap[doc.category] || doc.category} />
                 </motion.div>
               ))
             ) : (
@@ -248,3 +267,4 @@ const DocsPage = () => {
 };
 
 export default DocsPage;
+
