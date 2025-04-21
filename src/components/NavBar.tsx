@@ -21,9 +21,31 @@ interface UserData {
   image?: string;
 }
 
+// Thêm custom hook để theo dõi localStorage
+const useLocalStorage = (key: string) => {
+  const [value, setValue] = useState(() => {
+    const storedValue = localStorage.getItem(key);
+    return storedValue ? JSON.parse(storedValue) : null;
+  });
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === key) {
+        setValue(e.newValue ? JSON.parse(e.newValue) : null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [key]);
+
+  return value;
+};
+
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<UserData | null>(null);
+  const storedUser = useLocalStorage('user');
+  const [user, setUser] = useState<UserData | null>(storedUser);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,38 +57,22 @@ const NavBar = () => {
     { title: "Giới thiệu", path: "/gioi-thieu", icon: <Info size={18} /> },
   ];
 
+  // Cập nhật user state khi storedUser thay đổi
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-      } catch (e) {
-        console.error('Failed to parse user data');
-      }
+    if (storedUser && typeof storedUser === 'object' && storedUser.id) {
+      setUser(storedUser);
+    } else {
+      setUser(null);
     }
-
-    const handleStorageChange = () => {
-      const updatedUser = localStorage.getItem('user');
-      if (updatedUser) {
-        setUser(JSON.parse(updatedUser));
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+  }, [storedUser]);
 
   const isActive = (path: string) => {
     return location.pathname === path ? "bg-dtktmt-blue-medium text-white" : "text-dtktmt-blue-dark hover:bg-dtktmt-blue-light";
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    localStorage.clear();
+    sessionStorage.clear();
     setUser(null);
     toast.success("Đăng xuất thành công!");
     navigate('/');
