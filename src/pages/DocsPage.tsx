@@ -4,7 +4,7 @@ import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import ChatBox from "@/components/ChatBox";
 import DocumentCard from "@/components/DocumentCard";
-import DocumentCategories, { documentCategories } from "@/components/DocumentCategories";
+import DocumentCategories from "@/components/DocumentCategories";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
