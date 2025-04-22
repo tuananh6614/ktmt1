@@ -1,21 +1,22 @@
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
+import { useNavigate } from "react-router-dom";
 interface BuyDocDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
   docTitle: string;
   docPrice: number;
+  docId: string;
 }
 
-const BuyDocDialog = ({ open, onClose, onSuccess, docTitle, docPrice }: BuyDocDialogProps) => {
-  const handleBuy = () => {
-    // Giả lập mua thành công 
-    toast.success("Mua thành công! Bạn đã sở hữu tài liệu.");
-    onSuccess();
+const BuyDocDialog = ({ open, onClose, onSuccess, docTitle, docPrice, docId }: BuyDocDialogProps) => {
+  const navigate = useNavigate();
+  
+  const handleProceedToPayment = () => {
+    // Chuyển đến trang thanh toán với thông tin tài liệu
+    navigate(`/thanh-toan?id=${docId}&title=${encodeURIComponent(docTitle)}&price=${docPrice}`);
     onClose();
   };
 
@@ -27,8 +28,8 @@ const BuyDocDialog = ({ open, onClose, onSuccess, docTitle, docPrice }: BuyDocDi
         </DialogHeader>
         <div className="my-4">
           <p>
-            Bạn có chắc chắn mua <span className="font-semibold">{docTitle}</span> với giá{" "}
-            <span className="font-bold text-dtktmt-pink-dark">
+          Bạn có chắc chắn muốn mua <span className="font-semibold">{docTitle}</span> với giá{" "}           
+           <span className="font-bold text-dtktmt-pink-dark">
               {docPrice.toLocaleString("vi-VN")} đ
             </span>
             ?
@@ -36,8 +37,8 @@ const BuyDocDialog = ({ open, onClose, onSuccess, docTitle, docPrice }: BuyDocDi
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Huỷ</Button>
-          <Button className="bg-dtktmt-pink-medium" onClick={handleBuy}>
-            Xác nhận mua
+          <Button className="bg-dtktmt-pink-medium" onClick={handleProceedToPayment}>
+          Tiến hành thanh toán
           </Button>
         </DialogFooter>
       </DialogContent>

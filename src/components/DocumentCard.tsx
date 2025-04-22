@@ -1,6 +1,6 @@
 import { FileText, Download, Eye, CheckCircle, X, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import BuyDocDialog from "./BuyDocDialog";
 
@@ -34,6 +34,12 @@ const DocumentCard = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isBuyDialogOpen, setBuyDialogOpen] = useState(false);
   const [purchased, setPurchased] = useState(isPurchased);
+  useEffect(() => {
+    const purchasedDocs = JSON.parse(localStorage.getItem("purchasedDocs") || "[]");
+    if (purchasedDocs.includes(id)) {
+      setPurchased(true);
+    }
+  }, [id]);
 
   const formatPrice = (price: number): string =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
@@ -156,9 +162,6 @@ const DocumentCard = ({
                     className="w-full h-full border rounded-md pointer-events-none"
                   ></iframe>
                   <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-10 text-center p-6 rounded-lg gap-2">
-                    <p className="text-base font-semibold text-dtktmt-blue-dark mb-2">
-                      Bạn chỉ có thể xem {fileType === "pdf" ? "3 trang đầu" : "3 slide đầu tiên"} của tài liệu này.
-                    </p>
                     <p className="text-dtktmt-pink-dark mb-4">Vui lòng mua để xem đầy đủ nội dung!</p>
                     <Button onClick={() => { setIsPreviewOpen(false); setBuyDialogOpen(true); }} className="bg-dtktmt-pink-medium hover:bg-dtktmt-pink-dark px-6">
                       Mua để xem đầy đủ
@@ -183,6 +186,7 @@ const DocumentCard = ({
         onSuccess={() => setPurchased(true)}
         docTitle={title}
         docPrice={price}
+        docId={id}
       />
     </>
   );

@@ -12,7 +12,7 @@ import DocsPage from "./pages/DocsPage";
 import AboutPage from "./pages/AboutPage";
 import ProfilePage from "./pages/ProfilePage";
 import AuthPage from "./pages/AuthPage";
-
+import PaymentPage from "./pages/PaymentPage";
 // Tạo QueryClient mới
 const queryClient = new QueryClient();
 
@@ -32,6 +32,7 @@ const App = () => (
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="thanh-toan" element={<PaymentPage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
