@@ -1,7 +1,6 @@
-
 import { FileText, Download, Eye, CheckCircle, X, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import BuyDocDialog from "./BuyDocDialog";
 
@@ -35,14 +34,6 @@ const DocumentCard = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isBuyDialogOpen, setBuyDialogOpen] = useState(false);
   const [purchased, setPurchased] = useState(isPurchased);
-
-  // Kiểm tra trạng thái mua hàng từ localStorage
-  useEffect(() => {
-    const purchasedDocs = JSON.parse(localStorage.getItem("purchasedDocs") || "[]");
-    if (purchasedDocs.includes(id)) {
-      setPurchased(true);
-    }
-  }, [id]);
 
   const formatPrice = (price: number): string =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
@@ -192,7 +183,6 @@ const DocumentCard = ({
         onSuccess={() => setPurchased(true)}
         docTitle={title}
         docPrice={price}
-        docId={id}
       />
     </>
   );

@@ -1,41 +1,42 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider } from "./components/ui/theme-provider";
-import { Toaster } from "sonner";
-
-// Các trang
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { StrictMode } from "react";
 import Index from "./pages/Index";
-import AboutPage from "./pages/AboutPage";
-import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
 import CoursesPage from "./pages/CoursesPage";
-import ProfilePage from "./pages/ProfilePage";
 import DocsPage from "./pages/DocsPage";
-import PaymentPage from "./pages/PaymentPage";
+import AboutPage from "./pages/AboutPage";
+import ProfilePage from "./pages/ProfilePage";
+import AuthPage from "./pages/AuthPage";
 
-import "./App.css";
+// Tạo QueryClient mới
+const queryClient = new QueryClient();
 
-function App() {
-  return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/register" element={<Navigate to="/auth?tab=register" replace />} />
-          <Route path="/login" element={<Navigate to="/auth?tab=login" replace />} />
-          <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="/tai-lieu" element={<DocsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-      <Toaster richColors closeButton position="top-right" />
-    </ThemeProvider>
-  );
-}
+const App = () => (
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/khoa-hoc" element={<CoursesPage />} />
+            <Route path="/tai-lieu" element={<DocsPage />} />
+            <Route path="/gioi-thieu" element={<AboutPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/register" element={<AuthPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </StrictMode>
+);
 
 export default App;
