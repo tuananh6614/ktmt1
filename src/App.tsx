@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/ui/theme-provider";
 import { Toaster } from "sonner";
 
@@ -23,6 +23,8 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/auth" element={<AuthPage />} />
+          <Route path="/register" element={<Navigate to="/auth?tab=register" replace />} />
+          <Route path="/login" element={<Navigate to="/auth?tab=login" replace />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/docs" element={<DocsPage />} />
           <Route path="/tai-lieu" element={<DocsPage />} />

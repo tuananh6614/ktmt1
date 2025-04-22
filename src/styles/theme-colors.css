@@ -1,0 +1,20 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --dtktmt-blue-light: 147 197 253;
+    --dtktmt-blue-medium: 59 130 246;
+    --dtktmt-blue-dark: 29 78 216;
+    
+    --dtktmt-purple-light: 196 181 253;
+    --dtktmt-purple-medium: 139 92 246;
+    --dtktmt-purple-dark: 109 40 217;
+    
+    --dtktmt-pink-light: 249 168 212;
+    --dtktmt-pink-medium: 236 72 153;
+    --dtktmt-pink-dark: 190 24 93;
+  }
+}

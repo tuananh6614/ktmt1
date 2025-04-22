@@ -1,7 +1,6 @@
+
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -33,10 +32,66 @@
   }
 }
 
-.card {
-  padding: 2em;
+/* Custom animations */
+@keyframes gradient-slide {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-.read-the-docs {
-  color: #888;
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Glass effect style */
+.glass-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.glowing-text {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.card-3d {
+  transition: all 0.3s ease;
+  transform: perspective(1000px) rotateY(0deg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+}
+
+.card-3d:hover {
+  transform: perspective(1000px) rotateY(2deg);
+}
+
+/* Smooth text animation */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Add theme colors for consistency */
+:root {
+  --dtktmt-blue-light: #93c5fd;
+  --dtktmt-blue-medium: #3b82f6;
+  --dtktmt-blue-dark: #1d4ed8;
+  
+  --dtktmt-purple-light: #c4b5fd;
+  --dtktmt-purple-medium: #8b5cf6;
+  --dtktmt-purple-dark: #6d28d9;
+  
+  --dtktmt-pink-light: #f9a8d4;
+  --dtktmt-pink-medium: #ec4899;
+  --dtktmt-pink-dark: #be185d;
 }
