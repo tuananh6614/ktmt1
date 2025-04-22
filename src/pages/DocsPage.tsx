@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Search, SortAsc, SortDesc, FileText } from "lucide-react";
 import NavBar from "@/components/NavBar";
@@ -11,49 +10,128 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
-// Hiện tại không có dữ liệu tài liệu mẫu, chờ lấy data thật từ backend/service
+interface Document {
+  id: number;
+  title: string;
+  description: string;
+  category_id: number | null;
+  category_name: string | null;
+  price: number | null;
+  file_path: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Helper function để lấy loại file từ file_path
+const getFileType = (filePath: string | null): string => {
+  if (!filePath) return "unknown";
+  
+  const fileExtension = filePath.split('.').pop()?.toLowerCase() || "";
+  
+  // Nhóm các loại file tương tự
+  if (["doc", "docx"].includes(fileExtension)) return "doc";
+  if (["xls", "xlsx"].includes(fileExtension)) return "xls";
+  if (["ppt", "pptx"].includes(fileExtension)) return "ppt";
+  if (fileExtension === "pdf") return "pdf";
+  
+  return fileExtension || "unknown";
+};
+
+// Helper function để tạo placeholder image dựa vào tên file
+const getPlaceholderImage = (title: string, filePath: string | null) => {
+  if (!filePath) return "https://placehold.co/600x400?text=Tài+liệu";
+  
+  const fileExtension = filePath.split('.').pop()?.toLowerCase();
+  
+  switch (fileExtension) {
+    case 'pdf':
+      return `https://placehold.co/600x400/e74c3c/white?text=PDF+-+${encodeURIComponent(title)}`;
+    case 'docx':
+    case 'doc':
+      return `https://placehold.co/600x400/3498db/white?text=DOC+-+${encodeURIComponent(title)}`;
+    case 'xlsx':
+    case 'xls':
+      return `https://placehold.co/600x400/2ecc71/white?text=XLS+-+${encodeURIComponent(title)}`;
+    case 'pptx':
+    case 'ppt':
+      return `https://placehold.co/600x400/f39c12/white?text=PPT+-+${encodeURIComponent(title)}`;
+    default:
+      return `https://placehold.co/600x400/95a5a6/white?text=${encodeURIComponent(title)}`;
+  }
+};
+
+// Helper function để lấy URL xem trước tài liệu
+const getPreviewUrl = (filePath: string | null): string => {
+  if (!filePath) return "#";
+  
+  // Nếu file_path bắt đầu bằng http hoặc https, sử dụng trực tiếp
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    return filePath;
+  }
+  
+  // Nếu là file pdf, có thể xem trực tiếp
+  if (filePath.toLowerCase().endsWith('.pdf')) {
+    return `http://localhost:3000${filePath}`;
+  }
+  
+  // Đối với các loại file khác, hiện tại chỉ hiển thị thông báo
+  return "#";
+};
+
 const DocsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [fileTypeFilter, setFileTypeFilter] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const [categories, setCategories] = useState<DocumentCategory[]>([]);
-  const [catMap, setCatMap] = useState<Record<string, string>>({});
-
+  // Lấy danh sách tài liệu
   useEffect(() => {
-    fetch("/api/document-categories")
-      .then((res) => res.json())
-      .then((data: DocumentCategory[]) => {
-        setCategories(data);
-        const mapping: Record<string, string> = {};
-        data.forEach((cat) => {
-          mapping[cat.slug] = cat.name;
-        });
-        setCatMap(mapping);
-      });
-  }, []);
+    const fetchDocuments = async () => {
+      try {
+        setLoading(true);
+        
+        let url = "http://localhost:3000/api/documents";
+        if (selectedCategory) {
+          url += `?category_id=${selectedCategory}`;
+        }
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách tài liệu");
+        }
+        
+        const data = await response.json();
+        setDocuments(data);
+        setError(null);
+      } catch (err) {
+        console.error("Lỗi khi tải tài liệu:", err);
+        setError("Không thể tải danh sách tài liệu");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDocuments();
+  }, [selectedCategory]);
 
-  // Dữ liệu tài liệu hiện tại rỗng, chỉ sẵn sàng cho fetch sau này
-  const allDocuments: any[] = [];
-
-  const filteredDocuments = allDocuments
+  const filteredDocuments = documents
     .filter((doc) => {
       const matchesSearch =
         doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         doc.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesFileType = !fileTypeFilter || doc.fileType === fileTypeFilter;
+      const matchesFileType = !fileTypeFilter || getFileType(doc.file_path) === fileTypeFilter;
 
-      const matchesCategory = !selectedCategory || doc.category === selectedCategory;
-
-      return matchesSearch && matchesFileType && matchesCategory;
+      return matchesSearch && matchesFileType;
     })
     .sort((a, b) => {
       if (sortDirection === "asc") {
-        return a.price - b.price;
+        return (a.price || 0) - (b.price || 0);
       } else {
-        return b.price - a.price;
+        return (b.price || 0) - (a.price || 0);
       }
     });
 
@@ -116,7 +194,7 @@ const DocsPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tất cả</SelectItem>
-                      {["pdf", "docx", "pptx"].map((type) => (
+                      {["pdf", "doc", "xls", "ppt"].map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.toUpperCase()}
                         </SelectItem>
@@ -152,18 +230,35 @@ const DocsPage = () => {
             transition={{ delay: 0.3 }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
-            {filteredDocuments.length > 0 ? (
+            {loading ? (
+              <div className="col-span-full py-8 text-center">
+                <p className="text-gray-500">Đang tải dữ liệu...</p>
+              </div>
+            ) : error ? (
+              <div className="col-span-full py-8 text-center">
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : filteredDocuments.length > 0 ? (
               filteredDocuments.map((doc) => (
                 <motion.div
                   key={doc.id}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
-                    delay: parseInt(doc.id) * 0.1,
+                    delay: doc.id * 0.05 % 0.5,
                     duration: 0.3
                   }}
                 >
-                  <DocumentCard {...doc} categoryName={catMap[doc.category] || doc.category} />
+                  <DocumentCard 
+                    id={doc.id.toString()}
+                    title={doc.title}
+                    description={doc.description}
+                    image={getPlaceholderImage(doc.title, doc.file_path)}
+                    price={doc.price || 0}
+                    fileType={getFileType(doc.file_path)}
+                    preview={getPreviewUrl(doc.file_path)}
+                    categoryName={doc.category_name || "Chưa phân loại"}
+                  />
                 </motion.div>
               ))
             ) : (

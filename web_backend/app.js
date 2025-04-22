@@ -38,6 +38,7 @@ const upload = multer({
 // Thêm middleware để phục vụ file tĩnh
 const app = express();
 app.use('/uploads', express.static('uploads'));
+app.use('/documents', express.static('uploads/documents'));
 
 // Middleware
 app.use(cors());
@@ -58,6 +59,141 @@ app.use((req, res, next) => {
 // Auth routes
 app.post('/api/register', authController.register);
 app.post('/api/login', authController.login);
+
+// API để lấy danh sách document categories
+app.get('/api/document-categories', async (req, res) => {
+  try {
+    const [categories] = await db.execute('SELECT * FROM documents_categories ORDER BY category_name');
+    res.json(categories);
+  } catch (error) {
+    console.error('Error fetching document categories:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách danh mục tài liệu' });
+  }
+});
+
+// API để lấy danh sách tài liệu (có thể lọc theo category_id)
+app.get('/api/documents', async (req, res) => {
+  try {
+    const { category_id } = req.query;
+    
+    let query = `
+      SELECT d.*, c.category_name 
+      FROM documents d
+      LEFT JOIN documents_categories c ON d.category_id = c.id
+    `;
+    
+    const params = [];
+    
+    if (category_id) {
+      query += ' WHERE d.category_id = ?';
+      params.push(category_id);
+    }
+    
+    query += ' ORDER BY d.created_at DESC';
+    
+    const [documents] = await db.execute(query, params);
+    res.json(documents);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách tài liệu' });
+  }
+});
+
+// API để thêm dữ liệu mẫu (chỉ sử dụng cho demo)
+app.post('/api/seed-documents', async (req, res) => {
+  try {
+    // Kiểm tra đã có dữ liệu chưa
+    const [existingDocs] = await db.execute('SELECT COUNT(*) as count FROM documents');
+    
+    if (existingDocs[0].count > 0) {
+      return res.json({ message: 'Đã có dữ liệu mẫu, không cần thêm nữa' });
+    }
+    
+    // Thêm dữ liệu mẫu
+    const sampleDocs = [
+      {
+        title: 'Giáo trình Kỹ thuật máy tính cơ bản',
+        description: 'Giáo trình đầy đủ về kiến thức cơ bản của kỹ thuật máy tính, bao gồm kiến trúc máy tính, tổ chức dữ liệu và thuật toán.',
+        category_id: 1,
+        price: 50000,
+        file_path: '/uploads/documents/ktmt-basics.pdf'
+      },
+      {
+        title: 'Kỹ thuật số - Từ cơ bản đến nâng cao',
+        description: 'Tài liệu chuyên sâu về kỹ thuật số, bao gồm các hệ thống số, cổng logic, flip-flop và ứng dụng thực tế.',
+        category_id: 2,
+        price: 75000,
+        file_path: '/uploads/documents/digital-electronics.pdf'
+      },
+      {
+        title: 'Giáo trình Điện tử tương tự',
+        description: 'Giới thiệu về các mạch điện tử tương tự, các linh kiện cơ bản và phân tích mạch điện tử.',
+        category_id: 3,
+        price: 65000,
+        file_path: '/uploads/documents/analog-electronics.pdf'
+      },
+      {
+        title: 'Lập trình Arduino cơ bản',
+        description: 'Hướng dẫn chi tiết về lập trình vi điều khiển Arduino với các ví dụ thực tế và bài tập.',
+        category_id: 4,
+        price: 80000,
+        file_path: '/uploads/documents/arduino-programming.pdf'
+      },
+      {
+        title: 'Kỹ thuật điện - Lý thuyết và ứng dụng',
+        description: 'Tài liệu tổng quan về kỹ thuật điện, các định luật cơ bản và ứng dụng trong thực tế.',
+        category_id: 5,
+        price: 60000,
+        file_path: '/uploads/documents/electrical-engineering.pdf'
+      }
+    ];
+    
+    for (const doc of sampleDocs) {
+      await db.execute(
+        'INSERT INTO documents (title, description, category_id, price, file_path) VALUES (?, ?, ?, ?, ?)',
+        [doc.title, doc.description, doc.category_id, doc.price, doc.file_path]
+      );
+    }
+    
+    res.json({ message: 'Đã thêm dữ liệu mẫu thành công', count: sampleDocs.length });
+  } catch (error) {
+    console.error('Error seeding documents:', error);
+    res.status(500).json({ error: 'Lỗi khi thêm dữ liệu mẫu tài liệu' });
+  }
+});
+
+// API để thêm danh mục tài liệu mẫu (chỉ sử dụng cho demo)
+app.post('/api/seed-categories', async (req, res) => {
+  try {
+    // Kiểm tra đã có dữ liệu chưa
+    const [existingCats] = await db.execute('SELECT COUNT(*) as count FROM documents_categories');
+    
+    if (existingCats[0].count > 0) {
+      return res.json({ message: 'Đã có danh mục mẫu, không cần thêm nữa' });
+    }
+    
+    // Thêm danh mục mẫu
+    const sampleCategories = [
+      'Kỹ thuật máy tính',
+      'Điện tử số',
+      'Điện tử tương tự',
+      'Lập trình vi điều khiển',
+      'Kỹ thuật điện'
+    ];
+    
+    for (const category of sampleCategories) {
+      await db.execute(
+        'INSERT INTO documents_categories (category_name) VALUES (?)',
+        [category]
+      );
+    }
+    
+    res.json({ message: 'Đã thêm danh mục mẫu thành công', count: sampleCategories.length });
+  } catch (error) {
+    console.error('Error seeding categories:', error);
+    res.status(500).json({ error: 'Lỗi khi thêm danh mục mẫu' });
+  }
+});
 
 // Protected routes
 app.get('/api/profile', auth, async (req, res) => {
