@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
@@ -572,4 +573,134 @@ const AuthPage = () => {
                               className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
                               required
                               name="full_name"
-                              value={registerData
+                              value={registerData.full_name}
+                              onChange={handleRegisterInputChange}
+                            />
+                          </div>
+                          
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <Input
+                              placeholder="Email"
+                              type="email"
+                              className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                              required
+                              name="email"
+                              value={registerData.email}
+                              onChange={handleRegisterInputChange}
+                            />
+                          </div>
+                          
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <Input
+                              placeholder="Số điện thoại"
+                              type="tel"
+                              className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                              required
+                              name="phone_number"
+                              value={registerData.phone_number}
+                              onChange={handleRegisterInputChange}
+                            />
+                          </div>
+                          
+                          <div className="relative">
+                            <School className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <Input
+                              placeholder="Trường học"
+                              type="text"
+                              className="pl-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                              required
+                              name="school"
+                              value={registerData.school}
+                              onChange={handleRegisterInputChange}
+                            />
+                          </div>
+                          
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <Input
+                              placeholder="Mật khẩu"
+                              type={showPassword ? "text" : "password"}
+                              className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                              required
+                              name="password"
+                              value={registerData.password}
+                              onChange={handleRegisterInputChange}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                            >
+                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
+                          
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <Input
+                              placeholder="Xác nhận mật khẩu"
+                              type={showConfirmPassword ? "text" : "password"}
+                              className="pl-10 pr-10 border-gray-200 focus:border-dtktmt-purple-medium focus:ring-dtktmt-purple-light transition-all duration-300"
+                              required
+                              name="confirm_password"
+                              value={registerData.confirm_password}
+                              onChange={handleRegisterInputChange}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                            >
+                              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
+                          
+                          <Button
+                            className="w-full bg-gradient-to-r from-dtktmt-purple-medium to-dtktmt-purple-dark hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-lg font-medium text-white rounded-lg py-2.5"
+                            disabled={isLoading}
+                            type="submit"
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center gap-2">
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Đang đăng ký...</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 justify-center w-full">
+                                <UserPlus size={18} />
+                                <span>Đăng ký</span>
+                              </div>
+                            )}
+                          </Button>
+                          
+                          <p className="text-center text-sm text-gray-500 mt-4">
+                            Bằng việc đăng ký, bạn đã đồng ý với
+                            <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark ml-1 font-medium">
+                              Điều khoản dịch vụ
+                            </a>
+                            <span className="mx-1">và</span>
+                            <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">
+                              Chính sách bảo mật
+                            </a>
+                            <span className="mx-1">của chúng tôi</span>
+                          </p>
+                        </form>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </Tabs>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default AuthPage;
