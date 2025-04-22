@@ -65,9 +65,9 @@ const CourseCard = ({
             </p>
           </div>
           
-          <div className="mt-auto pt-4 border-t">
-            <div className="flex items-center justify-between text-xs text-dtktmt-blue-dark mb-3">
-              <div className="flex items-center gap-1.5">
+          <div className="mt-auto">
+            <div className="flex items-center justify-between text-xs border-t pt-4 mt-2">
+              <div className="flex items-center gap-1.5 text-dtktmt-blue-dark">
                 <Book size={16} className="text-dtktmt-blue-medium" />
                 <span>{lessons} bài học</span>
               </div>
@@ -81,7 +81,7 @@ const CourseCard = ({
             </div>
             
             {progress !== undefined && (
-              <div className="mb-4 flex items-center justify-between text-xs">
+              <div className="mt-3 flex items-center justify-between text-xs">
                 <span className="text-dtktmt-blue-dark font-medium">Tiến độ: {progress}%</span>
                 <HoverCard>
                   <HoverCardTrigger asChild>
@@ -109,7 +109,7 @@ const CourseCard = ({
               </div>
             )}
 
-            <div>
+            <div className="mt-4">
               <div className="bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium text-white text-sm font-medium py-2 px-4 rounded-full inline-flex items-center gap-1.5 transition-all hover:shadow-md w-full justify-center">
                 <span>Xem chi tiết</span>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
