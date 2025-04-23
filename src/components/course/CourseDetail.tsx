@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ChevronDown, BookOpen, Clock, GraduationCap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,16 @@ interface CourseDetailProps {
 }
 
 const CourseDetail = ({ course }: CourseDetailProps) => {
+  const navigate = useNavigate();
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
+
+  const handleChapterClick = (chapterId: string) => {
+    navigate(`/khoa-hoc/${course.id}/chuong/${chapterId}`);
+  };
+
+  const handleQuizClick = (chapterId: string) => {
+    navigate(`/khoa-hoc/${course.id}/chuong/${chapterId}/kiem-tra`);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -84,7 +93,8 @@ const CourseDetail = ({ course }: CourseDetailProps) => {
                       {chapter.lessons.map((lesson, lessonIndex) => (
                         <div
                           key={lesson.id}
-                          className="flex items-center justify-between p-3 bg-white rounded-lg"
+                          className="flex items-center justify-between p-3 bg-white rounded-lg cursor-pointer hover:bg-gray-50"
+                          onClick={() => handleChapterClick(chapter.id)}
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-sm text-gray-500">
@@ -99,7 +109,11 @@ const CourseDetail = ({ course }: CourseDetailProps) => {
                       ))}
                       {chapter.testId && (
                         <div className="mt-4">
-                          <Button variant="outline" className="w-full">
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => handleQuizClick(chapter.id)}
+                          >
                             Kiểm tra cuối chương
                           </Button>
                         </div>
@@ -132,7 +146,10 @@ const CourseDetail = ({ course }: CourseDetailProps) => {
                 </div>
               )}
               
-              <Button className="w-full bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark">
+              <Button 
+                className="w-full bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark"
+                onClick={() => course.chapters.length > 0 && handleChapterClick(course.chapters[0].id)}
+              >
                 {course.progress !== undefined ? 'Tiếp tục học' : 'Đăng ký học'}
               </Button>
               
