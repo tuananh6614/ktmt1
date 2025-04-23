@@ -1,5 +1,5 @@
 
-import { Book, Clock } from "lucide-react";
+import { Book, Clock, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import { motion } from "framer-motion";
@@ -110,12 +110,12 @@ const CourseCard = ({
             )}
 
             <div className="mt-4">
-              <Link to={`/khoa-hoc/${id}`} className="bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium text-white text-sm font-medium py-2 px-4 rounded-full inline-flex items-center gap-1.5 transition-all hover:shadow-md w-full justify-center">
+              <div className="bg-gradient-to-r from-dtktmt-blue-medium to-dtktmt-purple-medium text-white text-sm font-medium py-2 px-4 rounded-full inline-flex items-center gap-1.5 transition-all hover:shadow-md w-full justify-center">
                 <span>Xem chi tiết</span>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </Link>
+              </div>
             </div>
           </div>
         </div>

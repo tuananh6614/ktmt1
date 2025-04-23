@@ -12,10 +12,7 @@ import AboutPage from "./pages/AboutPage";
 import ProfilePage from "./pages/ProfilePage";
 import AuthPage from "./pages/AuthPage";
 import PaymentPage from "./pages/PaymentPage";
-import CourseDetail from "./pages/CourseDetail";
-import ChapterDetail from "./pages/ChapterDetail";
-import ChapterQuiz from "./pages/ChapterQuiz";
-
+// Tạo QueryClient mới
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -33,9 +30,6 @@ const App = () => (
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
-            <Route path="/khoa-hoc/:courseId" element={<CourseDetail />} />
-            <Route path="/khoa-hoc/:courseId/chuong/:chapterId" element={<ChapterDetail />} />
-            <Route path="/khoa-hoc/:courseId/chuong/:chapterId/kiem-tra" element={<ChapterQuiz />} />
             <Route path="*" element={<NotFound />} />
             <Route path="thanh-toan" element={<PaymentPage />} />
           </Routes>
