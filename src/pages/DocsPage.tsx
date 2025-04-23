@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
+import { API_BASE_URL } from "@/config/config";
 
 interface Document {
   id: number;
@@ -71,7 +72,7 @@ const getPreviewUrl = (filePath: string | null): string => {
   
   // Nếu là file pdf, có thể xem trực tiếp
   if (filePath.toLowerCase().endsWith('.pdf')) {
-    return `http://localhost:3000${filePath}`;
+    return `${API_BASE_URL}${filePath}`;
   }
   
   // Đối với các loại file khác, hiện tại chỉ hiển thị thông báo
@@ -93,7 +94,7 @@ const DocsPage = () => {
       try {
         setLoading(true);
         
-        let url = "http://localhost:3000/api/documents";
+        let url = `${API_BASE_URL}/api/documents`;
         if (selectedCategory) {
           url += `?category_id=${selectedCategory}`;
         }

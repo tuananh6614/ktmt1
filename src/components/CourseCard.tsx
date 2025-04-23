@@ -1,4 +1,3 @@
-
 import { Book, Clock, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
@@ -9,10 +8,11 @@ interface CourseCardProps {
   title: string;
   description: string;
   image: string;
-  lessons: number;
+  lessons?: number;
   duration?: string;
   level?: string;
   progress?: number;
+  status?: 'active' | 'inactive' | 'maintenance';
 }
 
 const CourseCard = ({
@@ -20,11 +20,16 @@ const CourseCard = ({
   title,
   description,
   image,
-  lessons,
+  lessons = 0,
   duration,
   level,
   progress,
+  status = 'active',
 }: CourseCardProps) => {
+  if (status !== 'active') {
+    return null;
+  }
+  
   return (
     <motion.div 
       whileHover={{ y: -5, scale: 1.01 }}
@@ -38,6 +43,9 @@ const CourseCard = ({
               src={image || "/placeholder.svg"} 
               alt={title}
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/placeholder.svg";
+              }}
             />
           </div>
           {level && (
@@ -66,19 +74,21 @@ const CourseCard = ({
           </div>
           
           <div className="mt-auto">
-            <div className="flex items-center justify-between text-xs border-t pt-4 mt-2">
-              <div className="flex items-center gap-1.5 text-dtktmt-blue-dark">
-                <Book size={16} className="text-dtktmt-blue-medium" />
-                <span>{lessons} bài học</span>
-              </div>
-              
-              {duration && (
-                <div className="flex items-center gap-1.5 text-dtktmt-purple-dark">
-                  <Clock size={16} className="text-dtktmt-purple-medium" />
-                  <span>{duration}</span>
+            {lessons > 0 && (
+              <div className="flex items-center justify-between text-xs border-t pt-4 mt-2">
+                <div className="flex items-center gap-1.5 text-dtktmt-blue-dark">
+                  <Book size={16} className="text-dtktmt-blue-medium" />
+                  <span>{lessons} bài học</span>
                 </div>
-              )}
-            </div>
+                
+                {duration && (
+                  <div className="flex items-center gap-1.5 text-dtktmt-purple-dark">
+                    <Clock size={16} className="text-dtktmt-purple-medium" />
+                    <span>{duration}</span>
+                  </div>
+                )}
+              </div>
+            )}
             
             {progress !== undefined && (
               <div className="mt-3 flex items-center justify-between text-xs">
@@ -100,8 +110,8 @@ const CourseCard = ({
                         />
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span>Đã học: {Math.round(progress/100 * lessons)} bài</span>
-                        <span>Còn lại: {lessons - Math.round(progress/100 * lessons)} bài</span>
+                        <span>Đã học: {Math.round(progress/100 * (lessons || 0))} bài</span>
+                        <span>Còn lại: {(lessons || 0) - Math.round(progress/100 * (lessons || 0))} bài</span>
                       </div>
                     </div>
                   </HoverCardContent>

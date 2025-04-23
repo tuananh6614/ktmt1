@@ -311,6 +311,162 @@ app.put('/api/profile/avatar', auth, upload.single('avatar'), async (req, res) =
   }
 });
 
+// API để lấy danh sách khóa học
+app.get('/api/courses', async (req, res) => {
+  try {
+    const [courses] = await db.execute('SELECT * FROM courses ORDER BY created_at DESC');
+    res.json(courses);
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách khóa học' });
+  }
+});
+
+// API để lấy chi tiết khóa học theo ID
+app.get('/api/courses/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [courses] = await db.execute('SELECT * FROM courses WHERE id = ?', [id]);
+    
+    if (courses.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy khóa học' });
+    }
+    
+    res.json(courses[0]);
+  } catch (error) {
+    console.error('Error fetching course details:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy chi tiết khóa học' });
+  }
+});
+
+// API để thêm khóa học mới (yêu cầu quyền admin)
+app.post('/api/courses', auth, async (req, res) => {
+  try {
+    // Kiểm tra quyền admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+    }
+    
+    const { title, description, thumbnail, status } = req.body;
+    
+    if (!title || !description || !thumbnail) {
+      return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+    }
+    
+    const [result] = await db.execute(
+      'INSERT INTO courses (title, description, thumbnail, status) VALUES (?, ?, ?, ?)',
+      [title, description, thumbnail, status || 'active']
+    );
+    
+    res.status(201).json({
+      message: 'Thêm khóa học thành công',
+      id: result.insertId
+    });
+  } catch (error) {
+    console.error('Error adding course:', error);
+    res.status(500).json({ error: 'Lỗi khi thêm khóa học' });
+  }
+});
+
+// API để cập nhật thông tin khóa học (yêu cầu quyền admin)
+app.put('/api/courses/:id', auth, async (req, res) => {
+  try {
+    // Kiểm tra quyền admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+    }
+    
+    const { id } = req.params;
+    const { title, description, thumbnail, status } = req.body;
+    
+    if (!title || !description || !thumbnail) {
+      return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+    }
+    
+    const [result] = await db.execute(
+      'UPDATE courses SET title = ?, description = ?, thumbnail = ?, status = ? WHERE id = ?',
+      [title, description, thumbnail, status || 'active', id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy khóa học' });
+    }
+    
+    res.json({
+      message: 'Cập nhật khóa học thành công',
+      id: parseInt(id)
+    });
+  } catch (error) {
+    console.error('Error updating course:', error);
+    res.status(500).json({ error: 'Lỗi khi cập nhật khóa học' });
+  }
+});
+
+// API để xóa khóa học (yêu cầu quyền admin)
+app.delete('/api/courses/:id', auth, async (req, res) => {
+  try {
+    // Kiểm tra quyền admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+    }
+    
+    const { id } = req.params;
+    
+    const [result] = await db.execute('DELETE FROM courses WHERE id = ?', [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy khóa học' });
+    }
+    
+    res.json({
+      message: 'Xóa khóa học thành công',
+      id: parseInt(id)
+    });
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    res.status(500).json({ error: 'Lỗi khi xóa khóa học' });
+  }
+});
+
+// API để tạo dữ liệu mẫu cho khóa học (chỉ sử dụng cho demo)
+app.post('/api/seed-courses', async (req, res) => {
+  try {
+    // Kiểm tra đã có dữ liệu chưa
+    const [existingCourses] = await db.execute('SELECT COUNT(*) as count FROM courses');
+    
+    if (existingCourses[0].count > 0) {
+      return res.json({ message: 'Đã có dữ liệu khóa học, không cần thêm nữa' });
+    }
+    
+    // Nhận dữ liệu từ request body
+    const courses = req.body.courses;
+    
+    if (!courses || !Array.isArray(courses) || courses.length === 0) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp mảng dữ liệu khóa học' });
+    }
+    
+    let insertedCount = 0;
+    
+    for (const course of courses) {
+      if (!course.title || !course.description || !course.thumbnail) {
+        continue; // Bỏ qua các khóa học không đủ thông tin
+      }
+      
+      await db.execute(
+        'INSERT INTO courses (title, description, thumbnail, status) VALUES (?, ?, ?, ?)',
+        [course.title, course.description, course.thumbnail, course.status || 'active']
+      );
+      
+      insertedCount++;
+    }
+    
+    res.json({ message: 'Đã thêm dữ liệu khóa học thành công', count: insertedCount });
+  } catch (error) {
+    console.error('Error seeding courses:', error);
+    res.status(500).json({ error: 'Lỗi khi thêm dữ liệu khóa học' });
+  }
+});
+
 // Error handling
 app.use((err, req, res, next) => {
     console.error('\n=== Error ===');

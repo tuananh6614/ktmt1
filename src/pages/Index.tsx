@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Book, ArrowRight, Star } from "lucide-react";
 import NavBar from "@/components/NavBar";
@@ -17,7 +17,54 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+// Định nghĩa interface cho dữ liệu khóa học từ API
+interface Course {
+  id: number;
+  title: string;
+  description: string;
+  thumbnail: string;
+  status: 'active' | 'inactive' | 'maintenance';
+  created_at: string;
+  updated_at: string;
+}
+
+const API_URL = 'http://localhost:3000/api';
+
 const Index = () => {
+  const [popularCourses, setPopularCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Lấy danh sách khóa học từ API
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/courses`);
+        
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách khóa học");
+        }
+        
+        const data = await response.json();
+        // Chỉ lấy các khóa học active và giới hạn 6 khóa học
+        const activeCourses = data
+          .filter((course: Course) => course.status === 'active')
+          .slice(0, 6);
+          
+        setPopularCourses(activeCourses);
+        setError(null);
+      } catch (err) {
+        console.error("Lỗi khi tải khóa học:", err);
+        setError("Không thể tải danh sách khóa học");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCourses();
+  }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -41,63 +88,6 @@ const Index = () => {
       });
     };
   }, []);
-
-  const popularCourses = [
-    {
-      id: "1",
-      title: "Lập trình nhúng với ARM Cortex-M",
-      description: "Kiến thức chuyên sâu về lập trình nhúng sử dụng kiến trúc ARM Cortex-M",
-      image: "/placeholder.svg",
-      lessons: 28,
-      duration: "14 tuần",
-      level: "Trung cấp",
-    },
-    {
-      id: "2",
-      title: "Điện tử số",
-      description: "Tổng quan về kỹ thuật điện tử số và thiết kế mạch",
-      image: "/placeholder.svg",
-      lessons: 18,
-      duration: "8 tuần",
-      level: "Cơ bản",
-    },
-    {
-      id: "3",
-      title: "Xử lý tín hiệu số",
-      description: "Các phương pháp xử lý tín hiệu số trong thực tế",
-      image: "/placeholder.svg",
-      lessons: 30,
-      duration: "16 tuần",
-      level: "Nâng cao",
-    },
-    {
-      id: "4",
-      title: "IoT và ứng dụng",
-      description: "Phát triển các ứng dụng IoT với Arduino và ESP8266",
-      image: "/placeholder.svg",
-      lessons: 22,
-      duration: "10 tuần",
-      level: "Trung cấp",
-    },
-    {
-      id: "5",
-      title: "Lập trình nhúng C/C++",
-      description: "Lập trình ngôn ngữ C/C++ chuyên sâu cho hệ thống nhúng",
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      lessons: 28,
-      duration: "14 tuần",
-      level: "Trung cấp",
-    },
-    {
-      id: "6",
-      title: "Thiết kế PCB",
-      description: "Học thiết kế mạch in chuyên nghiệp với Altium Designer",
-      image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      lessons: 20,
-      duration: "10 tuần",
-      level: "Cơ bản",
-    },
-  ];
 
   const topDocuments = [
     {
@@ -208,25 +198,43 @@ const Index = () => {
               </motion.div>
             </div>
 
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-2 md:-ml-4">
-                {popularCourses.map((course) => (
-                  <CarouselItem key={course.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                    <CourseCard {...course} />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <div className="flex justify-end mt-4 gap-2">
-                <CarouselPrevious className="static translate-y-0 h-10 w-10 rounded-full hover:bg-dtktmt-blue-medium hover:text-white border-dtktmt-blue-medium" />
-                <CarouselNext className="static translate-y-0 h-10 w-10 rounded-full hover:bg-dtktmt-blue-medium hover:text-white border-dtktmt-blue-medium" />
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Đang tải khóa học...</p>
               </div>
-            </Carousel>
+            ) : error ? (
+              <div className="text-center py-8">
+                <p className="text-red-500">{error}</p>
+              </div>
+            ) : (
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-2 md:-ml-4">
+                  {popularCourses.map((course) => (
+                    <CarouselItem key={course.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                      <CourseCard 
+                        id={String(course.id)}
+                        title={course.title}
+                        description={course.description}
+                        image={course.thumbnail}
+                        lessons={20} // Giá trị mặc định vì không có trong CSDL
+                        duration="10 tuần" // Giá trị mặc định
+                        level="Cơ bản" // Giá trị mặc định
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex justify-end mt-4 gap-2">
+                  <CarouselPrevious className="static translate-y-0 h-10 w-10 rounded-full hover:bg-dtktmt-blue-medium hover:text-white border-dtktmt-blue-medium" />
+                  <CarouselNext className="static translate-y-0 h-10 w-10 rounded-full hover:bg-dtktmt-blue-medium hover:text-white border-dtktmt-blue-medium" />
+                </div>
+              </Carousel>
+            )}
 
             <div className="mt-10 text-center">
               <Link 
@@ -251,7 +259,7 @@ const Index = () => {
                 <h2 className="text-2xl md:text-3xl font-bold text-dtktmt-blue-dark mb-2">
                   <span className="gradient-text">Tài liệu</span> bán chạy
                 </h2>
-                <p className="text-gray-500">Tài liệu chất lượng cao được nhiều sinh viên lựa chọn</p>
+                <p className="text-gray-500">Tài liệu học tập chất lượng cao</p>
               </motion.div>
               <motion.div variants={fadeInUp}>
                 <Link
@@ -264,17 +272,16 @@ const Index = () => {
               </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {topDocuments.map((doc, index) => (
-                <motion.div 
-                  key={doc.id} 
-                  variants={fadeInUp}
-                  custom={index}
-                >
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={staggerContainer}
+            >
+              {topDocuments.map((doc) => (
+                <motion.div key={doc.id} variants={fadeInUp}>
                   <DocumentCard {...doc} />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </motion.section>
 
           {/* Đánh giá từ sinh viên */}

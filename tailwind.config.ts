@@ -192,7 +192,17 @@ export default {
                 "gradient-slide": {
                     "0%": { backgroundPosition: "0% 50%" },
                     "100%": { backgroundPosition: "200% 50%" }
-                }
+                },
+                shimmer: {
+                    '0%, 100%': {
+                        'background-size': '300% 300%',
+                        'background-position': 'left center'
+                    },
+                    '50%': {
+                        'background-size': '300% 300%',
+                        'background-position': 'right center'
+                    },
+                },
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -201,13 +211,14 @@ export default {
                 'pulse-soft': 'pulse-soft 2s infinite ease-in-out',
                 'rotate-slow': 'rotate-slow 15s linear infinite',
                 'slide-in-bottom': 'slide-in-bottom 0.5s ease-out forwards',
-                'text-shimmer': 'text-shimmer 3s infinite',
+                'text-shimmer': 'shimmer 5s linear infinite',
                 'text-pop': 'text-pop 0.5s ease-in-out',
                 'bounce-light': 'bounce-light 2s ease-in-out infinite',
                 'wave': 'wave 2s ease-in-out infinite',
                 'wobble': 'wobble 1s ease-in-out',
                 "shimmer": "shimmer 2s infinite",
-                "gradient-slide": "gradient-slide 3s linear infinite"
+                "gradient-slide": "gradient-slide 3s linear infinite",
+                'pulse': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
 			},
             fontFamily: {
                 'vietnam': ['Be Vietnam Pro', 'sans-serif'],
