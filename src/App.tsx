@@ -7,6 +7,8 @@ import { StrictMode } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CoursesPage from "./pages/CoursesPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
+import LessonPage from "./pages/LessonPage";
 import DocsPage from "./pages/DocsPage";
 import AboutPage from "./pages/AboutPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -25,13 +27,15 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/khoa-hoc" element={<CoursesPage />} />
+            <Route path="/khoa-hoc/:courseId" element={<CourseDetailPage />} />
+            <Route path="/hoc-tap/:courseId/bai-hoc/:lessonId" element={<LessonPage />} />
             <Route path="/tai-lieu" element={<DocsPage />} />
             <Route path="/gioi-thieu" element={<AboutPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
+            <Route path="/thanh-toan" element={<PaymentPage />} />
             <Route path="*" element={<NotFound />} />
-            <Route path="thanh-toan" element={<PaymentPage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

@@ -467,6 +467,214 @@ app.post('/api/seed-courses', async (req, res) => {
   }
 });
 
+// API để lấy danh sách chapters của một khóa học
+app.get('/api/courses/:courseId/chapters', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    
+    const [chapters] = await db.execute(
+      'SELECT * FROM chapters WHERE course_id = ? ORDER BY chapter_order ASC',
+      [courseId]
+    );
+    
+    if (chapters.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy chương nào cho khóa học này' });
+    }
+    
+    res.json(chapters);
+  } catch (error) {
+    console.error('Error fetching chapters:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách chương' });
+  }
+});
+
+// API để lấy danh sách lessons của một chapter
+app.get('/api/chapters/:chapterId/lessons', async (req, res) => {
+  try {
+    const { chapterId } = req.params;
+    
+    const [lessons] = await db.execute(
+      'SELECT * FROM lessons WHERE chapter_id = ? ORDER BY lesson_order ASC',
+      [chapterId]
+    );
+    
+    if (lessons.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy bài học nào cho chương này' });
+    }
+    
+    res.json(lessons);
+  } catch (error) {
+    console.error('Error fetching lessons:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách bài học' });
+  }
+});
+
+// API để lấy nội dung chi tiết của một bài học
+app.get('/api/lessons/:lessonId/pages', async (req, res) => {
+  try {
+    const { lessonId } = req.params;
+    
+    const [pages] = await db.execute(
+      'SELECT * FROM pages WHERE lesson_id = ? ORDER BY page_number ASC',
+      [lessonId]
+    );
+    
+    if (pages.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy nội dung cho bài học này' });
+    }
+    
+    res.json(pages);
+  } catch (error) {
+    console.error('Error fetching pages:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy nội dung bài học' });
+  }
+});
+
+// API để lấy cấu trúc đầy đủ của một khóa học (bao gồm chapters và lessons)
+app.get('/api/courses/:courseId/structure', async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    
+    // Lấy thông tin khóa học
+    const [courses] = await db.execute('SELECT * FROM courses WHERE id = ?', [courseId]);
+    
+    if (courses.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy khóa học' });
+    }
+    
+    const course = courses[0];
+    
+    // Lấy danh sách chapters
+    const [chapters] = await db.execute(
+      'SELECT * FROM chapters WHERE course_id = ? ORDER BY chapter_order ASC',
+      [courseId]
+    );
+    
+    // Lấy danh sách lessons cho mỗi chapter
+    const chaptersWithLessons = await Promise.all(
+      chapters.map(async (chapter) => {
+        const [lessons] = await db.execute(
+          'SELECT * FROM lessons WHERE chapter_id = ? ORDER BY lesson_order ASC',
+          [chapter.id]
+        );
+        
+        return {
+          ...chapter,
+          lessons
+        };
+      })
+    );
+    
+    res.json({
+      ...course,
+      chapters: chaptersWithLessons
+    });
+  } catch (error) {
+    console.error('Error fetching course structure:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy cấu trúc khóa học' });
+  }
+});
+
+// API để tạo dữ liệu mẫu cho cấu trúc khóa học (chỉ sử dụng cho demo)
+app.post('/api/seed-course-structure', async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    
+    if (!courseId) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp course_id' });
+    }
+    
+    // Kiểm tra khóa học tồn tại
+    const [courses] = await db.execute('SELECT * FROM courses WHERE id = ?', [courseId]);
+    
+    if (courses.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy khóa học' });
+    }
+    
+    // Kiểm tra đã có dữ liệu chưa
+    const [existingChapters] = await db.execute('SELECT COUNT(*) as count FROM chapters WHERE course_id = ?', [courseId]);
+    
+    if (existingChapters[0].count > 0) {
+      return res.json({ message: `Đã có dữ liệu cho khóa học ${courseId}, không cần thêm nữa` });
+    }
+    
+    // Tạo 3 chương mẫu
+    const chapterTitles = [
+      'Chương 1: Giới thiệu tổng quan',
+      'Chương 2: Kiến thức cơ bản',
+      'Chương 3: Ứng dụng thực tiễn'
+    ];
+    
+    let chaptersInserted = 0;
+    let lessonsInserted = 0;
+    let pagesInserted = 0;
+    
+    for (let i = 0; i < chapterTitles.length; i++) {
+      // Thêm chapter
+      const [chapterResult] = await db.execute(
+        'INSERT INTO chapters (course_id, title, chapter_order) VALUES (?, ?, ?)',
+        [courseId, chapterTitles[i], i + 1]
+      );
+      
+      const chapterId = chapterResult.insertId;
+      chaptersInserted++;
+      
+      // Tạo 3-5 bài học cho mỗi chương
+      const lessonCount = 3 + Math.floor(Math.random() * 3);
+      
+      for (let j = 0; j < lessonCount; j++) {
+        const [lessonResult] = await db.execute(
+          'INSERT INTO lessons (chapter_id, title, lesson_order) VALUES (?, ?, ?)',
+          [chapterId, `Bài ${j + 1}: Nội dung bài học ${j + 1} của ${chapterTitles[i]}`, j + 1]
+        );
+        
+        const lessonId = lessonResult.insertId;
+        lessonsInserted++;
+        
+        // Tạo 2-4 trang cho mỗi bài học
+        const pageCount = 2 + Math.floor(Math.random() * 3);
+        
+        for (let k = 0; k < pageCount; k++) {
+          const pageType = k === 0 ? 'text' : (Math.random() > 0.7 ? 'video' : 'text');
+          let content = '';
+          
+          if (pageType === 'text') {
+            content = `<h2>Nội dung trang ${k + 1} của bài ${j + 1}</h2>
+<p>Đây là nội dung mẫu được tạo tự động cho khóa học. Bạn có thể thay thế bằng nội dung thực tế sau.</p>
+<p>Đoạn văn thứ hai để minh họa định dạng.</p>
+<ul>
+  <li>Điểm thứ nhất cần ghi nhớ</li>
+  <li>Điểm thứ hai cần ghi nhớ</li>
+  <li>Điểm thứ ba cần ghi nhớ</li>
+</ul>`;
+          } else if (pageType === 'video') {
+            content = `{"videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ", "title": "Video minh họa cho bài học"}`;
+          }
+          
+          await db.execute(
+            'INSERT INTO pages (lesson_id, page_number, page_type, content) VALUES (?, ?, ?, ?)',
+            [lessonId, k + 1, pageType, content]
+          );
+          
+          pagesInserted++;
+        }
+      }
+    }
+    
+    res.json({ 
+      message: 'Đã tạo dữ liệu mẫu thành công', 
+      stats: {
+        chaptersInserted,
+        lessonsInserted,
+        pagesInserted
+      }
+    });
+  } catch (error) {
+    console.error('Error seeding course structure:', error);
+    res.status(500).json({ error: 'Lỗi khi tạo dữ liệu mẫu cho cấu trúc khóa học' });
+  }
+});
+
 // Error handling
 app.use((err, req, res, next) => {
     console.error('\n=== Error ===');

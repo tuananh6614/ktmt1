@@ -138,30 +138,14 @@ const NavBar = () => {
             
             {user ? (
               <div className="flex items-center space-x-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={getFullAvatarUrl(user.image)} />
-                        <AvatarFallback className="bg-dtktmt-blue-light text-white">
-                          {user.full_name?.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <Link to="/profile">
-                      <DropdownMenuItem>
-                        Trang cá nhân
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link to="/settings">
-                      <DropdownMenuItem>
-                        Cài đặt
-                      </DropdownMenuItem>
-                    </Link>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Link to="/profile">
+                  <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-dtktmt-blue-medium transition-all">
+                    <AvatarImage src={getFullAvatarUrl(user.image)} />
+                    <AvatarFallback className="bg-dtktmt-blue-light text-white">
+                      {user.full_name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
                 <Button 
                   onClick={() => setShowLogoutDialog(true)}
                   className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-1"
@@ -212,37 +196,26 @@ const NavBar = () => {
             ))}
             
             {user ? (
-              <div className="flex items-center space-x-4">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={getFullAvatarUrl(user.image)} />
-                        <AvatarFallback className="bg-dtktmt-blue-light text-white">
-                          {user.full_name?.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <Link to="/profile">
-                      <DropdownMenuItem>
-                        Trang cá nhân
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link to="/settings">
-                      <DropdownMenuItem>
-                        Cài đặt
-                      </DropdownMenuItem>
-                    </Link>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <div className="flex items-center justify-between">
+                <Link 
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium"
+                >
+                  <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-dtktmt-blue-medium transition-all">
+                    <AvatarImage src={getFullAvatarUrl(user.image)} />
+                    <AvatarFallback className="bg-dtktmt-blue-light text-white">
+                      {user.full_name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>Trang cá nhân</span>
+                </Link>
                 <button
                   onClick={() => {
                     setIsOpen(false);
                     setShowLogoutDialog(true);
                   }}
-                  className="w-full block px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 bg-dtktmt-blue-medium text-white"
+                  className="px-3 py-2 rounded-md text-base font-medium flex items-center gap-2 bg-dtktmt-blue-medium text-white"
                 >
                   <LogOut size={18} />
                   Đăng xuất
