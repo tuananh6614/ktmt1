@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Menu, X, Home, BookOpen } from "lucide-react";
 import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -24,8 +25,7 @@ interface Lesson {
   chapter_id: number;
   title: string;
   lesson_order: number;
-  created_at: string;
-  updated_at: string;
+  pages: Page[];
 }
 
 interface Chapter {
@@ -65,72 +65,55 @@ const LessonPage = () => {
   
   // Lấy cấu trúc khóa học
   useEffect(() => {
-    const checkEnrollment = () => {
-      const enrolledCourses = JSON.parse(localStorage.getItem("enrolledCourses") || "[]");
-      if (!enrolledCourses.includes(courseId)) {
+    const fetchLesson = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast.error("Vui lòng đăng nhập để xem bài học");
+          navigate('/login');
+          return;
+        }
+
+        // Lấy thông tin bài học
+        const lessonResponse = await fetch(`${API_BASE_URL}/api/lessons/${lessonId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!lessonResponse.ok) {
+          if (lessonResponse.status === 401) {
+            toast.error("Phiên đăng nhập đã hết hạn");
+            navigate('/login');
+            return;
+          }
+          if (lessonResponse.status === 404) {
+            toast.error("Không tìm thấy bài học");
+            navigate(`/khoa-hoc/${courseId}`);
+            return;
+          }
+          throw new Error('Không thể tải nội dung bài học');
+        }
+
+        const lessonData = await lessonResponse.json();
+        if (!lessonData.pages || lessonData.pages.length === 0) {
+          toast.error("Bài học này chưa có nội dung");
+          navigate(`/khoa-hoc/${courseId}`);
+          return;
+        }
+
+        setPages(lessonData.pages);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching lesson:', error);
+        toast.error("Có lỗi xảy ra khi tải bài học");
         navigate(`/khoa-hoc/${courseId}`);
-        toast.error("Bạn cần đăng ký khóa học này trước khi xem bài học.");
-        return false;
       }
-      return true;
     };
 
-    const fetchCourseStructure = async () => {
-      if (!checkEnrollment()) return;
-      
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/courses/${courseId}/structure`);
-        
-        if (!response.ok) {
-          throw new Error("Không thể tải thông tin khóa học");
-        }
-        
-        const data = await response.json();
-        setCourse(data);
-        
-        // Tìm bài học hiện tại
-        let foundLesson: Lesson | null = null;
-        for (const chapter of data.chapters) {
-          for (const lesson of chapter.lessons) {
-            if (lesson.id.toString() === lessonId) {
-              foundLesson = lesson;
-              break;
-            }
-          }
-          if (foundLesson) break;
-        }
-        
-        if (foundLesson) {
-          setCurrentLesson(foundLesson);
-          // Lấy nội dung bài học
-          const pagesResponse = await fetch(`${API_BASE_URL}/api/lessons/${lessonId}/pages`);
-          
-          if (!pagesResponse.ok) {
-            throw new Error("Không thể tải nội dung bài học");
-          }
-          
-          const pagesData = await pagesResponse.json();
-          setPages(pagesData);
-          
-          if (pagesData.length > 0) {
-            setCurrentPage(pagesData[0]);
-            setCurrentPageIndex(0);
-          }
-        } else {
-          throw new Error("Không tìm thấy bài học");
-        }
-        
-        setError(null);
-      } catch (err) {
-        console.error("Lỗi khi tải thông tin:", err);
-        setError("Không thể tải nội dung bài học");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchCourseStructure();
+    fetchLesson();
   }, [courseId, lessonId, navigate]);
   
   // Cập nhật tiến độ khi chuyển trang
@@ -140,9 +123,9 @@ const LessonPage = () => {
     }
   }, [currentPageIndex, pages.length]);
   
-  const goToNextPage = () => {
+  const handleNextPage = () => {
     if (currentPageIndex < pages.length - 1) {
-      setCurrentPageIndex(currentPageIndex + 1);
+      setCurrentPageIndex(prev => prev + 1);
       setCurrentPage(pages[currentPageIndex + 1]);
       // Thêm animation scroll lên đầu trang
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -158,9 +141,9 @@ const LessonPage = () => {
     }
   };
   
-  const goToPrevPage = () => {
+  const handlePrevPage = () => {
     if (currentPageIndex > 0) {
-      setCurrentPageIndex(currentPageIndex - 1);
+      setCurrentPageIndex(prev => prev - 1);
       setCurrentPage(pages[currentPageIndex - 1]);
       // Thêm animation scroll lên đầu trang
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -248,6 +231,40 @@ const LessonPage = () => {
     }
   };
   
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-dtktmt-blue-medium border-t-transparent rounded-full mx-auto mb-4 animate-spin"></div>
+            <p className="text-dtktmt-blue-dark">Đang tải bài học...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!currentLesson || !currentLesson.pages.length) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <NavBar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-xl text-gray-600 mb-4">Không tìm thấy nội dung bài học</p>
+            <Button onClick={() => navigate(`/khoa-hoc/${courseId}`)}>
+              Quay lại khóa học
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const currentPageData = currentLesson.pages[currentPageIndex];
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -331,59 +348,47 @@ const LessonPage = () => {
           
           {/* Content */}
           <div className="container py-8 max-w-4xl">
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin w-12 h-12 border-4 border-t-dtktmt-blue-medium border-r-transparent border-b-dtktmt-blue-medium border-l-transparent rounded-full mx-auto mb-4"></div>
-                <p>Đang tải nội dung bài học...</p>
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold text-dtktmt-blue-dark">
+                  {currentLesson?.title}
+                </h1>
+                <div className="text-sm text-gray-500">
+                  Trang {currentPageIndex + 1}/{pages.length}
+                </div>
               </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-red-500 mb-4">{error}</p>
-                <Button onClick={() => navigate(`/khoa-hoc/${courseId}`)} variant="outline">
-                  Quay lại trang khóa học
+              
+              <Progress value={progress} className="mb-8" />
+              
+              <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
+                {renderPageContent()}
+              </div>
+              
+              <div className="flex justify-between pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handlePrevPage}
+                  disabled={currentPageIndex === 0 && !getPrevLesson()}
+                  className="flex items-center gap-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Trang trước
+                </Button>
+                
+                <Button
+                  onClick={handleNextPage}
+                  className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-2"
+                >
+                  Trang tiếp theo
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-            ) : (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h1 className="text-2xl font-bold text-dtktmt-blue-dark">
-                    {currentLesson?.title}
-                  </h1>
-                  <div className="text-sm text-gray-500">
-                    Trang {currentPageIndex + 1}/{pages.length}
-                  </div>
-                </div>
-                
-                <Progress value={progress} className="mb-8" />
-                
-                <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8">
-                  {renderPageContent()}
-                </div>
-                
-                <div className="flex justify-between pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={goToPrevPage}
-                    disabled={currentPageIndex === 0 && !getPrevLesson()}
-                    className="flex items-center gap-2"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Trang trước
-                  </Button>
-                  
-                  <Button
-                    onClick={goToNextPage}
-                    className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark flex items-center gap-2"
-                  >
-                    Trang tiếp theo
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

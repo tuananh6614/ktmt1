@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const authController = require('./controllers/authController');
 const auth = require('./middleware/auth');
+const enrollmentController = require('./controllers/enrollmentController');
 
 // Thêm multer để xử lý upload file
 const multer = require('multer');
@@ -672,6 +673,55 @@ app.post('/api/seed-course-structure', async (req, res) => {
   } catch (error) {
     console.error('Error seeding course structure:', error);
     res.status(500).json({ error: 'Lỗi khi tạo dữ liệu mẫu cho cấu trúc khóa học' });
+  }
+});
+
+// Enrollment routes
+app.post('/api/enrollments', auth, enrollmentController.enrollCourse);
+app.get('/api/enrollments', auth, enrollmentController.getEnrolledCourses);
+app.get('/api/enrollments/check/:course_id', auth, enrollmentController.checkEnrollment);
+app.put('/api/enrollments/progress', auth, enrollmentController.updateProgress);
+
+// API để lấy thông tin chi tiết của một bài học
+app.get('/api/lessons/:lessonId', auth, async (req, res) => {
+  try {
+    const { lessonId } = req.params;
+    
+    const [lessons] = await db.execute(
+      'SELECT * FROM lessons WHERE id = ?',
+      [lessonId]
+    );
+    
+    if (lessons.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy bài học' });
+    }
+    
+    const lesson = lessons[0];
+    
+    // Lấy thông tin chapter
+    const [chapters] = await db.execute(
+      'SELECT * FROM chapters WHERE id = ?',
+      [lesson.chapter_id]
+    );
+    
+    if (chapters.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy chương học' });
+    }
+    
+    // Lấy danh sách trang của bài học
+    const [pages] = await db.execute(
+      'SELECT * FROM pages WHERE lesson_id = ? ORDER BY page_number ASC',
+      [lessonId]
+    );
+    
+    res.json({
+      ...lesson,
+      chapter: chapters[0],
+      pages
+    });
+  } catch (error) {
+    console.error('Error fetching lesson details:', error);
+    res.status(500).json({ error: 'Lỗi khi lấy thông tin bài học' });
   }
 });
 

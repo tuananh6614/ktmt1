@@ -14,6 +14,7 @@ import AboutPage from "./pages/AboutPage";
 import ProfilePage from "./pages/ProfilePage";
 import AuthPage from "./pages/AuthPage";
 import PaymentPage from "./pages/PaymentPage";
+import CourseContent from "@/pages/CourseContent";
 // Tạo QueryClient mới
 const queryClient = new QueryClient();
 
@@ -28,13 +29,14 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/khoa-hoc" element={<CoursesPage />} />
             <Route path="/khoa-hoc/:courseId" element={<CourseDetailPage />} />
-            <Route path="/hoc-tap/:courseId/bai-hoc/:lessonId" element={<LessonPage />} />
+            <Route path="/khoa-hoc/:courseId/bai-hoc/:lessonId" element={<LessonPage />} />
             <Route path="/tai-lieu" element={<DocsPage />} />
             <Route path="/gioi-thieu" element={<AboutPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
             <Route path="/thanh-toan" element={<PaymentPage />} />
+            <Route path="/khoa-hoc/:courseId/noi-dung" element={<CourseContent />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -63,6 +63,11 @@ const CourseDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [currentProgress, setCurrentProgress] = useState<{
+    chapterId: number;
+    lessonId: number;
+    pageNumber: number;
+  } | null>(null);
 
   // Lấy dữ liệu khóa học bao gồm chương và bài học
   useEffect(() => {
@@ -132,15 +137,62 @@ const CourseDetailPage = () => {
     };
 
     // Kiểm tra xem người dùng đã đăng ký khóa học này chưa
-    const checkEnrollment = () => {
-      // Tạm sử dụng localStorage để kiểm tra, trong ứng dụng thực tế cần gọi API
-      const enrolledCourses = JSON.parse(localStorage.getItem("enrolledCourses") || "[]");
-      setIsEnrolled(enrolledCourses.includes(courseId));
+    const checkEnrollment = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsEnrolled(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/enrollments`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch enrollments');
+        }
+
+        const enrollments = await response.json();
+        setIsEnrolled(enrollments.some(e => e.course_id === parseInt(courseId || '0')));
+      } catch (error) {
+        console.error('Error checking enrollment:', error);
+        setIsEnrolled(false);
+      }
     };
     
     fetchCourseStructure();
     checkEnrollment();
   }, [courseId]);
+
+  // Thêm useEffect để lấy tiến độ học tập
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE_URL}/api/enrollments/progress?course_id=${courseId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentProgress(data);
+        }
+      } catch (error) {
+        console.error('Error fetching progress:', error);
+      }
+    };
+
+    if (isEnrolled) {
+      fetchProgress();
+    }
+  }, [courseId, isEnrolled]);
 
   // Tính tổng số bài học
   const totalLessons = course?.chapters.reduce((total, chapter) => {
@@ -152,33 +204,50 @@ const CourseDetailPage = () => {
     setEnrolling(true);
     
     try {
-      // Trong ứng dụng thực tế, cần gọi API đăng ký
-      // Đây là mô phỏng
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Lưu vào localStorage
-      const enrolledCourses = JSON.parse(localStorage.getItem("enrolledCourses") || "[]");
-      if (!enrolledCourses.includes(courseId)) {
-        enrolledCourses.push(courseId);
-        localStorage.setItem("enrolledCourses", JSON.stringify(enrolledCourses));
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error("Vui lòng đăng nhập để đăng ký khóa học");
+        navigate('/login');
+        return;
       }
-      
+
+      const response = await fetch(`${API_BASE_URL}/api/enrollments`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ course_id: courseId })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Đăng ký thất bại');
+      }
+
       setIsEnrolled(true);
       toast.success("Đăng ký khóa học thành công!");
     } catch (error) {
       console.error("Lỗi khi đăng ký khóa học:", error);
-      toast.error("Đăng ký khóa học thất bại. Vui lòng thử lại sau!");
+      toast.error(error.message || "Đăng ký khóa học thất bại. Vui lòng thử lại sau!");
     } finally {
       setEnrolling(false);
     }
   };
 
-  // Mở bài học đầu tiên
+  // Sửa lại hàm startLearning
   const startLearning = () => {
-    if (course?.chapters.length && course.chapters[0].lessons.length) {
+    if (!course?.chapters.length) return;
+
+    if (currentProgress) {
+      // Nếu có tiến độ học tập, điều hướng đến bài học đang học dở
+      navigate(`/khoa-hoc/${courseId}/noi-dung?chapter=${currentProgress.chapterId}&lesson=${currentProgress.lessonId}&page=${currentProgress.pageNumber}`);
+    } else {
+      // Nếu chưa có tiến độ, bắt đầu từ bài đầu tiên
       const firstChapter = course.chapters[0];
-      const firstLesson = firstChapter.lessons[0];
-      navigate(`/hoc-tap/${courseId}/bai-hoc/${firstLesson.id}`);
+      if (firstChapter.lessons.length > 0) {
+        navigate(`/khoa-hoc/${courseId}/noi-dung?chapter=${firstChapter.id}&lesson=${firstChapter.lessons[0].id}&page=1`);
+      }
     }
   };
 
@@ -316,7 +385,7 @@ const CourseDetailPage = () => {
                                               variant="ghost"
                                               size="sm"
                                               className="h-8 w-8 p-0 rounded-full"
-                                              onClick={() => navigate(`/hoc-tap/${courseId}/bai-hoc/${lesson.id}`)}
+                                              onClick={() => navigate(`/khoa-hoc/${courseId}/noi-dung?chapter=${chapter.id}&lesson=${lesson.id}&page=1`)}
                                             >
                                               <PlayCircle className="h-5 w-5 text-dtktmt-blue-medium" />
                                             </Button>
@@ -325,7 +394,7 @@ const CourseDetailPage = () => {
                                           )}
                                           <span className="text-sm font-semibold">{lesson.title}</span>
                                         </div>
-                                        <span className="text-xs text-gray-500">~15 phút</span>
+                                        
                                       </div>
                                       
                                       {/* Danh sách các trang trong bài học */}

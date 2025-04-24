@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText, Star } from "lucide-react";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@/config/config";
+import { Button } from "@/components/ui/button";
 
 const API_URL = `${API_BASE_URL}/api`;
 
@@ -39,10 +40,23 @@ interface ProfileUser {
   };
 }
 
+interface EnrolledCourse {
+  id: number;
+  course_id: number;
+  title: string;
+  description: string;
+  thumbnail: string;
+  progress_percent: number;
+  status: string;
+  enrolled_date: string;
+}
+
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
 
   const handleProfileUpdate = (updatedUser: any) => {
     if (profileUser) {
@@ -115,6 +129,35 @@ const ProfilePage = () => {
     fetchUserProfile();
   }, [navigate]);
 
+  useEffect(() => {
+    const fetchEnrolledCourses = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/enrollments`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch enrolled courses');
+        }
+
+        const courses = await response.json();
+        setEnrolledCourses(courses);
+      } catch (error) {
+        console.error('Error fetching enrolled courses:', error);
+        toast.error("Có lỗi xảy ra khi tải danh sách khóa học");
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    fetchEnrolledCourses();
+  }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -179,11 +222,54 @@ const ProfilePage = () => {
               </TabsList>
               
               <TabsContent value="courses">
-                <div className="p-8 text-center bg-gray-50 rounded-lg">
-                  <BookOpen size={48} className="text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có khóa học nào</h3>
-                  <p className="text-gray-500 mb-4">Bạn chưa đăng ký khóa học nào</p>
-                </div>
+                {isLoadingCourses ? (
+                  <div className="p-8 text-center">
+                    <div className="w-12 h-12 border-4 border-dtktmt-blue-medium border-t-transparent rounded-full mx-auto mb-4 animate-spin"></div>
+                    <p className="text-dtktmt-blue-dark">Đang tải danh sách khóa học...</p>
+                  </div>
+                ) : enrolledCourses.length === 0 ? (
+                  <div className="p-8 text-center bg-gray-50 rounded-lg">
+                    <BookOpen size={48} className="text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có khóa học nào</h3>
+                    <p className="text-gray-500 mb-4">Bạn chưa đăng ký khóa học nào</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {enrolledCourses.map((course) => (
+                      <div key={course.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                        <img 
+                          src={course.thumbnail} 
+                          alt={course.title}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="p-4">
+                          <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{course.description}</p>
+                          <div className="flex items-center justify-between">
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                              <div 
+                                className="bg-dtktmt-blue-medium h-2.5 rounded-full" 
+                                style={{ width: `${course.progress_percent || 0}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-sm text-gray-600 ml-2">{course.progress_percent || 0}%</span>
+                          </div>
+                          <div className="mt-4 flex justify-between items-center">
+                            <span className="text-sm text-gray-500">
+                              Đăng ký: {new Date(course.enrolled_date).toLocaleDateString('vi-VN')}
+                            </span>
+                            <Button 
+                              onClick={() => navigate(`/khoa-hoc/${course.course_id}`)}
+                              className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark text-white"
+                            >
+                              Tiếp tục học
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="documents">
