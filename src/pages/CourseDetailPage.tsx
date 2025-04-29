@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { API_BASE_URL } from "@/config/config";
+import QuestionBank from "@/components/QuestionBank";
 
 // Định nghĩa interface cho dữ liệu
 interface Page {
@@ -348,13 +349,13 @@ const CourseDetailPage = () => {
 
             {/* Nội dung chi tiết */}
             <div className="container py-12">
-              <Tabs defaultValue="content" className="w-full">
+              <Tabs defaultValue="noi-dung" className="w-full">
                 <TabsList className="mb-8">
-                  <TabsTrigger value="content">Nội dung khóa học</TabsTrigger>
-                  <TabsTrigger value="overview">Ngân hàng câu hỏi</TabsTrigger>
+                  <TabsTrigger value="noi-dung">Nội dung khóa học</TabsTrigger>
+                  <TabsTrigger value="cau-hoi">Ngân hàng câu hỏi</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="content" className="space-y-6">
+                <TabsContent value="noi-dung" className="space-y-6">
                   <div className="grid md:grid-cols-3 gap-8">
                     <div className="md:col-span-2">
                       <h2 className="text-2xl font-bold mb-6">Nội dung khóa học</h2>
@@ -480,11 +481,8 @@ const CourseDetailPage = () => {
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="overview">
-                  <div className="bg-white rounded-xl shadow-lg p-8">
-     
-                    {/* Nội dung mới sẽ được thêm vào đây */}
-                  </div>
+                <TabsContent value="cau-hoi">
+                  <QuestionBank />
                 </TabsContent>
               </Tabs>
             </div>

@@ -7,6 +7,7 @@ require('dotenv').config();
 const authController = require('./controllers/authController');
 const auth = require('./middleware/auth');
 const enrollmentController = require('./controllers/enrollmentController');
+const questionController = require('./controllers/questionController');
 
 // Thêm multer để xử lý upload file
 const multer = require('multer');
@@ -724,6 +725,10 @@ app.get('/api/lessons/:lessonId', auth, async (req, res) => {
     res.status(500).json({ error: 'Lỗi khi lấy thông tin bài học' });
   }
 });
+
+// Questions routes
+app.get('/api/questions/:courseId', questionController.getQuestionsByCourse);
+app.post('/api/questions/:courseId/seed', questionController.seedQuestions);
 
 // Error handling
 app.use((err, req, res, next) => {
