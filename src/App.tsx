@@ -17,6 +17,7 @@ import PaymentPage from "./pages/PaymentPage";
 import CourseContent from "@/pages/CourseContent";
 import QuestionBank from "./components/QuestionBank";
 import ExamPage from "./pages/ExamPage";
+import ExamResultPage from "./pages/ExamResultPage";
 // Tạo QueryClient mới
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/khoa-hoc/:courseId" element={<CourseDetailPage />} />
             <Route path="/khoa-hoc/:courseId/bai-hoc/:lessonId" element={<LessonPage />} />
             <Route path="/khoa-hoc/:courseId/thi" element={<ExamPage />} />
+            <Route path="/khoa-hoc/:courseId/ket-qua" element={<ExamResultPage />} />
             <Route path="/tai-lieu" element={<DocsPage />} />
             <Route path="/gioi-thieu" element={<AboutPage />} />
             <Route path="/profile" element={<ProfilePage />} />

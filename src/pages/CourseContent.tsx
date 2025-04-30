@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronRight, ChevronDown, BookOpen, PlayCircle, FileText, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronDown, BookOpen, PlayCircle, FileText, ChevronLeft, ClipboardCheck } from "lucide-react";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ interface Chapter {
   title: string;
   chapter_order: number;
   lessons: Lesson[];
+  has_test?: boolean;
 }
 
 interface Course {
@@ -35,7 +36,49 @@ interface Course {
   title: string;
   description: string;
   chapters: Chapter[];
+  has_final_test?: boolean;
 }
+
+// Chapter Test Component
+const ChapterTest = ({ chapterId, courseId }: { chapterId: number, courseId: string | undefined }) => {
+  return (
+    <div className="mt-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <ClipboardCheck className="w-5 h-5 text-blue-500" />
+          <h3 className="font-medium text-blue-700">Bài kiểm tra chương</h3>
+        </div>
+        <Button 
+          onClick={() => window.location.href = `/khoa-hoc/${courseId}/thi?type=chapter&chapter=${chapterId}`}
+          className="bg-blue-600 hover:bg-blue-700"
+          size="sm"
+        >
+          Làm bài kiểm tra
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Course Final Test Component
+const CourseFinalTest = ({ courseId }: { courseId: string | undefined }) => {
+  return (
+    <div className="mt-6 p-5 border border-orange-200 rounded-lg bg-orange-50">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-bold text-orange-700 text-lg">Bài kiểm tra cuối khóa</h3>
+          <p className="text-orange-600 text-sm mt-1">Hoàn thành bài kiểm tra để nhận chứng chỉ khóa học</p>
+        </div>
+        <Button 
+          onClick={() => window.location.href = `/khoa-hoc/${courseId}/thi?type=final`}
+          className="bg-orange-600 hover:bg-orange-700"
+        >
+          Làm bài kiểm tra
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 const CourseContent = () => {
   const { courseId } = useParams<{ courseId: string }>();
@@ -88,8 +131,25 @@ const CourseContent = () => {
 
         const data = await response.json();
         
+        // Add test info to data - force enable tests for all chapters
+        if (data && data.chapters) {
+          data.chapters.forEach(chapter => {
+            if (chapter) chapter.has_test = true; 
+          });
+          data.has_final_test = true;
+        }
+        
         // Tải pages cho tất cả các bài học
         const courseWithPages = await loadPagesForAllLessons(data, token);
+        
+        // Ensure tests are enabled after loading pages
+        if (courseWithPages && courseWithPages.chapters) {
+          courseWithPages.chapters.forEach(chapter => {
+            if (chapter) chapter.has_test = true;
+          });
+          courseWithPages.has_final_test = true;
+        }
+        
         setCourse(courseWithPages);
         
         // Xử lý tham số từ URL
@@ -293,18 +353,10 @@ const CourseContent = () => {
             >
               <div className="bg-white rounded-xl shadow-lg p-6 transition-shadow hover:shadow-xl">
                 <h2 className="text-2xl font-bold mb-6">{course?.title}</h2>
-                <Accordion 
-                  type="single" 
-                  defaultValue={`chapter-${selectedChapter}`}
-                  className="w-full"
-                >
-                  {course?.chapters.map((chapter) => (
-                    <AccordionItem 
-                      key={chapter.id} 
-                      value={`chapter-${chapter.id}`}
-                      className="border-b last:border-b-0"
-                    >
-                      <AccordionTrigger className="text-left hover:no-underline py-4 transition-colors hover:bg-gray-50 rounded-lg px-3">
+                <Accordion type="single" collapsible defaultValue={selectedChapter?.toString()}>
+                  {course.chapters.map((chapter) => (
+                    <AccordionItem key={chapter.id} value={chapter.id.toString()}>
+                      <AccordionTrigger className="text-left">
                         <div className="flex items-center gap-2">
                           <BookOpen className="h-4 w-4" />
                           <span>{chapter.title}</span>
@@ -346,11 +398,50 @@ const CourseContent = () => {
                               )}
                             </li>
                           ))}
+                          
+                          {/* Add Chapter Test UI */}
+                          {chapter.has_test && (
+                            <li>
+                              <div className="mt-3 p-3 border border-blue-200 rounded-lg bg-blue-50">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-2">
+                                    <ClipboardCheck className="w-4 h-4 text-blue-500" />
+                                    <span className="text-sm font-medium text-blue-700">Bài kiểm tra chương</span>
+                                  </div>
+                                  <Button 
+                                    onClick={() => window.location.href = `/khoa-hoc/${courseId}/thi?type=chapter&chapter=${chapter.id}`}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                    size="sm"
+                                  >
+                                    Làm bài
+                                  </Button>
+                                </div>
+                              </div>
+                            </li>
+                          )}
                         </ul>
                       </AccordionContent>
                     </AccordionItem>
                   ))}
                 </Accordion>
+                
+                {/* Course Final Test */}
+                {course.has_final_test && (
+                  <div className="mt-6 p-4 border border-orange-200 rounded-lg bg-orange-50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold text-orange-700 text-lg">Bài kiểm tra cuối khóa</h3>
+                        <p className="text-orange-600 text-sm mt-1">Hoàn thành bài kiểm tra để nhận chứng chỉ</p>
+                      </div>
+                      <Button 
+                        onClick={() => window.location.href = `/khoa-hoc/${courseId}/thi?type=final`}
+                        className="bg-orange-600 hover:bg-orange-700"
+                      >
+                        Làm bài
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
