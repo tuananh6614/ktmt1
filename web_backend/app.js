@@ -15,9 +15,10 @@ const adminAuth = require('./middleware/adminAuth');
 // Thêm multer để xử lý upload file
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
-// Cấu hình multer
-const storage = multer.diskStorage({
+// Cấu hình multer cho avatar
+const avatarStorage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, 'uploads/avatars/');
     },
@@ -27,14 +28,43 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({
-    storage: storage,
+const avatarUpload = multer({
+    storage: avatarStorage,
     limits: {
         fileSize: 5 * 1024 * 1024 // Giới hạn 5MB
     },
     fileFilter: function(req, file, cb) {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
             return cb(new Error('Chỉ chấp nhận file ảnh'));
+        }
+        cb(null, true);
+    }
+});
+
+// Cấu hình multer cho thumbnail khóa học
+const thumbnailStorage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        // Đảm bảo thư mục tồn tại
+        const uploadDir = 'uploads/thumbnails/';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function(req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'course-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const thumbnailUpload = multer({
+    storage: thumbnailStorage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // Giới hạn 5MB
+    },
+    fileFilter: function(req, file, cb) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+            return cb(new Error('Chỉ chấp nhận file ảnh (jpg, jpeg, png, gif)'));
         }
         cb(null, true);
     }
@@ -56,7 +86,11 @@ app.use((req, res, next) => {
     console.log(`Method: ${req.method}`);
     console.log(`URL: ${req.url}`);
     console.log('Headers:', req.headers);
-    console.log('Body:', req.body);
+    if (req.method !== 'POST' || !req.url.includes('/upload')) {
+        console.log('Body:', req.body);
+    } else {
+        console.log('Body: [Contains file upload data]');
+    }
     console.log('==================\n');
     next();
 });
@@ -282,7 +316,7 @@ app.put('/api/profile/change-password', auth, async(req, res) => {
 });
 
 // API cập nhật ảnh đại diện
-app.put('/api/profile/avatar', auth, upload.single('avatar'), async(req, res) => {
+app.put('/api/profile/avatar', auth, avatarUpload.single('avatar'), async(req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'Không có file được tải lên' });
@@ -338,31 +372,57 @@ app.get('/api/courses/:id', async(req, res) => {
     }
 });
 
-// API để thêm khóa học mới (yêu cầu quyền admin)
-app.post('/api/courses', auth, async(req, res) => {
+// API để thêm khóa học mới với upload file (yêu cầu quyền admin)
+app.post('/api/courses/upload', auth, thumbnailUpload.single('thumbnail'), async(req, res) => {
     try {
         // Kiểm tra quyền admin
         if (req.user.role !== 'admin') {
             return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
         }
 
-        const { title, description, thumbnail, status } = req.body;
+        console.log('=== Processing course upload ===');
+        const { title, description, status } = req.body;
 
-        if (!title || !description || !thumbnail) {
+        if (!title || !description) {
             return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
         }
 
+        if (!req.file) {
+            return res.status(400).json({ error: 'Vui lòng tải lên hình ảnh thumbnail' });
+        }
+
+        // Lấy đường dẫn tương đối của file đã upload
+        const thumbnailPath = `/uploads/thumbnails/${req.file.filename}`;
+        console.log('Thumbnail path:', thumbnailPath);
+
+        // Thêm khóa học mới vào database
         const [result] = await db.execute(
-            'INSERT INTO courses (title, description, thumbnail, status) VALUES (?, ?, ?, ?)', [title, description, thumbnail, status || 'active']
+            'INSERT INTO courses (title, description, thumbnail, status) VALUES (?, ?, ?, ?)',
+            [title, description, thumbnailPath, status || 'active']
         );
+
+        console.log('Course created with ID:', result.insertId);
 
         res.status(201).json({
             message: 'Thêm khóa học thành công',
-            id: result.insertId
+            id: result.insertId,
+            thumbnail: thumbnailPath
         });
     } catch (error) {
-        console.error('Error adding course:', error);
-        res.status(500).json({ error: 'Lỗi khi thêm khóa học' });
+        console.error('Error adding course with upload:', error);
+        
+        // Xóa file đã upload nếu có lỗi xảy ra
+        if (req.file) {
+            const filePath = path.join(__dirname, req.file.path);
+            try {
+                fs.unlinkSync(filePath);
+                console.log('Deleted uploaded file due to error:', filePath);
+            } catch (unlinkError) {
+                console.error('Error deleting uploaded file:', unlinkError);
+            }
+        }
+        
+        res.status(500).json({ error: 'Lỗi khi thêm khóa học', details: error.message });
     }
 });
 
@@ -862,6 +922,34 @@ app.delete('/api/admin/users/:id', adminAuth, async(req, res) => {
     } catch (error) {
         console.error('Error deleting user:', error);
         res.status(500).json({ error: 'Lỗi khi xóa tài khoản người dùng' });
+    }
+});
+
+// API để thêm khóa học mới (yêu cầu quyền admin)
+app.post('/api/courses', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { title, description, thumbnail, status } = req.body;
+
+        if (!title || !description || !thumbnail) {
+            return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+        }
+
+        const [result] = await db.execute(
+            'INSERT INTO courses (title, description, thumbnail, status) VALUES (?, ?, ?, ?)', [title, description, thumbnail, status || 'active']
+        );
+
+        res.status(201).json({
+            message: 'Thêm khóa học thành công',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('Error adding course:', error);
+        res.status(500).json({ error: 'Lỗi khi thêm khóa học' });
     }
 });
 
