@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Search, SortAsc, SortDesc, FileText } from "lucide-react";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ChatBox from "@/components/ChatBox";
-import DocumentCard from "@/components/DocumentCard";
-import DocumentCategories, { DocumentCategory } from "@/components/DocumentCategories";
+import NavBar from "@/components/componentsforpages/NavBar";
+import Footer from "@/components/componentsforpages/Footer";
+import ChatBox from "@/components/componentsforpages/ChatBox";
+import DocumentCard from "@/components/componentsforpages/DocumentCard";
+import DocumentCategories, { DocumentCategory } from "@/components/componentsforpages/DocumentCategories";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

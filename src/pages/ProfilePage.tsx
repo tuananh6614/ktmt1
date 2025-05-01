@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ChatBox from "@/components/ChatBox";
+import NavBar from "@/components/componentsforpages/NavBar";
+import Footer from "@/components/componentsforpages/Footer";
+import ChatBox from "@/components/componentsforpages/ChatBox";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, FileText, Star } from "lucide-react";

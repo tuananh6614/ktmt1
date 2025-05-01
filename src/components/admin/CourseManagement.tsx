@@ -154,8 +154,8 @@ const CourseManagement = () => {
   };
 
   const handleUpdateCourse = async (courseId: number) => {
-    // Triển khai sau
-    toast.info(`Chức năng cập nhật khóa học #${courseId} sẽ được triển khai sau`);
+    // Chuyển hướng đến trang chỉnh sửa khóa học
+    window.location.href = `/admin/courses/edit/${courseId}`;
   };
 
   const handleDeleteCourse = async (courseId: number) => {

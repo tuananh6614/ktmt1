@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import NavBar from "@/components/NavBar";
+import NavBar from "@/components/componentsforpages/NavBar";
 import { API_BASE_URL } from "@/config/config";
 import { Clock, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";

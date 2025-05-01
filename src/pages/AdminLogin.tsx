@@ -36,11 +36,7 @@ const AdminLogin = () => {
         throw new Error(data.error || 'Đăng nhập thất bại');
       }
 
-      localStorage.setItem('adminToken', data.token);
-      localStorage.setItem('adminUser', JSON.stringify(data.user));
-
-      toast.success("Đăng nhập admin thành công!");
-      navigate('/admin/dashboard');
+      handleSuccess(data.token, data.user);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Đăng nhập thất bại');
     } finally {
@@ -54,6 +50,13 @@ const AdminLogin = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSuccess = (token: string, userData: any) => {
+    localStorage.setItem('adminToken', token);
+    localStorage.setItem('adminUser', JSON.stringify(userData));
+    toast.success('Đăng nhập thành công');
+    navigate('/admin');
   };
 
   return (

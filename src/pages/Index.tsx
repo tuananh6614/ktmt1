@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Book, ArrowRight, Star } from "lucide-react";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ChatBox from "@/components/ChatBox";
-import CourseCard from "@/components/CourseCard";
-import DocumentCard from "@/components/DocumentCard";
+import NavBar from "@/components/componentsforpages/NavBar";
+import Footer from "@/components/componentsforpages/Footer";
+import ChatBox from "@/components/componentsforpages/ChatBox";
+import CourseCard from "@/components/componentsforpages/CourseCard";
+import DocumentCard from "@/components/componentsforpages/DocumentCard";
 import { motion } from "framer-motion";
-import FeaturedSection from "@/components/FeaturedSection";
-import CoursePromoBanner from "@/components/CoursePromoBanner";
+import FeaturedSection from "@/components/componentsforpages/FeaturedSection";
+import CoursePromoBanner from "@/components/componentsforpages/CoursePromoBanner";
 import {
   Carousel,
   CarouselContent,

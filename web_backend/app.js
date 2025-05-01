@@ -485,6 +485,273 @@ app.delete('/api/courses/:id', auth, async(req, res) => {
     }
 });
 
+// API để cập nhật thông tin chapter (yêu cầu quyền admin)
+app.put('/api/chapters/:id', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+        const { title, chapter_order } = req.body;
+
+        if (!title) {
+            return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+        }
+
+        const [result] = await db.execute(
+            'UPDATE chapters SET title = ?, chapter_order = ? WHERE id = ?', 
+            [title, chapter_order, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không tìm thấy chương' });
+        }
+
+        res.json({
+            message: 'Cập nhật chương thành công',
+            id: parseInt(id)
+        });
+    } catch (error) {
+        console.error('Error updating chapter:', error);
+        res.status(500).json({ error: 'Lỗi khi cập nhật chương' });
+    }
+});
+
+// API để thêm mới chapter (yêu cầu quyền admin)
+app.post('/api/chapters', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { course_id, title, chapter_order } = req.body;
+
+        if (!course_id || !title) {
+            return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+        }
+
+        const [result] = await db.execute(
+            'INSERT INTO chapters (course_id, title, chapter_order) VALUES (?, ?, ?)', 
+            [course_id, title, chapter_order || 1]
+        );
+
+        res.status(201).json({
+            message: 'Thêm chương mới thành công',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('Error adding chapter:', error);
+        res.status(500).json({ error: 'Lỗi khi thêm chương' });
+    }
+});
+
+// API để xóa chapter (yêu cầu quyền admin)
+app.delete('/api/chapters/:id', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+
+        const [result] = await db.execute('DELETE FROM chapters WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không tìm thấy chương' });
+        }
+
+        res.json({
+            message: 'Xóa chương thành công',
+            id: parseInt(id)
+        });
+    } catch (error) {
+        console.error('Error deleting chapter:', error);
+        res.status(500).json({ error: 'Lỗi khi xóa chương' });
+    }
+});
+
+// API để cập nhật thông tin lesson (yêu cầu quyền admin)
+app.put('/api/lessons/:id', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+        const { title, lesson_order } = req.body;
+
+        if (!title) {
+            return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+        }
+
+        const [result] = await db.execute(
+            'UPDATE lessons SET title = ?, lesson_order = ? WHERE id = ?', 
+            [title, lesson_order, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không tìm thấy bài học' });
+        }
+
+        res.json({
+            message: 'Cập nhật bài học thành công',
+            id: parseInt(id)
+        });
+    } catch (error) {
+        console.error('Error updating lesson:', error);
+        res.status(500).json({ error: 'Lỗi khi cập nhật bài học' });
+    }
+});
+
+// API để thêm mới lesson (yêu cầu quyền admin)
+app.post('/api/lessons', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { chapter_id, title, lesson_order } = req.body;
+
+        if (!chapter_id || !title) {
+            return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+        }
+
+        const [result] = await db.execute(
+            'INSERT INTO lessons (chapter_id, title, lesson_order) VALUES (?, ?, ?)', 
+            [chapter_id, title, lesson_order || 1]
+        );
+
+        res.status(201).json({
+            message: 'Thêm bài học mới thành công',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('Error adding lesson:', error);
+        res.status(500).json({ error: 'Lỗi khi thêm bài học' });
+    }
+});
+
+// API để xóa lesson (yêu cầu quyền admin)
+app.delete('/api/lessons/:id', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+
+        const [result] = await db.execute('DELETE FROM lessons WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không tìm thấy bài học' });
+        }
+
+        res.json({
+            message: 'Xóa bài học thành công',
+            id: parseInt(id)
+        });
+    } catch (error) {
+        console.error('Error deleting lesson:', error);
+        res.status(500).json({ error: 'Lỗi khi xóa bài học' });
+    }
+});
+
+// API để cập nhật thông tin page (yêu cầu quyền admin)
+app.put('/api/pages/:id', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+        const { page_number, page_type, content } = req.body;
+
+        if (!page_type || !content) {
+            return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+        }
+
+        const [result] = await db.execute(
+            'UPDATE pages SET page_number = ?, page_type = ?, content = ? WHERE id = ?', 
+            [page_number, page_type, content, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không tìm thấy trang nội dung' });
+        }
+
+        res.json({
+            message: 'Cập nhật trang nội dung thành công',
+            id: parseInt(id)
+        });
+    } catch (error) {
+        console.error('Error updating page:', error);
+        res.status(500).json({ error: 'Lỗi khi cập nhật trang nội dung' });
+    }
+});
+
+// API để thêm mới page (yêu cầu quyền admin)
+app.post('/api/pages', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { lesson_id, page_number, page_type, content } = req.body;
+
+        if (!lesson_id || !page_type || !content) {
+            return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+        }
+
+        const [result] = await db.execute(
+            'INSERT INTO pages (lesson_id, page_number, page_type, content) VALUES (?, ?, ?, ?)', 
+            [lesson_id, page_number, page_type, content]
+        );
+
+        res.status(201).json({
+            message: 'Thêm trang nội dung mới thành công',
+            id: result.insertId
+        });
+    } catch (error) {
+        console.error('Error adding page:', error);
+        res.status(500).json({ error: 'Lỗi khi thêm trang nội dung' });
+    }
+});
+
+// API để xóa page (yêu cầu quyền admin)
+app.delete('/api/pages/:id', auth, async(req, res) => {
+    try {
+        // Kiểm tra quyền admin
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+
+        const [result] = await db.execute('DELETE FROM pages WHERE id = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không tìm thấy trang nội dung' });
+        }
+
+        res.json({
+            message: 'Xóa trang nội dung thành công',
+            id: parseInt(id)
+        });
+    } catch (error) {
+        console.error('Error deleting page:', error);
+        res.status(500).json({ error: 'Lỗi khi xóa trang nội dung' });
+    }
+});
+
 // API để tạo dữ liệu mẫu cho khóa học (chỉ sử dụng cho demo)
 app.post('/api/seed-courses', async(req, res) => {
     try {
@@ -602,16 +869,30 @@ app.get('/api/courses/:courseId/structure', async(req, res) => {
             'SELECT * FROM chapters WHERE course_id = ? ORDER BY chapter_order ASC', [courseId]
         );
 
-        // Lấy danh sách lessons cho mỗi chapter
+        // Lấy danh sách lessons và pages cho mỗi chapter
         const chaptersWithLessons = await Promise.all(
             chapters.map(async(chapter) => {
                 const [lessons] = await db.execute(
                     'SELECT * FROM lessons WHERE chapter_id = ? ORDER BY lesson_order ASC', [chapter.id]
                 );
+                
+                // Lấy pages cho mỗi lesson
+                const lessonsWithPages = await Promise.all(
+                    lessons.map(async(lesson) => {
+                        const [pages] = await db.execute(
+                            'SELECT * FROM pages WHERE lesson_id = ? ORDER BY page_number ASC', [lesson.id]
+                        );
+                        
+                        return {
+                            ...lesson,
+                            pages
+                        };
+                    })
+                );
 
                 return {
                     ...chapter,
-                    lessons
+                    lessons: lessonsWithPages
                 };
             })
         );

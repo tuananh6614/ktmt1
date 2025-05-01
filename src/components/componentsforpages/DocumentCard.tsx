@@ -2,7 +2,7 @@ import { FileText, Download, Eye, CheckCircle, X, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import BuyDocDialog from "./BuyDocDialog";
+import BuyDocDialog from "@/components/componentsforpages/BuyDocDialog";
 
 interface DocumentCardProps {
   id: string;

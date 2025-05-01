@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Book, Clock, CheckCircle, ChevronRight, ChevronDown, Users, Award, PlayCircle, FileText, Lock, Star } from "lucide-react";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ChatBox from "@/components/ChatBox";
+import NavBar from "@/components/componentsforpages/NavBar";
+import Footer from "@/components/componentsforpages/Footer";
+import ChatBox from "@/components/componentsforpages/ChatBox";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { API_BASE_URL } from "@/config/config";
-import QuestionBank from "@/components/QuestionBank";
+import QuestionBank from "@/components/componentsforpages/QuestionBank";
 
 // Định nghĩa interface cho dữ liệu
 interface Page {

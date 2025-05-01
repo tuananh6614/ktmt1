@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ChatBox from "@/components/ChatBox";
-import CourseCard from "@/components/CourseCard";
+import NavBar from "@/components/componentsforpages/NavBar";
+import Footer from "@/components/componentsforpages/Footer";
+import ChatBox from "@/components/componentsforpages/ChatBox";
+import CourseCard from "@/components/componentsforpages/CourseCard";
 import { Input } from "@/components/ui/input";
 
 // Định nghĩa interface cho dữ liệu khóa học từ API

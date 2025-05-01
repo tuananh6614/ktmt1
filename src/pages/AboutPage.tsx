@@ -1,6 +1,6 @@
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import ChatBox from "@/components/ChatBox";
+import NavBar from "@/components/componentsforpages/NavBar";
+import Footer from "@/components/componentsforpages/Footer";
+import ChatBox from "@/components/componentsforpages/ChatBox";
 import { Mail, Phone, MapPin, Facebook, Github, Award, BookOpen, Trophy, GraduationCap, CheckCircle, ArrowRight, Code, Cpu, Layers, Zap } from "lucide-react";
 import { motion, AnimatePresence, useInView, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
