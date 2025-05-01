@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const db = require('./config/database');
+const User = require('./models/user');
 require('dotenv').config();
 
 const authController = require('./controllers/authController');
@@ -9,6 +10,7 @@ const auth = require('./middleware/auth');
 const enrollmentController = require('./controllers/enrollmentController');
 const questionController = require('./controllers/questionController');
 const examController = require('./controllers/examController');
+const adminAuth = require('./middleware/adminAuth');
 
 // Thêm multer để xử lý upload file
 const multer = require('multer');
@@ -733,6 +735,133 @@ app.get('/api/chapters/:id', async(req, res) => {
     } catch (error) {
         console.error('Error fetching chapter:', error);
         res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+});
+
+// Admin routes
+app.post('/api/admin/login', authController.adminLogin);
+app.get('/api/admin/dashboard', adminAuth, async(req, res) => {
+    try {
+        const user = req.user;
+        res.json({
+            message: 'Welcome to admin dashboard',
+            user: {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Error in admin dashboard:', error);
+        res.status(500).json({ error: 'Lỗi khi truy cập admin dashboard' });
+    }
+});
+
+// API lấy danh sách người dùng
+app.get('/api/admin/users', adminAuth, async(req, res) => {
+    try {
+        const [users] = await db.execute(`
+            SELECT id, email, full_name, phone_number, school, status, role, created_at 
+            FROM users 
+            WHERE role != 'admin'
+            ORDER BY created_at DESC
+        `);
+        
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy danh sách người dùng' });
+    }
+});
+
+// API cập nhật trạng thái người dùng
+app.put('/api/admin/users/:id/status', adminAuth, async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        console.log('=== Updating User Status ===');
+        console.log('User ID:', id);
+        console.log('New status:', status);
+
+        if (!['active', 'inactive'].includes(status)) {
+            return res.status(400).json({ error: 'Trạng thái không hợp lệ' });
+        }
+
+        // Kiểm tra người dùng tồn tại
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+        }
+
+        // Cập nhật trạng thái
+        const [result] = await db.execute(
+            'UPDATE users SET status = ? WHERE id = ?',
+            [status, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không thể cập nhật trạng thái' });
+        }
+
+        console.log('Status updated successfully');
+        res.json({ 
+            message: 'Cập nhật trạng thái thành công',
+            user: {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name,
+                status: status
+            }
+        });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        res.status(500).json({ error: 'Lỗi khi cập nhật trạng thái người dùng' });
+    }
+});
+
+// API xóa tài khoản người dùng
+app.delete('/api/admin/users/:id', adminAuth, async(req, res) => {
+    try {
+        const { id } = req.params;
+
+        console.log('=== Deleting User ===');
+        console.log('User ID:', id);
+
+        // Kiểm tra người dùng tồn tại
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+        }
+
+        // Không cho phép xóa tài khoản admin
+        if (user.role === 'admin') {
+            return res.status(403).json({ error: 'Không thể xóa tài khoản admin' });
+        }
+
+        // Xóa người dùng
+        const [result] = await db.execute(
+            'DELETE FROM users WHERE id = ?',
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không thể xóa người dùng' });
+        }
+
+        console.log('User deleted successfully');
+        res.json({ 
+            message: 'Xóa tài khoản thành công',
+            user: {
+                id: user.id,
+                email: user.email,
+                full_name: user.full_name
+            }
+        });
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Lỗi khi xóa tài khoản người dùng' });
     }
 });
 

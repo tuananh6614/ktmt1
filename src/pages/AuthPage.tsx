@@ -647,7 +647,7 @@ const AuthPage = () => {
                               required
                             />
                             <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                              Tôi đ��ng ý với <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Điều khoản sử dụng</a> và <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Chính sách bảo mật</a>
+                              Tôi đồng ý với <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Điều khoản sử dụng</a> và <a href="#" className="text-dtktmt-purple-medium hover:text-dtktmt-purple-dark font-medium">Chính sách bảo mật</a>
                             </label>
                           </div>
                           

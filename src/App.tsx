@@ -18,6 +18,8 @@ import CourseContent from "@/pages/CourseContent";
 import QuestionBank from "./components/QuestionBank";
 import ExamPage from "./pages/ExamPage";
 import ExamResultPage from "./pages/ExamResultPage";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 // Tạo QueryClient mới
 const queryClient = new QueryClient();
 
@@ -43,6 +45,8 @@ const App = () => (
             <Route path="/thanh-toan" element={<PaymentPage />} />
             <Route path="/khoa-hoc/:courseId/noi-dung" element={<CourseContent />} />
             <Route path="/khoa-hoc/:courseId/cau-hoi" element={<QuestionBank />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
