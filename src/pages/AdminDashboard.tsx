@@ -1,6 +1,8 @@
 import { useState } from "react";
 import UserManagement from "@/components/admin/UserManagement";
 import CourseManagement from "@/components/admin/CourseManagement";
+import QuestionManagement from "@/components/admin/QuestionManagement";
+import ExamManagement from "@/components/admin/ExamManagement";
 
 interface AdminDashboardProps {
   activeTab?: string;
@@ -16,25 +18,9 @@ const AdminDashboard = ({ activeTab = 'users' }: AdminDashboardProps) => {
       case 'courses':
         return <CourseManagement />;
       case 'questions':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Quản lý câu hỏi</h2>
-            <div className="bg-white rounded-lg shadow p-6">
-              {/* Nội dung quản lý câu hỏi sẽ được thêm vào đây */}
-              <p>Danh sách câu hỏi sẽ hiển thị ở đây</p>
-            </div>
-          </div>
-        );
+        return <QuestionManagement />;
       case 'exams':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Quản lý bài thi</h2>
-            <div className="bg-white rounded-lg shadow p-6">
-              {/* Nội dung quản lý bài thi sẽ được thêm vào đây */}
-              <p>Danh sách bài thi sẽ hiển thị ở đây</p>
-            </div>
-          </div>
-        );
+        return <ExamManagement />;
       case 'documents':
         return (
           <div className="p-6">

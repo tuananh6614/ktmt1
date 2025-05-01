@@ -26,6 +26,11 @@ const questionController = {
     try {
       const { courseId } = req.params;
 
+      // Kiểm tra quyền admin
+      if (req.user && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+      }
+
       // Kiểm tra xem đã có câu hỏi cho khóa học này chưa
       const [existingQuestions] = await db.query(
         'SELECT q.* FROM questions q JOIN chapters c ON q.chapter_id = c.id WHERE c.course_id = ?',
@@ -95,6 +100,121 @@ const questionController = {
       res.json({ message: 'Đã thêm câu hỏi mẫu thành công' });
     } catch (error) {
       console.error('Lỗi khi thêm câu hỏi mẫu:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+
+  // Thêm câu hỏi mới
+  addQuestion: async (req, res) => {
+    try {
+      // Kiểm tra quyền admin
+      if (req.user && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+      }
+
+      const { chapter_id, question_text, option_a, option_b, option_c, option_d, correct_answer } = req.body;
+
+      if (!chapter_id || !question_text || !option_a || !option_b || !option_c || !option_d || !correct_answer) {
+        return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin câu hỏi' });
+      }
+
+      // Kiểm tra chapter tồn tại
+      const [chapters] = await db.query('SELECT * FROM chapters WHERE id = ?', [chapter_id]);
+      if (chapters.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy chương' });
+      }
+
+      // Thêm câu hỏi mới
+      const [result] = await db.query(
+        'INSERT INTO questions (chapter_id, question_text, option_a, option_b, option_c, option_d, correct_answer) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [chapter_id, question_text, option_a, option_b, option_c, option_d, correct_answer]
+      );
+
+      res.status(201).json({
+        message: 'Thêm câu hỏi thành công',
+        id: result.insertId,
+        chapter_id,
+        question_text,
+        option_a,
+        option_b,
+        option_c,
+        option_d,
+        correct_answer
+      });
+    } catch (error) {
+      console.error('Lỗi khi thêm câu hỏi mới:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+
+  // Cập nhật câu hỏi
+  updateQuestion: async (req, res) => {
+    try {
+      // Kiểm tra quyền admin
+      if (req.user && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+      }
+
+      const { id } = req.params;
+      const { question_text, option_a, option_b, option_c, option_d, correct_answer } = req.body;
+
+      if (!question_text || !option_a || !option_b || !option_c || !option_d || !correct_answer) {
+        return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin câu hỏi' });
+      }
+
+      // Kiểm tra câu hỏi tồn tại
+      const [questions] = await db.query('SELECT * FROM questions WHERE id = ?', [id]);
+      if (questions.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy câu hỏi' });
+      }
+
+      // Cập nhật câu hỏi
+      await db.query(
+        'UPDATE questions SET question_text = ?, option_a = ?, option_b = ?, option_c = ?, option_d = ?, correct_answer = ? WHERE id = ?',
+        [question_text, option_a, option_b, option_c, option_d, correct_answer, id]
+      );
+
+      res.json({
+        message: 'Cập nhật câu hỏi thành công',
+        id,
+        question_text,
+        option_a,
+        option_b,
+        option_c,
+        option_d,
+        correct_answer
+      });
+    } catch (error) {
+      console.error('Lỗi khi cập nhật câu hỏi:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+
+  // Xóa câu hỏi
+  deleteQuestion: async (req, res) => {
+    try {
+      // Kiểm tra quyền admin
+      if (req.user && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+      }
+
+      const { id } = req.params;
+
+      // Kiểm tra câu hỏi tồn tại
+      const [questions] = await db.query('SELECT * FROM questions WHERE id = ?', [id]);
+      if (questions.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy câu hỏi' });
+      }
+
+      // Xóa câu hỏi
+      await db.query('DELETE FROM questions WHERE id = ?', [id]);
+
+      res.json({
+        message: 'Xóa câu hỏi thành công',
+        id
+      });
+    } catch (error) {
+      console.error('Lỗi khi xóa câu hỏi:', error);
       res.status(500).json({ message: 'Lỗi server' });
     }
   }

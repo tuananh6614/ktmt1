@@ -1052,7 +1052,10 @@ app.get('/api/lessons/:lessonId', auth, async(req, res) => {
 
 // Questions routes
 app.get('/api/questions/:courseId', questionController.getQuestionsByCourse);
-app.post('/api/questions/:courseId/seed', questionController.seedQuestions);
+app.post('/api/questions/:courseId/seed', adminAuth, questionController.seedQuestions);
+app.post('/api/questions', adminAuth, questionController.addQuestion);
+app.put('/api/questions/:id', adminAuth, questionController.updateQuestion);
+app.delete('/api/questions/:id', adminAuth, questionController.deleteQuestion);
 
 // Exam routes
 app.get('/api/exams', auth, examController.getExams);
@@ -1061,6 +1064,13 @@ app.post('/api/user-exams', auth, examController.createUserExam);
 app.get('/api/user-exams/:id/questions', auth, examController.getUserExamQuestions);
 app.post('/api/user-exams/:id/submit', auth, examController.submitUserExam);
 app.get('/api/user-exam-results', auth, examController.getUserExamResults);
+
+// Admin exam routes
+app.get('/api/admin/exams', adminAuth, examController.getAdminExams);
+app.post('/api/admin/exams', adminAuth, examController.createExam);
+app.put('/api/admin/exams/:id', adminAuth, examController.updateExam);
+app.delete('/api/admin/exams/:id', adminAuth, examController.deleteExam);
+app.get('/api/admin/exam-results', adminAuth, examController.getAdminExamResults);
 
 // Add route to get information about chapters
 app.get('/api/chapters/:id', async(req, res) => {

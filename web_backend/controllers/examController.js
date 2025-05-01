@@ -364,3 +364,192 @@ exports.getUserExamResults = async(req, res) => {
         res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 };
+
+// ADMIN: Get all exams for admin
+exports.getAdminExams = async(req, res) => {
+    try {
+        // Check admin role 
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Không có quyền truy cập' });
+        }
+
+        const { course_id } = req.query;
+
+        let query = 'SELECT * FROM exams';
+        let params = [];
+
+        if (course_id) {
+            query += ' WHERE course_id = ?';
+            params.push(course_id);
+        }
+
+        query += ' ORDER BY created_at DESC';
+
+        const [exams] = await db.execute(query, params);
+
+        res.json(exams);
+    } catch (error) {
+        console.error('Error in getAdminExams:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+};
+
+// ADMIN: Create a new exam
+exports.createExam = async(req, res) => {
+    try {
+        // Check admin role
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { course_id, chapter_id, title, time_limit, total_questions } = req.body;
+
+        if (!course_id || !title || !time_limit || !total_questions) {
+            return res.status(400).json({ message: 'Thiếu thông tin bài thi' });
+        }
+
+        // Verify course exists
+        const [courses] = await db.execute('SELECT * FROM courses WHERE id = ?', [course_id]);
+        if (courses.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+        }
+
+        // If chapter_id is provided, verify chapter exists
+        if (chapter_id) {
+            const [chapters] = await db.execute('SELECT * FROM chapters WHERE id = ? AND course_id = ?', [chapter_id, course_id]);
+            if (chapters.length === 0) {
+                return res.status(404).json({ message: 'Không tìm thấy chương trong khóa học này' });
+            }
+        }
+
+        // Create exam
+        const [result] = await db.execute(
+            'INSERT INTO exams (course_id, chapter_id, title, time_limit, total_questions, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+            [course_id, chapter_id, title, time_limit, total_questions]
+        );
+
+        res.status(201).json({
+            id: result.insertId,
+            course_id,
+            chapter_id,
+            title,
+            time_limit,
+            total_questions,
+            message: 'Tạo bài thi thành công'
+        });
+    } catch (error) {
+        console.error('Error in createExam:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ', details: error.message });
+    }
+};
+
+// ADMIN: Update an exam
+exports.updateExam = async(req, res) => {
+    try {
+        // Check admin role
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+        const { course_id, chapter_id, title, time_limit, total_questions } = req.body;
+
+        if (!title || !time_limit || !total_questions) {
+            return res.status(400).json({ message: 'Thiếu thông tin bài thi' });
+        }
+
+        // Verify exam exists
+        const [exams] = await db.execute('SELECT * FROM exams WHERE id = ?', [id]);
+        if (exams.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy bài thi' });
+        }
+
+        // Update exam
+        await db.execute(
+            'UPDATE exams SET course_id = ?, chapter_id = ?, title = ?, time_limit = ?, total_questions = ?, updated_at = NOW() WHERE id = ?',
+            [course_id, chapter_id, title, time_limit, total_questions, id]
+        );
+
+        res.json({
+            id,
+            course_id,
+            chapter_id,
+            title,
+            time_limit,
+            total_questions,
+            message: 'Cập nhật bài thi thành công'
+        });
+    } catch (error) {
+        console.error('Error in updateExam:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ', details: error.message });
+    }
+};
+
+// ADMIN: Delete an exam
+exports.deleteExam = async(req, res) => {
+    try {
+        // Check admin role
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+        }
+
+        const { id } = req.params;
+
+        // Verify exam exists
+        const [exams] = await db.execute('SELECT * FROM exams WHERE id = ?', [id]);
+        if (exams.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy bài thi' });
+        }
+
+        // Delete related user_exam entries (this will cascade delete question_test entries)
+        await db.execute('DELETE FROM user_exam WHERE exam_id = ?', [id]);
+
+        // Delete exam
+        await db.execute('DELETE FROM exams WHERE id = ?', [id]);
+
+        res.json({
+            id,
+            message: 'Xóa bài thi thành công'
+        });
+    } catch (error) {
+        console.error('Error in deleteExam:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ', details: error.message });
+    }
+};
+
+// ADMIN: Get all exam results
+exports.getAdminExamResults = async(req, res) => {
+    try {
+        // Check admin role
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Không có quyền truy cập' });
+        }
+
+        const { course_id } = req.query;
+
+        let query = `
+        SELECT ue.*, e.title as exam_title, e.chapter_id, 
+               c.title as course_title, u.full_name as user_name, u.email as user_email
+        FROM user_exam ue
+        JOIN exams e ON ue.exam_id = e.id
+        JOIN courses c ON e.course_id = c.id
+        JOIN users u ON ue.user_id = u.id
+        `;
+
+        let params = [];
+
+        if (course_id) {
+            query += ' WHERE e.course_id = ?';
+            params.push(course_id);
+        }
+
+        query += ' ORDER BY ue.created_at DESC';
+
+        const [results] = await db.execute(query, params);
+
+        res.json(results);
+    } catch (error) {
+        console.error('Error in getAdminExamResults:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+};

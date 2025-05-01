@@ -40,7 +40,7 @@ const menuItems: MenuItem[] = [
   },
   {
     id: 'questions',
-    title: 'Quản lý câu hỏi',
+    title: 'Quản lý câu ngân hàng hỏi',
     icon: <Book className="h-5 w-5" />,
     path: '/admin/questions',
     description: 'Thêm, sửa, xóa và quản lý câu hỏi'
