@@ -1,4 +1,3 @@
-
 import { Activity, BookOpen, Clock, FileText, Award } from "lucide-react";
 import { Card } from "@/components/ui/card";
 

@@ -148,7 +148,6 @@ exports.createUserExam = async(req, res) => {
 
                 console.log(`Found ${courseQuestions.length} total questions for course ${courseId}`);
 
-                // Ghi log chi tiết về các câu hỏi tìm thấy
                 if (courseQuestions.length > 0) {
                     console.log("Question chapters distribution:");
 
@@ -168,7 +167,6 @@ exports.createUserExam = async(req, res) => {
                 allQuestions = courseQuestions;
 
                 if (courseQuestions.length === 0) {
-                    // Thử cách khác: lấy từng chương một
                     console.log("No questions found with direct query, trying alternative approach");
 
                     // Lấy tất cả chapter_id của khóa học
@@ -204,70 +202,66 @@ exports.createUserExam = async(req, res) => {
             }
         }
 
-        console.log(`Total available questions: ${allQuestions.length}`);
-
+        // Kiểm tra xem có đủ câu hỏi không
         if (allQuestions.length === 0) {
-            return res.status(400).json({
-                message: 'Không có câu hỏi nào cho bài kiểm tra này',
-                details: chapterId ?
-                    `Chương ${chapterId} không có câu hỏi nào` : `Khóa học ${courseId} không có câu hỏi nào`
-            });
+            return res.status(404).json({ message: 'Không tìm thấy câu hỏi nào phù hợp' });
         }
 
-        // Chọn ngẫu nhiên các câu hỏi (tối đa theo config hoặc tất cả nếu ít hơn)
-        const actualQuestionCount = Math.min(allQuestions.length, exam.total_questions);
-        console.log(`Will select ${actualQuestionCount} questions from ${allQuestions.length} available`);
-
-        // Shuffle và chọn câu hỏi
-        const shuffledQuestions = [...allQuestions]
-            .sort(() => 0.5 - Math.random())
-            .slice(0, actualQuestionCount);
-
-        console.log(`Actually selected ${shuffledQuestions.length} questions`);
-
-        if (shuffledQuestions.length === 0) {
-            return res.status(400).json({ message: 'Không thể chọn câu hỏi cho bài kiểm tra' });
+        if (allQuestions.length < exam.total_questions) {
+            console.log(`Warning: Not enough questions. Found ${allQuestions.length}, needed ${exam.total_questions}`);
         }
 
-        // Add selected questions to question_test one by one
-        let successfulInserts = 0;
-
-        for (const question of shuffledQuestions) {
-            try {
-                console.log(`Adding question ${question.id} to test ${userExamId}`);
-                await db.execute(
-                    'INSERT INTO question_test (question_id, user_exam_id, created_at) VALUES (?, ?, NOW())', [question.id, userExamId]
-                );
-                successfulInserts++;
-            } catch (insertErr) {
-                console.error(`Error inserting question ${question.id}:`, insertErr.message);
-                // Continue with next question
+        // Chọn ngẫu nhiên các câu hỏi cho bài kiểm tra
+        let selectedQuestions = [];
+        
+        if (allQuestions.length <= exam.total_questions) {
+            // Nếu không đủ câu hỏi, lấy tất cả
+            selectedQuestions = allQuestions;
+        } else {
+            // Lấy ngẫu nhiên số lượng câu hỏi cần thiết
+            // Trộn mảng câu hỏi
+            for (let i = allQuestions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
             }
+            
+            // Chọn số lượng cần thiết
+            selectedQuestions = allQuestions.slice(0, exam.total_questions);
         }
 
-        console.log(`Successfully added ${successfulInserts} out of ${shuffledQuestions.length} questions`);
-        console.log("=== CREATE USER EXAM COMPLETED ===\n");
+        console.log(`Selected ${selectedQuestions.length} questions for the exam`);
 
-        if (successfulInserts === 0) {
-            // If no questions were added, delete the user exam and return error
-            await db.execute('DELETE FROM user_exam WHERE id = ?', [userExamId]);
-            return res.status(500).json({
-                message: 'Lỗi khi thêm câu hỏi vào bài kiểm tra',
-                details: 'Không thể thêm bất kỳ câu hỏi nào'
+        // Thêm các câu hỏi đã chọn vào bảng question_test
+        for (const question of selectedQuestions) {
+            await db.execute(
+                'INSERT INTO question_test (user_exam_id, question_id) VALUES (?, ?)',
+                [userExamId, question.id]
+            );
+        }
+
+        // Phân phối câu hỏi từ nhiều chương (nếu là bài kiểm tra cuối khóa)
+        if (!chapterId) {
+            // Ghi log phân phối câu hỏi theo chương
+            const distribution = {};
+            selectedQuestions.forEach(q => {
+                if (!distribution[q.chapter_id]) {
+                    distribution[q.chapter_id] = 0;
+                }
+                distribution[q.chapter_id]++;
             });
+            console.log("Question distribution in final exam:", JSON.stringify(distribution));
         }
 
         res.status(201).json({
             id: userExamId,
             exam_id,
-            user_id: userId,
-            attempt_count: 1,
-            question_count: successfulInserts
+            questions_count: selectedQuestions.length,
+            message: 'Tạo bài kiểm tra thành công'
         });
     } catch (error) {
-        console.error('Error in createUserExam:', error);
+        console.error("Error in createUserExam:", error);
         res.status(500).json({
-            message: 'Lỗi máy chủ khi tạo bài kiểm tra',
+            message: 'Lỗi khi tạo bài kiểm tra',
             details: error.message
         });
     }
@@ -422,16 +416,17 @@ exports.createExam = async(req, res) => {
             }
         }
 
+        // Sửa lỗi: chapter_id có thể NULL nếu là bài thi cuối khóa
+        let query = 'INSERT INTO exams (course_id, chapter_id, title, time_limit, total_questions, created_at) VALUES (?, ?, ?, ?, ?, NOW())';
+        let params = [course_id, chapter_id ? chapter_id : null, title, time_limit, total_questions];
+        
         // Create exam
-        const [result] = await db.execute(
-            'INSERT INTO exams (course_id, chapter_id, title, time_limit, total_questions, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
-            [course_id, chapter_id, title, time_limit, total_questions]
-        );
+        const [result] = await db.execute(query, params);
 
         res.status(201).json({
             id: result.insertId,
             course_id,
-            chapter_id,
+            chapter_id: chapter_id ? chapter_id : null,
             title,
             time_limit,
             total_questions,

@@ -1357,24 +1357,54 @@ app.get('/api/documents/purchase/check/:document_id', auth, async(req, res) => {
         const { document_id } = req.params;
         const user_id = req.user.id;
         
+        console.log(`Kiểm tra mua tài liệu - User ID: ${user_id}, Document ID: ${document_id}`);
+        
         // Kiểm tra xem người dùng đã mua tài liệu này chưa từ bảng documents_user
         const [purchases] = await db.execute(
             'SELECT * FROM documents_user WHERE user_id = ? AND document_id = ?', 
             [user_id, document_id]
         );
         
+        const purchased = purchases.length > 0;
+        console.log(`Kết quả kiểm tra: ${purchased ? 'Đã mua' : 'Chưa mua'}`);
+        
         res.json({
-            purchased: purchases.length > 0,
+            purchased: purchased,
             document_id
         });
     } catch (error) {
         console.error('Lỗi khi kiểm tra tài liệu đã mua:', error);
-        res.status(500).json({ message: 'Lỗi server' });
+        res.status(500).json({ 
+            message: 'Lỗi server',
+            error: error.message
+        });
     }
 });
 
 // Cập nhật API lấy danh sách tài liệu đã mua
 app.get('/api/documents/purchased', auth, async(req, res) => {
+    try {
+        const user_id = req.user.id;
+        
+        // Lấy danh sách tài liệu đã mua từ bảng documents_user
+        const [purchases] = await db.execute(`
+            SELECT d.*, c.category_name, du.transaction_date as purchase_date
+            FROM documents_user du
+            JOIN documents d ON du.document_id = d.id
+            LEFT JOIN documents_categories c ON d.category_id = c.id
+            WHERE du.user_id = ?
+            ORDER BY du.transaction_date DESC
+        `, [user_id]);
+        
+        res.json(purchases);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách tài liệu đã mua:', error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// API để lấy danh sách tài liệu đã mua của người dùng
+app.get('/api/user/documents', auth, async(req, res) => {
     try {
         const user_id = req.user.id;
         

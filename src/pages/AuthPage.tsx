@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, User, Lock, Mail, Phone, School, UserPlus, Eye, EyeOff } from "lucide-react";
@@ -68,7 +67,15 @@ const AuthPage = () => {
       localStorage.setItem('user', JSON.stringify(data.user));
 
       toast.success("Đăng nhập thành công!");
-      navigate('/profile'); // Chuyển hướng đến trang profile thay vì dashboard
+      
+      // Kiểm tra nếu có đường dẫn redirect sau khi đăng nhập
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        localStorage.removeItem('redirectAfterLogin'); // Xóa đường dẫn redirect sau khi sử dụng
+        navigate(redirectPath);
+      } else {
+        navigate('/profile'); // Nếu không có redirect, chuyển hướng đến trang profile
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Đăng nhập thất bại');
     } finally {

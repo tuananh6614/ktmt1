@@ -4,8 +4,10 @@ import NavBar from "@/components/componentsforpages/NavBar";
 import Footer from "@/components/componentsforpages/Footer";
 import ChatBox from "@/components/componentsforpages/ChatBox";
 import ProfileHeader from "@/components/profile/ProfileHeader";
+import StatsSection from "@/components/profile/StatsSection";
+import TestResults from "@/components/profile/TestResults";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, FileText, Star } from "lucide-react";
+import { BookOpen, FileText, Star, Clock, Award } from "lucide-react";
 import { toast } from "sonner";
 import { API_BASE_URL } from "@/config/config";
 import { Button } from "@/components/ui/button";
@@ -51,12 +53,37 @@ interface EnrolledCourse {
   enrolled_date: string;
 }
 
+interface TestResult {
+  id: string;
+  title: string;
+  date: string;
+  score: number;
+  total: number;
+  passed: boolean;
+  course_title: string;
+  chapter_id: string | null;
+}
+
+interface PurchasedDocument {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  file_path: string;
+  category_name: string;
+  purchase_date: string;
+}
+
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
+  const [isLoadingTestResults, setIsLoadingTestResults] = useState(true);
+  const [purchasedDocuments, setPurchasedDocuments] = useState<PurchasedDocument[]>([]);
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
 
   const handleProfileUpdate = (updatedUser: any) => {
     if (profileUser) {
@@ -98,7 +125,7 @@ const ProfilePage = () => {
           email: userData.email,
           phone: userData.phone_number || '',
           school: userData.school || '',
-          image: userData.avatar_url ? `http://localhost:3000${userData.avatar_url}` : "/placeholder.svg",
+          image: userData.avatar_url ? `${API_BASE_URL}${userData.avatar_url}` : "/placeholder.svg",
           joined: new Date(userData.created_at || Date.now()).toLocaleDateString('vi-VN'),
           stats: {
             coursesCompleted: 0,
@@ -110,7 +137,7 @@ const ProfilePage = () => {
 
         localStorage.setItem('user', JSON.stringify({
           ...userData,
-          image: userData.avatar_url ? `http://localhost:3000${userData.avatar_url}` : "/placeholder.svg"
+          image: userData.avatar_url ? `${API_BASE_URL}${userData.avatar_url}` : "/placeholder.svg"
         }));
 
         setIsLoading(false);
@@ -129,15 +156,28 @@ const ProfilePage = () => {
     fetchUserProfile();
   }, [navigate]);
 
+  // Fetch các khóa học đã đăng ký
   useEffect(() => {
+    let isMounted = true;
+    let isRequesting = false;
+    
     const fetchEnrolledCourses = async () => {
+      // Nếu đang gọi API hoặc đã có dữ liệu, không gọi lại
+      if (isRequesting || (enrolledCourses.length > 0 && !isLoadingCourses)) return;
+      
       const token = localStorage.getItem('token');
       if (!token) return;
 
       try {
+        isRequesting = true;
+        setIsLoadingCourses(true);
+        
+        console.log('Đang tải danh sách khóa học đã đăng ký');
+        
         const response = await fetch(`${API_BASE_URL}/api/enrollments`, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store'
           }
         });
 
@@ -146,17 +186,222 @@ const ProfilePage = () => {
         }
 
         const courses = await response.json();
-        setEnrolledCourses(courses);
+        console.log(`Đã nhận được ${courses.length} khóa học đã đăng ký`);
+        
+        if (isMounted) {
+          setEnrolledCourses(courses);
+        }
       } catch (error) {
         console.error('Error fetching enrolled courses:', error);
-        toast.error("Có lỗi xảy ra khi tải danh sách khóa học");
+        if (isMounted) {
+          toast.error("Có lỗi xảy ra khi tải danh sách khóa học");
+        }
       } finally {
-        setIsLoadingCourses(false);
+        isRequesting = false;
+        if (isMounted) {
+          setIsLoadingCourses(false);
+        }
       }
     };
 
-    fetchEnrolledCourses();
-  }, []);
+    if (!isLoading) {
+      fetchEnrolledCourses();
+    }
+    
+    // Cleanup function để tránh memory leak
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoading, enrolledCourses.length, isLoadingCourses]);
+
+  // Fetch các tài liệu đã mua
+  useEffect(() => {
+    let isMounted = true;
+    let isRequesting = false;
+    
+    const fetchPurchasedDocuments = async () => {
+      // Nếu đang gọi API hoặc đã có dữ liệu, không gọi lại
+      if (isRequesting || (purchasedDocuments.length > 0 && !isLoadingDocuments)) return;
+      
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        isRequesting = true;
+        setIsLoadingDocuments(true);
+        
+        console.log('Đang tải danh sách tài liệu đã mua');
+        
+        const response = await fetch(`${API_BASE_URL}/api/user/documents`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch purchased documents');
+        }
+
+        const documents = await response.json();
+        console.log(`Đã nhận được ${documents.length} tài liệu đã mua`);
+        
+        if (isMounted) {
+          setPurchasedDocuments(documents);
+
+          // Cập nhật số tài liệu đã mua trong stats
+          if (profileUser) {
+            setProfileUser({
+              ...profileUser,
+              stats: {
+                ...profileUser.stats,
+                documentsPurchased: documents.length
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching purchased documents:', error);
+        if (isMounted) {
+          toast.error("Có lỗi xảy ra khi tải danh sách tài liệu đã mua");
+        }
+      } finally {
+        isRequesting = false;
+        if (isMounted) {
+          setIsLoadingDocuments(false);
+        }
+      }
+    };
+
+    if (!isLoading && profileUser) {
+      fetchPurchasedDocuments();
+    }
+    
+    // Cleanup function để tránh memory leak
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoading, profileUser, purchasedDocuments.length, isLoadingDocuments]);
+
+  // Fetch kết quả các bài kiểm tra
+  useEffect(() => {
+    let isMounted = true;
+    let isRequesting = false;
+    
+    const fetchTestResults = async () => {
+      // Nếu đang gọi API hoặc đã có dữ liệu, không gọi lại
+      if (isRequesting || (testResults.length > 0 && !isLoadingTestResults)) return;
+      
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        isRequesting = true;
+        setIsLoadingTestResults(true);
+        
+        // Thêm log để debug
+        console.log('Đang tải kết quả kiểm tra cho người dùng');
+        
+        const response = await fetch(`${API_BASE_URL}/api/user-exam-results`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch test results');
+        }
+
+        const examResults = await response.json();
+        
+        // Kiểm tra kết quả nhận được
+        console.log(`Đã nhận được ${examResults.length} kết quả kiểm tra`);
+        
+        // Chỉ tiếp tục xử lý nếu component vẫn được mount
+        if (isMounted) {
+          // Chuyển đổi sang định dạng TestResult
+          const formattedResults = examResults.map((result: any) => ({
+            id: result.id.toString(),
+            title: result.exam_title,
+            date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
+            score: result.score || 0,
+            total: 100, // Thường tính theo thang điểm 100
+            passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
+            course_title: result.course_title,
+            chapter_id: result.chapter_id
+          }));
+
+          setTestResults(formattedResults);
+
+          // Tính số liệu thống kê
+          calculateStats(formattedResults, examResults);
+        }
+      } catch (error) {
+        console.error('Error fetching test results:', error);
+        if (isMounted) {
+          toast.error("Có lỗi xảy ra khi tải kết quả kiểm tra");
+        }
+      } finally {
+        isRequesting = false;
+        if (isMounted) {
+          setIsLoadingTestResults(false);
+        }
+      }
+    };
+    
+    // Hàm tính toán thống kê từ kết quả
+    const calculateStats = (formattedResults: TestResult[], examResults: any[]) => {
+      if (!profileUser) return;
+      
+      if (formattedResults.length > 0) {
+        const totalScore = formattedResults.reduce((sum, result) => sum + result.score, 0);
+        const avgScore = Math.round(totalScore / formattedResults.length);
+        
+        // Tính số khóa học đã hoàn thành dựa trên bài kiểm tra cuối khóa
+        const completedCourses = new Set();
+        const inProgressCourses = new Set();
+        
+        // Phân loại khóa học đã hoàn thành và đang học
+        examResults.forEach((result: any) => {
+          if (result.chapter_id === null && result.score >= 70) {
+            // Bài kiểm tra cuối khóa và đạt điểm pass
+            completedCourses.add(result.course_id);
+          } else if (result.chapter_id !== null) {
+            // Bài kiểm tra chương
+            inProgressCourses.add(result.course_id);
+          }
+        });
+        
+        // Loại bỏ các khóa học đã hoàn thành ra khỏi danh sách đang học
+        inProgressCourses.forEach(courseId => {
+          if (completedCourses.has(courseId)) {
+            inProgressCourses.delete(courseId);
+          }
+        });
+
+        setProfileUser({
+          ...profileUser,
+          stats: {
+            ...profileUser.stats,
+            coursesCompleted: completedCourses.size,
+            coursesInProgress: inProgressCourses.size,
+            avgScore: avgScore,
+            documentsPurchased: profileUser.stats.documentsPurchased
+          }
+        });
+      }
+    };
+
+    if (!isLoading && profileUser) {
+      fetchTestResults();
+    }
+    
+    // Cleanup function để tránh memory leak và update state khi component unmount
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoading, profileUser, testResults.length, isLoadingTestResults]);
 
   if (isLoading) {
     return (
@@ -204,9 +449,43 @@ const ProfilePage = () => {
             onProfileUpdate={handleProfileUpdate}
           />
 
-          <div className="mt-12">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-dtktmt-blue-light/30 flex items-center justify-center mb-2">
+                <BookOpen size={20} className="text-dtktmt-blue-dark" />
+              </div>
+              <p className="text-2xl font-semibold text-dtktmt-blue-dark">{profileUser.stats.coursesCompleted}</p>
+              <p className="text-xs text-gray-500">Khóa học đã hoàn thành</p>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-dtktmt-pink-light/30 flex items-center justify-center mb-2">
+                <Clock size={20} className="text-dtktmt-pink-dark" />
+              </div>
+              <p className="text-2xl font-semibold text-dtktmt-pink-dark">{profileUser.stats.coursesInProgress}</p>
+              <p className="text-xs text-gray-500">Khóa học đang học</p>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-dtktmt-purple-light/30 flex items-center justify-center mb-2">
+                <FileText size={20} className="text-dtktmt-purple-medium" />
+              </div>
+              <p className="text-2xl font-semibold text-dtktmt-purple-medium">{profileUser.stats.documentsPurchased}</p>
+              <p className="text-xs text-gray-500">Tài liệu đã mua</p>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 hover:shadow-md transition-shadow flex flex-col items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-dtktmt-yellow/30 flex items-center justify-center mb-2">
+                <Award size={20} className="text-dtktmt-blue-dark" />
+              </div>
+              <p className="text-2xl font-semibold text-dtktmt-blue-dark">{profileUser.stats.avgScore}</p>
+              <p className="text-xs text-gray-500">Điểm trung bình</p>
+            </div>
+          </div>
+
+          <div className="mt-8">
             <Tabs defaultValue="courses" className="w-full">
-              <TabsList className="w-full grid grid-cols-3 mb-8">
+              <TabsList className="w-full grid grid-cols-3 mb-6">
                 <TabsTrigger value="courses" className="flex items-center gap-2">
                   <BookOpen size={16} />
                   <span>Khóa học của tôi</span>
@@ -238,7 +517,7 @@ const ProfilePage = () => {
                     {enrolledCourses.map((course) => (
                       <div key={course.id} className="bg-white rounded-lg shadow-md overflow-hidden">
                         <img 
-                          src={course.thumbnail} 
+                          src={course.thumbnail.startsWith('/') ? `${API_BASE_URL}${course.thumbnail}` : course.thumbnail} 
                           alt={course.title}
                           className="w-full h-48 object-cover"
                         />
@@ -273,19 +552,63 @@ const ProfilePage = () => {
               </TabsContent>
               
               <TabsContent value="documents">
-                <div className="p-8 text-center bg-gray-50 rounded-lg">
-                  <FileText size={48} className="text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có tài liệu nào</h3>
-                  <p className="text-gray-500 mb-4">Bạn chưa mua tài liệu nào</p>
-                </div>
+                {isLoadingDocuments ? (
+                  <div className="p-8 text-center">
+                    <div className="w-12 h-12 border-4 border-dtktmt-blue-medium border-t-transparent rounded-full mx-auto mb-4 animate-spin"></div>
+                    <p className="text-dtktmt-blue-dark">Đang tải danh sách tài liệu...</p>
+                  </div>
+                ) : purchasedDocuments.length === 0 ? (
+                  <div className="p-8 text-center bg-gray-50 rounded-lg">
+                    <FileText size={48} className="text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có tài liệu nào</h3>
+                    <p className="text-gray-500 mb-4">Bạn chưa mua tài liệu nào</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {purchasedDocuments.map((document) => (
+                      <div key={document.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div className="p-6">
+                          <div className="bg-dtktmt-blue-light/20 p-4 rounded-lg mb-4 flex justify-center">
+                            <FileText size={48} className="text-dtktmt-blue-medium" />
+                          </div>
+                          <h3 className="text-lg font-semibold mb-2">{document.title}</h3>
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{document.description}</p>
+                          <div className="flex items-center text-sm text-gray-500 mb-4">
+                            <span className="bg-dtktmt-blue-light/30 text-dtktmt-blue-dark px-2 py-1 rounded">
+                              {document.category_name}
+                            </span>
+                            <span className="ml-2">
+                              Mua ngày: {new Date(document.purchase_date).toLocaleDateString('vi-VN')}
+                            </span>
+                          </div>
+                          <Button 
+                            onClick={() => window.open(`${API_BASE_URL}/api/documents/download/${document.id}`, '_blank')}
+                            className="w-full bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark text-white"
+                          >
+                            Tải xuống
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="tests">
-                <div className="p-8 text-center bg-gray-50 rounded-lg">
-                  <Star size={48} className="text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có kết quả kiểm tra</h3>
-                  <p className="text-gray-500 mb-4">Bạn chưa thực hiện bài kiểm tra nào</p>
-                </div>
+                {isLoadingTestResults ? (
+                  <div className="p-8 text-center">
+                    <div className="w-12 h-12 border-4 border-dtktmt-blue-medium border-t-transparent rounded-full mx-auto mb-4 animate-spin"></div>
+                    <p className="text-dtktmt-blue-dark">Đang tải kết quả kiểm tra...</p>
+                  </div>
+                ) : testResults.length === 0 ? (
+                  <div className="p-8 text-center bg-gray-50 rounded-lg">
+                    <Star size={48} className="text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-medium text-gray-600 mb-2">Chưa có kết quả kiểm tra</h3>
+                    <p className="text-gray-500 mb-4">Bạn chưa thực hiện bài kiểm tra nào</p>
+                  </div>
+                ) : (
+                  <TestResults results={testResults} />
+                )}
               </TabsContent>
             </Tabs>
           </div>

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { API_BASE_URL } from "@/config/config";
-import { Clock, BookOpen } from "lucide-react";
+import { Clock, BookOpen, AlertTriangle, Lock } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Question {
   id: number;
@@ -20,36 +21,124 @@ interface Question {
 const QuestionBank = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<boolean>(false);
 
-  const { data: questions, isLoading } = useQuery<Question[]>({
+  // Log để debug
+  useEffect(() => {
+    console.log('QuestionBank mounted, courseId:', courseId);
+    console.log('API URL:', `${API_BASE_URL}/api/questions/${courseId}`);
+  }, [courseId]);
+
+  const { data: questions, isLoading, isError } = useQuery<Question[]>({
     queryKey: ["questions", courseId],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/questions/${courseId}`);
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+      try {
+        console.log('Fetching questions for course ID:', courseId);
+        
+        // Lấy token xác thực từ localStorage
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setAuthError(true);
+          throw new Error('Vui lòng đăng nhập để xem ngân hàng câu hỏi');
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/api/questions/${courseId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (response.status === 401 || response.status === 403) {
+          setAuthError(true);
+          throw new Error('Vui lòng đăng nhập để xem ngân hàng câu hỏi');
+        }
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`${response.status}: ${errorText || "Network response was not ok"}`);
+        }
+        
+        const data = await response.json();
+        console.log(`Fetched ${data?.length || 0} questions`);
+        return data;
+      } catch (error) {
+        console.error('Error fetching questions:', error);
+        setError(error instanceof Error ? error.message : 'Đã xảy ra lỗi khi tải câu hỏi');
+        throw error;
       }
-      return response.json();
     },
+    retry: 1,
   });
 
   const handleStartExam = () => {
     // Chuyển đến trang thi với ID khóa học
     navigate(`/khoa-hoc/${courseId}/thi`);
   };
+  
+  const handleLogin = () => {
+    // Lưu đường dẫn hiện tại để quay lại sau khi đăng nhập
+    const currentPath = window.location.pathname;
+    localStorage.setItem('redirectAfterLogin', currentPath);
+    navigate('/login');
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[200px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <p className="ml-3">Đang tải ngân hàng câu hỏi...</p>
+      </div>
+    );
+  }
+  
+  if (authError) {
+    return (
+      <div className="text-center py-8 bg-yellow-50 rounded-lg border border-yellow-200 p-6">
+        <div className="flex justify-center mb-4">
+          <Lock className="h-12 w-12 text-yellow-500" />
+        </div>
+        <h3 className="text-lg font-medium text-yellow-800">Vui lòng đăng nhập</h3>
+        <p className="text-yellow-600 mt-2">Bạn cần đăng nhập để xem ngân hàng câu hỏi</p>
+        <Button 
+          variant="default" 
+          className="mt-4 bg-yellow-500 hover:bg-yellow-600"
+          onClick={handleLogin}
+        >
+          Đăng nhập
+        </Button>
+      </div>
+    );
+  }
+
+  if (isError || error) {
+    return (
+      <div className="text-center py-8 bg-red-50 rounded-lg border border-red-200 p-6">
+        <div className="flex justify-center mb-4">
+          <AlertTriangle className="h-12 w-12 text-red-500" />
+        </div>
+        <h3 className="text-lg font-medium text-red-800">Không thể tải ngân hàng câu hỏi</h3>
+        <p className="text-red-600 mt-2">{error || "Vui lòng thử lại sau."}</p>
+        <Button 
+          variant="outline" 
+          className="mt-4"
+          onClick={() => window.location.reload()}
+        >
+          Thử lại
+        </Button>
       </div>
     );
   }
 
   if (!questions || questions.length === 0) {
     return (
-      <div className="text-center py-8">
+      <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-medium">Chưa có câu hỏi cho khóa học này</h3>
-        <p className="text-gray-500 mt-2">Vui lòng quay lại sau.</p>
+        <p className="text-gray-500 mt-2">Giáo viên đang cập nhật ngân hàng câu hỏi. Vui lòng quay lại sau.</p>
       </div>
     );
   }
@@ -75,7 +164,6 @@ const QuestionBank = () => {
 
       {/* Phần xem trước câu hỏi */}
       <div className="space-y-4">
-
         <div className="grid gap-4">
           {previewQuestions.map((question, index) => (
             <Card key={question.id} className="border border-gray-200">

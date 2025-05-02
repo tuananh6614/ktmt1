@@ -135,6 +135,7 @@ const ExamPage = () => {
       }
 
       console.log("Đang tạo bài kiểm tra cho exam_id:", examId);
+      console.log("Loại bài kiểm tra:", testType, "Course ID:", courseId, "Chapter ID:", chapterId);
 
       // Create a new user exam entry
       const createResponse = await fetch(`${API_BASE_URL}/api/user-exams`, {
@@ -167,6 +168,7 @@ const ExamPage = () => {
 
       console.log("Tạo bài kiểm tra thành công:", responseData);
       setUserExamId(responseData.id);
+      toast.success(`Đã tạo bài kiểm tra với ${responseData.questions_count} câu hỏi`);
       
       // After creating user exam, set initializing to false
       setIsInitializing(false);

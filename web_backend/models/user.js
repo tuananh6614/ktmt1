@@ -64,15 +64,24 @@ class User {
 
     static async findById(id) {
         try {
-            console.log('=== Finding User by ID ===');
-            console.log('ID:', id);
+            // Giảm log khi gọi hàm này thường xuyên (chỉ log trong chế độ debug)
+            const isDebug = process.env.DEBUG_MODE === 'true';
+            
+            if (isDebug) {
+                console.log('=== Finding User by ID ===');
+                console.log('ID:', id);
+            }
 
             const [rows] = await db.execute(
                 'SELECT * FROM users WHERE id = ?',
                 [id]
             );
-
-            console.log('Database response:', rows.length ? 'User found' : 'User not found');
+            
+            // Chỉ log nếu không tìm thấy user hoặc trong chế độ debug
+            if (rows.length === 0 || isDebug) {
+                console.log('Database response:', rows.length ? 'User found' : 'User not found');
+            }
+            
             return rows[0];
         } catch (error) {
             console.error('Error in User.findById:', error);

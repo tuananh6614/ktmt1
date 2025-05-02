@@ -47,15 +47,30 @@ const DocumentCard = ({
         const token = localStorage.getItem("token");
         if (!token) return; // Nếu không có token, người dùng chưa đăng nhập
         
-        const response = await fetch(`${API_BASE_URL}/api/documents/purchase/check/${id}`, {
+        // Thêm log để debug
+        console.log('Kiểm tra trạng thái mua tài liệu:', id);
+        
+        // Đảm bảo API URL được tạo đúng
+        const checkUrl = `${API_BASE_URL}/api/documents/purchase/check/${id}`;
+        console.log('Check URL:', checkUrl);
+        
+        const response = await fetch(checkUrl, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
         
+        // Log response để debug
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('Purchase check response:', data);
           setPurchased(data.purchased);
+        } else {
+          // Xử lý các lỗi response
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
         }
       } catch (error) {
         console.error("Lỗi khi kiểm tra trạng thái mua:", error);
@@ -120,16 +135,31 @@ const DocumentCard = ({
       
       // Sử dụng fetch API để tải xuống file
       try {
-        const response = await fetch(`${API_BASE_URL}/api/documents/download/${id}`, {
+        // Tạo URL với query parameter thay vì header để tránh lỗi CORS
+        const downloadUrl = `${API_BASE_URL}/api/documents/download/${id}`;
+        console.log('Download URL:', downloadUrl);
+        
+        const response = await fetch(downloadUrl, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         
+        // Log response để debug
+        console.log('Download response status:', response.status);
+        console.log('Download response headers:', [...response.headers.entries()]);
+        
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Lỗi khi tải xuống');
+          let errorMessage = 'Lỗi khi tải xuống';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            // Nếu không phải JSON response
+            errorMessage = await response.text() || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
         
         // Lấy tên file từ header Content-Disposition
