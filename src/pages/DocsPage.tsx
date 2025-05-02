@@ -86,6 +86,8 @@ const DocsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [purchasedDocuments, setPurchasedDocuments] = useState<Document[]>([]);
+  const [activeTab, setActiveTab] = useState<"all" | "purchased">("all");
   const [error, setError] = useState<string | null>(null);
 
   // Lấy danh sách tài liệu
@@ -118,7 +120,41 @@ const DocsPage = () => {
     fetchDocuments();
   }, [selectedCategory]);
 
-  const filteredDocuments = documents
+  // Lấy danh sách tài liệu đã mua
+  useEffect(() => {
+    const fetchPurchasedDocuments = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return; // Nếu không có token, người dùng chưa đăng nhập
+      
+      try {
+        setLoading(true);
+        
+        const response = await fetch(`${API_BASE_URL}/api/documents/purchased`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error("Không thể tải danh sách tài liệu đã mua");
+        }
+        
+        const data = await response.json();
+        setPurchasedDocuments(data);
+      } catch (err) {
+        console.error("Lỗi khi tải tài liệu đã mua:", err);
+        // Không hiển thị lỗi này cho người dùng
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (activeTab === "purchased") {
+      fetchPurchasedDocuments();
+    }
+  }, [activeTab]);
+
+  const filteredDocuments = (activeTab === "all" ? documents : purchasedDocuments)
     .filter((doc) => {
       const matchesSearch =
         doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -163,12 +199,44 @@ const DocsPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
+            className="flex justify-center mb-6"
           >
-            <DocumentCategories
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-            />
+            <div className="bg-white rounded-full shadow-md p-1 flex">
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`px-6 py-2 rounded-full transition-all ${
+                  activeTab === "all"
+                    ? "bg-dtktmt-blue-medium text-white shadow-sm"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                Tất cả tài liệu
+              </button>
+              <button
+                onClick={() => setActiveTab("purchased")}
+                className={`px-6 py-2 rounded-full transition-all ${
+                  activeTab === "purchased"
+                    ? "bg-dtktmt-blue-medium text-white shadow-sm"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                Tài liệu đã mua
+              </button>
+            </div>
           </motion.div>
+
+          {activeTab === "all" && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <DocumentCategories
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+              />
+            </motion.div>
+          )}
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -233,7 +301,8 @@ const DocsPage = () => {
           >
             {loading ? (
               <div className="col-span-full py-8 text-center">
-                <p className="text-gray-500">Đang tải dữ liệu...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-dtktmt-blue-medium mx-auto"></div>
+                <p className="mt-4 text-gray-500">Đang tải dữ liệu...</p>
               </div>
             ) : error ? (
               <div className="col-span-full py-8 text-center">
@@ -259,6 +328,7 @@ const DocsPage = () => {
                     fileType={getFileType(doc.file_path)}
                     preview={getPreviewUrl(doc.file_path)}
                     categoryName={doc.category_name || "Chưa phân loại"}
+                    isPurchased={activeTab === "purchased"}
                   />
                 </motion.div>
               ))
@@ -266,7 +336,19 @@ const DocsPage = () => {
               <div className="col-span-full py-8 text-center">
                 <div className="flex flex-col items-center gap-4">
                   <FileText size={48} className="text-gray-400" />
-                  <p className="text-gray-500">Không tìm thấy tài liệu phù hợp với tiêu chí tìm kiếm.</p>
+                  {activeTab === "purchased" ? (
+                    <div>
+                      <p className="text-gray-500 mb-2">Bạn chưa mua tài liệu nào.</p>
+                      <Button
+                        onClick={() => setActiveTab("all")}
+                        className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark"
+                      >
+                        Khám phá tài liệu
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">Không tìm thấy tài liệu phù hợp với tiêu chí tìm kiếm.</p>
+                  )}
                 </div>
               </div>
             )}

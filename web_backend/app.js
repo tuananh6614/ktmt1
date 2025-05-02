@@ -3,6 +3,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const db = require('./config/database');
 const User = require('./models/user');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const authController = require('./controllers/authController');
@@ -1278,6 +1279,381 @@ app.post('/api/courses', auth, async(req, res) => {
 });
 
 // API quản lý tài liệu (Admin)
+
+// Xóa API tạo bảng document_purchases và thay bằng API kiểm tra bảng documents_user
+app.post('/api/check-documents-user-table', async(req, res) => {
+    try {
+        // Kiểm tra bảng documents_user đã tồn tại
+        const [tables] = await db.execute(`
+            SELECT TABLE_NAME 
+            FROM information_schema.TABLES 
+            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'documents_user'
+        `, [process.env.DB_NAME || 'ktmt_db']);
+        
+        if (tables.length > 0) {
+            res.json({ message: 'Bảng documents_user đã tồn tại', exists: true });
+        } else {
+            res.json({ message: 'Bảng documents_user chưa tồn tại', exists: false });
+        }
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra bảng documents_user:', error);
+        res.status(500).json({ message: 'Lỗi khi kiểm tra bảng' });
+    }
+});
+
+// Cập nhật API mua tài liệu để sử dụng bảng documents_user
+app.post('/api/documents/purchase', auth, async(req, res) => {
+    try {
+        const { document_id } = req.body;
+        const user_id = req.user.id;
+        
+        if (!document_id) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp document_id' });
+        }
+        
+        // Kiểm tra tài liệu tồn tại
+        const [documents] = await db.execute('SELECT * FROM documents WHERE id = ?', [document_id]);
+        if (documents.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy tài liệu' });
+        }
+        
+        const document = documents[0];
+        
+        // Kiểm tra xem người dùng đã mua tài liệu này chưa
+        const [existingPurchases] = await db.execute(
+            'SELECT * FROM documents_user WHERE user_id = ? AND document_id = ?', 
+            [user_id, document_id]
+        );
+        
+        if (existingPurchases.length > 0) {
+            return res.json({ 
+                already_purchased: true,
+                message: 'Bạn đã mua tài liệu này rồi',
+                purchase_id: existingPurchases[0].id 
+            });
+        }
+        
+        // Ghi nhận giao dịch mua tài liệu vào bảng documents_user
+        const [result] = await db.execute(
+            'INSERT INTO documents_user (user_id, document_id, payment_method, details) VALUES (?, ?, ?, ?)',
+            [user_id, document_id, 'card', `{"price": ${document.price}, "status": "completed"}`]
+        );
+        
+        res.status(201).json({
+            message: 'Mua tài liệu thành công',
+            purchase_id: result.insertId,
+            document_id,
+            title: document.title
+        });
+    } catch (error) {
+        console.error('Lỗi khi mua tài liệu:', error);
+        res.status(500).json({ message: 'Lỗi server khi xử lý giao dịch' });
+    }
+});
+
+// Cập nhật API kiểm tra người dùng đã mua tài liệu chưa
+app.get('/api/documents/purchase/check/:document_id', auth, async(req, res) => {
+    try {
+        const { document_id } = req.params;
+        const user_id = req.user.id;
+        
+        // Kiểm tra xem người dùng đã mua tài liệu này chưa từ bảng documents_user
+        const [purchases] = await db.execute(
+            'SELECT * FROM documents_user WHERE user_id = ? AND document_id = ?', 
+            [user_id, document_id]
+        );
+        
+        res.json({
+            purchased: purchases.length > 0,
+            document_id
+        });
+    } catch (error) {
+        console.error('Lỗi khi kiểm tra tài liệu đã mua:', error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// Cập nhật API lấy danh sách tài liệu đã mua
+app.get('/api/documents/purchased', auth, async(req, res) => {
+    try {
+        const user_id = req.user.id;
+        
+        // Lấy danh sách tài liệu đã mua từ bảng documents_user
+        const [purchases] = await db.execute(`
+            SELECT d.*, c.category_name, du.transaction_date as purchase_date
+            FROM documents_user du
+            JOIN documents d ON du.document_id = d.id
+            LEFT JOIN documents_categories c ON d.category_id = c.id
+            WHERE du.user_id = ?
+            ORDER BY du.transaction_date DESC
+        `, [user_id]);
+        
+        res.json(purchases);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách tài liệu đã mua:', error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// Middleware để xác thực qua token query parameter
+const authByQuery = async (req, res, next) => {
+    try {
+        // Kiểm tra token
+        const token = req.query.token;
+        if (!token) {
+            return res.status(401).json({ message: 'Token không được cung cấp' });
+        }
+
+        console.log('Token từ query:', token);
+        
+        try {
+            // Đảm bảo jwt đã được import
+            if (typeof jwt === 'undefined') {
+                throw new Error('jwt module is not loaded properly');
+            }
+            
+            // Xác minh token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+            console.log('Decoded token payload:', decoded);
+            
+            // Lấy userId từ token (có thể là user_id hoặc userId tùy vào cách tạo token)
+            const userId = decoded.userId || decoded.user_id || decoded.id;
+            
+            if (!userId) {
+                console.error('Không tìm thấy userId trong token payload:', decoded);
+                return res.status(401).json({ message: 'Token không hợp lệ - không có userId' });
+            }
+            
+            // Kiểm tra người dùng
+            const [rows] = await db.execute('SELECT * FROM users WHERE id = ?', [userId]);
+            
+            if (!rows.length) {
+                return res.status(401).json({ message: 'Người dùng không tồn tại' });
+            }
+            
+            // Lưu thông tin người dùng vào request
+            req.user = rows[0];
+            next();
+        } catch (jwtError) {
+            console.error('Lỗi JWT:', jwtError);
+            return res.status(401).json({ message: 'Token không hợp lệ', error: jwtError.message });
+        }
+    } catch (error) {
+        console.error('Lỗi xác thực token trong query:', error);
+        return res.status(401).json({ message: 'Lỗi xác thực', error: error.message });
+    }
+};
+
+// Cập nhật API tải xuống tài liệu để hỗ trợ xác thực thông thường
+app.get('/api/documents/download/:document_id', auth, async(req, res) => {
+    try {
+        const { document_id } = req.params;
+        const user_id = req.user.id;
+        
+        console.log(`Đang xử lý yêu cầu tải xuống tài liệu ID: ${document_id} cho user ${user_id}`);
+        
+        // Kiểm tra xem người dùng đã mua tài liệu này chưa từ bảng documents_user
+        const [purchases] = await db.execute(
+            'SELECT * FROM documents_user WHERE user_id = ? AND document_id = ?', 
+            [user_id, document_id]
+        );
+        
+        if (purchases.length === 0) {
+            console.log(`Người dùng ${user_id} chưa mua tài liệu ${document_id}`);
+            return res.status(403).json({ message: 'Bạn chưa mua tài liệu này' });
+        }
+        
+        // Lấy thông tin tài liệu
+        const [documents] = await db.execute('SELECT * FROM documents WHERE id = ?', [document_id]);
+        
+        if (documents.length === 0) {
+            console.log(`Không tìm thấy tài liệu ID: ${document_id}`);
+            return res.status(404).json({ message: 'Không tìm thấy tài liệu' });
+        }
+        
+        const document = documents[0];
+        console.log(`Tìm thấy tài liệu: ${document.title}, đường dẫn: ${document.file_path}`);
+        
+        // Xử lý đường dẫn file
+        let filePath;
+        if (!document.file_path) {
+            console.error('Không có đường dẫn file cho tài liệu ID:', document_id);
+            return res.status(404).json({ message: 'Không có đường dẫn file cho tài liệu này' });
+        }
+        
+        // Loại bỏ / ở đầu nếu có
+        const cleanPath = document.file_path.replace(/^\/+/, '');
+        
+        if (path.isAbsolute(cleanPath)) {
+            // Đường dẫn tuyệt đối
+            filePath = cleanPath;
+        } else {
+            // Đường dẫn tương đối
+            filePath = path.join(__dirname, cleanPath);
+        }
+        
+        console.log(`Đường dẫn file đầy đủ: ${filePath}`);
+        
+        // Kiểm tra file tồn tại
+        try {
+            const fileExists = await fs.promises.access(filePath, fs.constants.R_OK)
+                .then(() => true)
+                .catch(() => false);
+            
+            if (!fileExists) {
+                console.error(`File không tồn tại: ${filePath}`);
+                return res.status(404).json({ message: 'File không tồn tại' });
+            }
+            
+            console.log(`File tồn tại và có thể đọc: ${filePath}`);
+        } catch (e) {
+            console.error(`Lỗi truy cập file: ${e.message}`);
+            return res.status(404).json({ message: 'File không tồn tại hoặc không thể truy cập' });
+        }
+        
+        // Lấy kích thước file để thiết lập header Content-Length
+        const stats = await fs.promises.stat(filePath);
+        
+        // Lấy tên file gốc
+        const originalFileName = path.basename(filePath);
+        const safeFileName = encodeURIComponent(originalFileName);
+        
+        // Xác định Content-Type dựa trên phần mở rộng của file
+        const fileExtension = path.extname(filePath).toLowerCase();
+        let contentType = 'application/octet-stream'; // Mặc định
+        
+        switch (fileExtension) {
+            case '.pdf':
+                contentType = 'application/pdf';
+                break;
+            case '.doc':
+                contentType = 'application/msword';
+                break;
+            case '.docx':
+                contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                break;
+            case '.xls':
+                contentType = 'application/vnd.ms-excel';
+                break;
+            case '.xlsx':
+                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                break;
+            case '.ppt':
+                contentType = 'application/vnd.ms-powerpoint';
+                break;
+            case '.pptx':
+                contentType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+                break;
+            case '.txt':
+                contentType = 'text/plain';
+                break;
+            case '.csv':
+                contentType = 'text/csv';
+                break;
+            // Thêm các định dạng khác nếu cần
+        }
+        
+        // Thiết lập headers cho việc tải xuống
+        res.setHeader('Content-Disposition', `attachment; filename="${safeFileName}"`);
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Length', stats.size);
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        
+        // Ghi log thông tin tải xuống
+        console.log(`User ${user_id} đang tải xuống tài liệu ${document_id}: ${filePath}`);
+        
+        // Sử dụng phương thức sendFile
+        res.sendFile(filePath, (err) => {
+            if (err) {
+                console.error('Lỗi khi gửi file:', err);
+                if (!res.headersSent) {
+                    res.status(500).json({ message: 'Lỗi khi tải xuống file' });
+                }
+            } else {
+                console.log(`Tải xuống hoàn tất cho user ${user_id}, tài liệu ${document_id}`);
+            }
+        });
+    } catch (error) {
+        console.error('Lỗi khi tải xuống tài liệu:', error);
+        res.status(500).json({ message: 'Lỗi server khi tải xuống tài liệu', error: error.message });
+    }
+});
+
+// API để chuyển đổi file docx sang html để xem trước
+app.get('/api/documents/preview/:document_id', async(req, res) => {
+    try {
+        const { document_id } = req.params;
+        
+        // Lấy thông tin tài liệu
+        const [documents] = await db.execute('SELECT * FROM documents WHERE id = ?', [document_id]);
+        
+        if (documents.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy tài liệu' });
+        }
+        
+        const document = documents[0];
+        const filePath = path.join(__dirname, document.file_path.replace(/^\//, ''));
+        
+        // Kiểm tra file tồn tại
+        try {
+            await fs.access(filePath);
+        } catch (e) {
+            return res.status(404).json({ message: 'File không tồn tại' });
+        }
+        
+        // Xử lý preview dựa vào loại file
+        const fileExtension = path.extname(filePath).toLowerCase();
+        
+        if (fileExtension === '.docx' || fileExtension === '.doc') {
+            const mammoth = require('mammoth');
+            const buffer = await fs.readFile(filePath);
+            
+            try {
+                const result = await mammoth.convertToHtml({ buffer });
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <title>Preview: ${document.title}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
+                            img { max-width: 100%; height: auto; }
+                            table { border-collapse: collapse; width: 100%; margin-bottom: 15px; }
+                            table, th, td { border: 1px solid #ddd; }
+                            th, td { padding: 8px; text-align: left; }
+                            h1, h2, h3, h4, h5, h6 { color: #333; }
+                            .preview-watermark { position: fixed; bottom: 10px; right: 10px; font-size: 12px; color: #999; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="preview-container">
+                            ${result.value}
+                        </div>
+                        <div class="preview-watermark">Xem trước - ${document.title}</div>
+                    </body>
+                    </html>
+                `;
+                
+                res.setHeader('Content-Type', 'text/html');
+                return res.send(htmlContent);
+            } catch (error) {
+                console.error('Lỗi khi chuyển đổi docx sang HTML:', error);
+                return res.status(500).json({ message: 'Không thể tạo bản xem trước cho file này' });
+            }
+        } else if (fileExtension === '.pdf') {
+            // Chuyển hướng đến file PDF gốc
+            return res.redirect(document.file_path);
+        } else {
+            return res.status(400).json({ message: 'Loại file không được hỗ trợ xem trước' });
+        }
+    } catch (error) {
+        console.error('Lỗi khi tạo bản xem trước tài liệu:', error);
+        res.status(500).json({ message: 'Lỗi server khi tạo bản xem trước' });
+    }
+});
 
 // Cấu hình multer cho upload tài liệu
 const documentStorage = multer.diskStorage({

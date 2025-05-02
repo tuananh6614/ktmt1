@@ -1,8 +1,9 @@
 import { FileText, Download, Eye, CheckCircle, X, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import BuyDocDialog from "@/components/componentsforpages/BuyDocDialog";
+import { API_BASE_URL } from "@/config/config";
 
 interface DocumentCardProps {
   id: string;
@@ -34,7 +35,36 @@ const DocumentCard = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isBuyDialogOpen, setBuyDialogOpen] = useState(false);
   const [purchased, setPurchased] = useState(isPurchased);
+  const [loading, setLoading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const downloadLinkRef = useRef<HTMLAnchorElement>(null);
+  
   useEffect(() => {
+    // Kiểm tra xem người dùng đã mua tài liệu chưa từ API
+    const checkPurchaseStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return; // Nếu không có token, người dùng chưa đăng nhập
+        
+        const response = await fetch(`${API_BASE_URL}/api/documents/purchase/check/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setPurchased(data.purchased);
+        }
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra trạng thái mua:", error);
+      }
+    };
+    
+    checkPurchaseStatus();
+    
+    // Fallback vào localStorage nếu API không khả dụng
     const purchasedDocs = JSON.parse(localStorage.getItem("purchasedDocs") || "[]");
     if (purchasedDocs.includes(id)) {
       setPurchased(true);
@@ -47,6 +77,14 @@ const DocumentCard = ({
   const handleBuy = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Kiểm tra đăng nhập
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Vui lòng đăng nhập để mua tài liệu!");
+      return;
+    }
+    
     setBuyDialogOpen(true);
   };
 
@@ -56,23 +94,117 @@ const DocumentCard = ({
     setIsPreviewOpen(true);
   };
 
-  const handleDownload = (e: React.MouseEvent) => {
+  const handleDownload = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (purchased) {
-      toast.success("Đang tải xuống tài liệu...");
-    } else {
+    
+    if (!purchased) {
       toast.error("Vui lòng mua tài liệu để tải xuống!");
+      return;
+    }
+    
+    setLoading(true);
+    setIsDownloading(true);
+    setDownloadProgress(0);
+    
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("Vui lòng đăng nhập để tải xuống tài liệu!");
+        setLoading(false);
+        setIsDownloading(false);
+        return;
+      }
+      
+      toast.success("Đang chuẩn bị tải xuống tài liệu...");
+      
+      // Sử dụng fetch API để tải xuống file
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/documents/download/${id}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Lỗi khi tải xuống');
+        }
+        
+        // Lấy tên file từ header Content-Disposition
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `${title}.${fileType}`;
+        
+        if (contentDisposition) {
+          const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+          if (matches && matches[1]) {
+            filename = matches[1].replace(/['"]/g, '');
+          }
+        }
+        
+        // Hiển thị tiến trình tải xuống
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 5;
+          if (progress >= 95) {
+            clearInterval(interval);
+          }
+          setDownloadProgress(progress);
+        }, 150);
+        
+        // Tạo blob và tạo URL để tải xuống
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        
+        // Tạo thẻ a tạm thời để tải xuống
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Dọn dẹp
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Hoàn thành tiến trình
+        clearInterval(interval);
+        setDownloadProgress(100);
+        
+        setTimeout(() => {
+          setIsDownloading(false);
+          setDownloadProgress(0);
+        }, 2000);
+        
+        toast.success(`Đã tải xuống "${filename}" thành công!`);
+      } catch (error) {
+        console.error('Lỗi khi tải xuống:', error);
+        toast.error(error instanceof Error ? error.message : 'Lỗi không xác định khi tải xuống');
+        setIsDownloading(false);
+        setDownloadProgress(0);
+      }
+    } catch (error) {
+      console.error('Lỗi khi tải xuống:', error);
+      toast.error("Có lỗi xảy ra khi tải xuống tài liệu!");
+      setIsDownloading(false);
+      setDownloadProgress(0);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getLimitedPreviewUrl = () => {
-    if (fileType === "pdf" && preview !== "#") {
-      return `${preview}#page=1&view=FitH`;
+  const getPreviewUrl = (docId: string, fileType: string): string => {
+    // Sử dụng API preview mới cho file docx
+    if (fileType === 'doc') {
+      return `${API_BASE_URL}/api/documents/preview/${docId}`;
     }
-    if (fileType === "ppt" || fileType === "pptx") {
+    
+    // Đối với PDF, sử dụng URL gốc
+    if (fileType === 'pdf' && preview !== "#") {
       return preview;
     }
+    
     return preview;
   };
 
@@ -116,6 +248,20 @@ const DocumentCard = ({
                 {purchased ? "Đã mua" : formatPrice(price)}
               </span>
             </div>
+            
+            {/* Thanh tiến độ tải xuống */}
+            {isDownloading && (
+              <div className="w-full h-2 bg-gray-200 rounded-full mb-2">
+                <div 
+                  className="h-full bg-dtktmt-blue-medium rounded-full transition-all duration-300"
+                  style={{ width: `${downloadProgress}%` }}
+                ></div>
+                <p className="text-xs text-gray-500 text-right mt-1">
+                  {downloadProgress < 100 ? `Đang tải: ${downloadProgress}%` : 'Hoàn tất!'}
+                </p>
+              </div>
+            )}
+            
             <div className="flex gap-2">
               <Button 
                 onClick={handlePreview} 
@@ -126,9 +272,13 @@ const DocumentCard = ({
                 <span>Xem trước</span>
               </Button>
               {purchased ? (
-                <Button onClick={handleDownload} className="flex items-center gap-1 flex-1 bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark">
+                <Button 
+                  onClick={handleDownload} 
+                  className="flex items-center gap-1 flex-1 bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark"
+                  disabled={loading || isDownloading}
+                >
                   <Download size={16} />
-                  <span>Tải xuống</span>
+                  <span>{loading || isDownloading ? "Đang tải..." : "Tải xuống"}</span>
                 </Button>
               ) : (
                 <Button onClick={handleBuy} className="flex items-center gap-1 flex-1 bg-dtktmt-pink-medium hover:bg-dtktmt-pink-dark">
@@ -154,15 +304,18 @@ const DocumentCard = ({
               </button>
             </div>
             <div className="p-4 max-h-[calc(90vh-4rem)] overflow-auto flex flex-col gap-4">
-              {((fileType === "pdf" || fileType === "ppt" || fileType === "pptx") && !purchased) ? (
+              {((fileType === "pdf" || fileType === "doc" || fileType === "ppt" || fileType === "pptx") && !purchased) ? (
                 <div className="relative w-full h-[70vh]">
                   <iframe 
-                    src={getLimitedPreviewUrl()} 
+                    src={getPreviewUrl(id, fileType)} 
                     title={`Xem trước ${title}`}
-                    className="w-full h-full border rounded-md pointer-events-none"
+                    className="w-full h-full border rounded-md"
+                    // Chỉ tắt tính năng pointer-events cho PDF, giữ nguyên cho DOCX để người dùng vẫn cuộn được
+                    style={{pointerEvents: fileType === 'pdf' ? 'none' : 'auto'}}
                   ></iframe>
-                  <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-10 text-center p-6 rounded-lg gap-2">
-                    <p className="text-dtktmt-pink-dark mb-4">Vui lòng mua để xem đầy đủ nội dung!</p>
+                  <div className="absolute inset-0 bg-white/80 flex flex-col items-center justify-center z-10 text-center p-6 rounded-lg gap-2" 
+                       style={{top: "70%", height: "30%"}}>
+                    <p className="text-dtktmt-pink-dark mb-2">Vui lòng mua để xem đầy đủ nội dung!</p>
                     <Button onClick={() => { setIsPreviewOpen(false); setBuyDialogOpen(true); }} className="bg-dtktmt-pink-medium hover:bg-dtktmt-pink-dark px-6">
                       Mua để xem đầy đủ
                     </Button>
@@ -170,7 +323,7 @@ const DocumentCard = ({
                 </div>
               ) : (
                 <iframe 
-                  src={preview} 
+                  src={getPreviewUrl(id, fileType)} 
                   title={`Xem trước ${title}`}
                   className="w-full h-[70vh] border rounded-md bg-white"
                 ></iframe>
@@ -179,6 +332,16 @@ const DocumentCard = ({
           </div>
         </div>
       )}
+
+      {/* Thẻ a ẩn để tải xuống */}
+      <a 
+        ref={downloadLinkRef} 
+        href="#" 
+        download 
+        className="hidden"
+        target="_blank"
+        rel="noopener noreferrer"
+      ></a>
 
       <BuyDocDialog 
         open={isBuyDialogOpen}
