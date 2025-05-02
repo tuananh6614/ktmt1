@@ -1277,6 +1277,209 @@ app.post('/api/courses', auth, async(req, res) => {
     }
 });
 
+// API quản lý tài liệu (Admin)
+
+// Cấu hình multer cho upload tài liệu
+const documentStorage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        // Đảm bảo thư mục tồn tại
+        const uploadDir = 'uploads/documents/';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function(req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
+        cb(null, 'doc-' + uniqueSuffix + '-' + sanitizedName);
+    }
+});
+
+const documentUpload = multer({
+    storage: documentStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // Giới hạn 10MB
+    },
+    fileFilter: function(req, file, cb) {
+        if (!file.originalname.match(/\.(pdf|doc|docx)$/)) {
+            return cb(new Error('Chỉ chấp nhận file PDF, DOC, DOCX'));
+        }
+        cb(null, true);
+    }
+});
+
+// Thêm tài liệu mới (Admin)
+app.post('/api/admin/documents', adminAuth, documentUpload.single('document_file'), async(req, res) => {
+    try {
+        const { title, description, category_id, price } = req.body;
+
+        if (!title || !description || !category_id || !price || !req.file) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ thông tin' });
+        }
+
+        const file_path = `/uploads/documents/${req.file.filename}`;
+
+        const [result] = await db.execute(
+            'INSERT INTO documents (title, description, category_id, price, file_path, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+            [title, description, category_id, price, file_path]
+        );
+
+        res.status(201).json({
+            id: result.insertId,
+            title,
+            description,
+            category_id,
+            price,
+            file_path,
+            message: 'Thêm tài liệu thành công'
+        });
+    } catch (error) {
+        console.error('Lỗi khi thêm tài liệu:', error);
+        res.status(500).json({ message: 'Lỗi server khi thêm tài liệu' });
+    }
+});
+
+// Cập nhật tài liệu (Admin) - không có file
+app.put('/api/admin/documents/:id', adminAuth, async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, category_id, price } = req.body;
+
+        if (!title || !description || !category_id || !price) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ thông tin' });
+        }
+
+        // Kiểm tra tài liệu tồn tại
+        const [documents] = await db.execute('SELECT * FROM documents WHERE id = ?', [id]);
+        if (documents.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy tài liệu' });
+        }
+
+        await db.execute(
+            'UPDATE documents SET title = ?, description = ?, category_id = ?, price = ?, updated_at = NOW() WHERE id = ?',
+            [title, description, category_id, price, id]
+        );
+
+        res.json({
+            id: parseInt(id),
+            title,
+            description,
+            category_id,
+            price,
+            message: 'Cập nhật tài liệu thành công'
+        });
+    } catch (error) {
+        console.error('Lỗi khi cập nhật tài liệu:', error);
+        res.status(500).json({ message: 'Lỗi server khi cập nhật tài liệu' });
+    }
+});
+
+// Cập nhật tài liệu với file mới (Admin)
+app.put('/api/admin/documents/:id/upload', adminAuth, documentUpload.single('document_file'), async(req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, category_id, price } = req.body;
+
+        if (!title || !description || !category_id || !price || !req.file) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ thông tin và file' });
+        }
+
+        // Kiểm tra tài liệu tồn tại
+        const [documents] = await db.execute('SELECT * FROM documents WHERE id = ?', [id]);
+        if (documents.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy tài liệu' });
+        }
+
+        const oldDocument = documents[0];
+        
+        // Xóa file cũ nếu tồn tại
+        try {
+            const oldFilePath = path.join(__dirname, oldDocument.file_path.replace(/^\//, ''));
+            await fs.access(oldFilePath);
+            await fs.unlink(oldFilePath);
+        } catch (fileError) {
+            console.log('File cũ không tồn tại hoặc không thể xóa:', fileError);
+        }
+
+        const file_path = `/uploads/documents/${req.file.filename}`;
+
+        await db.execute(
+            'UPDATE documents SET title = ?, description = ?, category_id = ?, price = ?, file_path = ?, updated_at = NOW() WHERE id = ?',
+            [title, description, category_id, price, file_path, id]
+        );
+
+        res.json({
+            id: parseInt(id),
+            title,
+            description,
+            category_id,
+            price,
+            file_path,
+            message: 'Cập nhật tài liệu thành công'
+        });
+    } catch (error) {
+        console.error('Lỗi khi cập nhật tài liệu:', error);
+        res.status(500).json({ message: 'Lỗi server khi cập nhật tài liệu' });
+    }
+});
+
+// Xóa tài liệu (Admin)
+app.delete('/api/admin/documents/:id', adminAuth, async(req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Kiểm tra tài liệu tồn tại
+        const [documents] = await db.execute('SELECT * FROM documents WHERE id = ?', [id]);
+        if (documents.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy tài liệu' });
+        }
+
+        const document = documents[0];
+        
+        // Xóa file tài liệu nếu tồn tại
+        try {
+            const filePath = path.join(__dirname, document.file_path.replace(/^\//, ''));
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+        } catch (fileError) {
+            console.log('File không tồn tại hoặc không thể xóa:', fileError);
+        }
+
+        await db.execute('DELETE FROM documents WHERE id = ?', [id]);
+
+        res.json({ message: 'Xóa tài liệu thành công' });
+    } catch (error) {
+        console.error('Lỗi khi xóa tài liệu:', error);
+        res.status(500).json({ message: 'Lỗi server khi xóa tài liệu' });
+    }
+});
+
+// Thêm danh mục tài liệu (Admin)
+app.post('/api/admin/document-categories', adminAuth, async(req, res) => {
+    try {
+        const { category_name } = req.body;
+
+        if (!category_name) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp tên danh mục' });
+        }
+
+        const [result] = await db.execute(
+            'INSERT INTO documents_categories (category_name) VALUES (?)',
+            [category_name]
+        );
+
+        res.status(201).json({
+            id: result.insertId,
+            category_name,
+            message: 'Thêm danh mục thành công'
+        });
+    } catch (error) {
+        console.error('Lỗi khi thêm danh mục:', error);
+        res.status(500).json({ message: 'Lỗi server khi thêm danh mục' });
+    }
+});
+
 // Error handling
 app.use((err, req, res, next) => {
     console.error('\n=== Error ===');
@@ -1293,3 +1496,5 @@ app.listen(PORT, () => {
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log('=====================\n');
 });
+
+module.exports = app;
