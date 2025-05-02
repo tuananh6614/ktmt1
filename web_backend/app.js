@@ -70,6 +70,36 @@ const thumbnailUpload = multer({
     }
 });
 
+// Cấu hình multer cho upload file đề thi
+const examFileStorage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        // Đảm bảo thư mục tồn tại
+        const uploadDir = 'uploads/exam_files/';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function(req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'exam-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const examFileUpload = multer({
+    storage: examFileStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // Giới hạn 10MB
+    },
+    fileFilter: function(req, file, cb) {
+        // Chỉ cho phép file Word và PDF
+        if (!file.originalname.match(/\.(doc|docx|pdf)$/)) {
+            return cb(new Error('Chỉ chấp nhận file Word và PDF'));
+        }
+        cb(null, true);
+    }
+});
+
 // Thêm middleware để phục vụ file tĩnh
 const app = express();
 app.use('/uploads', express.static('uploads'));
@@ -1050,12 +1080,15 @@ app.get('/api/lessons/:lessonId', auth, async(req, res) => {
     }
 });
 
-// Questions routes
-app.get('/api/questions/:courseId', questionController.getQuestionsByCourse);
-app.post('/api/questions/:courseId/seed', adminAuth, questionController.seedQuestions);
+// Routes cho câu hỏi
+app.get('/api/questions/:courseId', auth, questionController.getQuestionsByCourse);
 app.post('/api/questions', adminAuth, questionController.addQuestion);
 app.put('/api/questions/:id', adminAuth, questionController.updateQuestion);
 app.delete('/api/questions/:id', adminAuth, questionController.deleteQuestion);
+
+// Thêm routes mới cho API trích xuất câu hỏi từ file đề thi
+app.post('/api/questions/upload-exam', adminAuth, examFileUpload.single('examFile'), questionController.uploadExamFile);
+app.post('/api/questions/batch', adminAuth, questionController.createQuestionBatch);
 
 // Exam routes
 app.get('/api/exams', auth, examController.getExams);
