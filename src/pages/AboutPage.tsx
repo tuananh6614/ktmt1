@@ -11,8 +11,8 @@ const AboutPage = () => {
     {
       name: "Phan Thị Thanh Ngọc ",
       role: "Giáo viên hướng dẫn",
-      image: "/placeholder.svg",
-      bio: "Thạc sĩ khoa điện tử viễn thông trường Đại Học Điện Lực",
+      image: "/lovable-uploads/Cn.jpg",
+      bio: "Giảng viên khoa điện tử viễn thông trường Đại học Điện Lực. ",
       social: {
         email: "",
         Facebook: "https://www.facebook.com/pttngoc",
@@ -23,7 +23,7 @@ const AboutPage = () => {
       name: "Nguyễn Tuấn Anh",
       role: "Trưởng nhóm phát triển",
       image: "/placeholder.svg",
-      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại Học Điện Lực.",
+      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại học Điện Lực.",
       social: {
         email: "tuananh6614@gmail.com",
         Facebook: "https://www.facebook.com/boycantien/",
@@ -34,7 +34,7 @@ const AboutPage = () => {
       name: "Trần Đinh Dũng",
       role: "Phó nhóm phát triển",
       image: "/placeholder.svg",
-      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại Học Điện Lực.",
+      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại học Điện Lực.",
       social: {
         email: "https://www.facebook.com/inhdung.936915",
         Facebook: "https://www.facebook.com/nguyen.van.phuong.658431",
@@ -45,7 +45,7 @@ const AboutPage = () => {
       name: "Nguyễn Văn Phương",
       role: "Phó nhóm phát triển",
       image: "/placeholder.svg",
-      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại Học Điện Lực.",
+      bio: "Sinh viên chuyên ngành điện tử viên thông trường Đại học Điện Lực.",
       social: {
         email: "levanc@dtktmt1.edu.vn",
         Facebook: "https://www.facebook.com/nguyen.van.phuong.658431",
@@ -326,8 +326,8 @@ const AboutPage = () => {
                               >
                                 {/* Logo or image */}
                                 <motion.img
-                                  src="" 
-                                  alt="DT&KTMT1" 
+                                  src="/lovable-uploads/logo.png" 
+                                  alt="" 
                                   className="w-full h-full object-contain rounded-full"
                                   animate={{ 
                                     scale: [1, 1.05, 1],
@@ -466,7 +466,7 @@ const AboutPage = () => {
                   background: "linear-gradient(to bottom, white, #f9fafb)" 
                 }}
               >
-                <div className="w-16 h-16 bg-dtktmt-blue-light/20 rounded-full flex items-center justify-center mb-4 relative">
+                <div className="w-16 h-16 bg-dt-blue-light/20 rounded-full flex items-center justify-center mb-4 relative">
                   <BookOpen size={32} className="text-dtktmt-blue-medium" />
                   <div className="absolute inset-0 rounded-full bg-dtktmt-blue-light/10 animate-ping opacity-75"></div>
                 </div>
@@ -628,7 +628,7 @@ const AboutPage = () => {
                     ></motion.div>
                     
                     <img 
-                      src="/placeholder.svg" 
+                      src="/lovable-uploads/logo.png" 
                       alt="Sứ mệnh DT&KTMT1" 
                       className="relative z-10 w-full object-cover h-[400px]"
                     />
