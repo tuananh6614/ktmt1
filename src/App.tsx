@@ -28,8 +28,8 @@ import AdminLayout from "./components/admin/AdminLayout";
 // Tạo QueryClient mới
 const queryClient = new QueryClient();
 
-// Xác định loại ứng dụng
-const isAdminApp = process.env.VITE_APP_TYPE === 'admin';
+// Xác định loại ứng dụng - Sử dụng import.meta.env thay cho process.env
+const isAdminApp = import.meta.env.VITE_APP_TYPE === 'admin';
 
 // Wrapper cho routes để sử dụng PageTransition
 const AppRoutes = () => {
