@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "@/components/componentsforpages/NavBar";
@@ -257,17 +258,47 @@ const ProfilePage = () => {
       .finally(() => setIsLoading(false));
   }, [navigate]);
 
+  // Adapter function to transform userData for ProfileHeader
+  const getFormattedUserData = () => {
+    if (!userData) return null;
+    
+    return {
+      name: userData.name || '',
+      role: userData.role || 'Học viên',
+      email: userData.email || '',
+      phone: userData.phone || '',
+      school: '', // không có trong UserData
+      image: userData.avatar || '',
+      joined: new Date(userData.created_at).toLocaleDateString('vi-VN'),
+      stats: {
+        coursesCompleted: enrolledCourses.filter(course => course.progress === 100).length,
+        coursesInProgress: enrolledCourses.filter(course => course.progress < 100).length,
+        documentsPurchased: purchasedDocs.length,
+        avgScore: testResults.length > 0 
+          ? Math.round(testResults.reduce((sum, test) => sum + test.score, 0) / testResults.length) 
+          : 0
+      }
+    };
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavBar />
       <main className="flex-grow container mx-auto px-4 py-8">
-        <ProfileHeader user={userData} onEdit={handleEditProfile} />
+        <ProfileHeader 
+          user={getFormattedUserData()} 
+          onProfileUpdate={handleEditProfile} 
+        />
         
         <StatsSection 
-          totalCourses={enrolledCourses.length} 
-          completedCourses={enrolledCourses.filter(course => course.progress === 100).length}
-          documentsCount={purchasedDocs.length}
-          testsPassed={testResults.filter(test => test.passed).length}
+          stats={{
+            coursesCompleted: enrolledCourses.filter(course => course.progress === 100).length,
+            coursesInProgress: enrolledCourses.filter(course => course.progress < 100).length,
+            documentsPurchased: purchasedDocs.length,
+            avgScore: testResults.length > 0 
+              ? Math.round(testResults.reduce((sum, test) => sum + test.score, 0) / testResults.length)
+              : 0
+          }}
         />
         
         <div className="mt-8">
@@ -351,9 +382,9 @@ const ProfilePage = () => {
       <Footer />
       
       <LogoutConfirmDialog
-        isOpen={isLogoutOpen}
-        onClose={() => setLogoutOpen(false)}
-        onLogout={handleLogout}
+        open={isLogoutOpen}
+        onOpenChange={setLogoutOpen}
+        onConfirm={handleLogout}
       />
     </div>
   );
