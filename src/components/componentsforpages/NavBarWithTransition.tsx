@@ -29,35 +29,37 @@ const NavBarWithTransition = () => {
     };
   }, []);
 
-  // Animation variants
+  // Animation variants - cập nhật để mượt mà hơn
   const menuVariants = {
     hidden: { height: 0, opacity: 0 },
     visible: { 
       height: "auto", 
       opacity: 1,
       transition: { 
-        duration: 0.3,
-        staggerChildren: 0.05
+        duration: 0.25,
+        ease: "easeOut",
+        staggerChildren: 0.04
       }
     },
     exit: { 
       height: 0, 
       opacity: 0,
       transition: { 
-        duration: 0.3,
-        staggerChildren: 0.05,
+        duration: 0.2,
+        ease: "easeIn",
+        staggerChildren: 0.03,
         staggerDirection: -1
       }
     }
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 10, opacity: 0 },
     visible: { y: 0, opacity: 1 },
-    exit: { y: -20, opacity: 0 }
+    exit: { y: -8, opacity: 0 }
   };
 
-  const handleLinkClick = (path: string, transitionType: 'fade' | 'slideUp' | 'slideLeft' | 'scale') => {
+  const handleLinkClick = (path: string, transitionType: 'fade' | 'slideUp' | 'slideLeft' | 'scale' | 'none') => {
     // Close mobile menu if open
     setMobileMenuOpen(false);
     
@@ -110,7 +112,7 @@ const NavBarWithTransition = () => {
           <NavigationMenuItem>
             <NavigationMenuLink 
               className="nav-link px-4 py-2 text-gray-700 hover:text-dtktmt-blue-medium transition-colors"
-              onClick={() => handleLinkClick("/tai-lieu", "scale")}
+              onClick={() => handleLinkClick("/tai-lieu", "none")}
             >
               Tài liệu
             </NavigationMenuLink>
@@ -118,7 +120,7 @@ const NavBarWithTransition = () => {
           <NavigationMenuItem>
             <NavigationMenuLink 
               className="nav-link px-4 py-2 text-gray-700 hover:text-dtktmt-blue-medium transition-colors"
-              onClick={() => handleLinkClick("/gioi-thieu", "slideUp")}
+              onClick={() => handleLinkClick("/gioi-thieu", "fade")}
             >
               Giới thiệu
             </NavigationMenuLink>
@@ -153,7 +155,7 @@ const NavBarWithTransition = () => {
         </Button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - cập nhật animation để mượt mà hơn */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -183,7 +185,7 @@ const NavBarWithTransition = () => {
               <motion.div variants={itemVariants}>
                 <div 
                   className="py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"
-                  onClick={() => handleLinkClick("/tai-lieu", "scale")}
+                  onClick={() => handleLinkClick("/tai-lieu", "none")}
                 >
                   Tài liệu
                 </div>
@@ -191,7 +193,7 @@ const NavBarWithTransition = () => {
               <motion.div variants={itemVariants}>
                 <div 
                   className="py-2 px-4 text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"
-                  onClick={() => handleLinkClick("/gioi-thieu", "slideUp")}
+                  onClick={() => handleLinkClick("/gioi-thieu", "fade")}
                 >
                   Giới thiệu
                 </div>

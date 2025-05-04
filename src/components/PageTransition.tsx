@@ -8,6 +8,7 @@ interface PageTransitionProps {
   children: React.ReactNode;
 }
 
+// Cải thiện các hiệu ứng chuyển trang mượt mà và nhẹ nhàng hơn
 const transitionVariants = {
   fade: {
     initial: { opacity: 0 },
@@ -15,24 +16,29 @@ const transitionVariants = {
     exit: { opacity: 0 },
   },
   slideUp: {
-    initial: { opacity: 0, y: 20 },
+    initial: { opacity: 0, y: 15 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
+    exit: { opacity: 0, y: -10 },
   },
   slideLeft: {
-    initial: { opacity: 0, x: 20 },
+    initial: { opacity: 0, x: 15 },
     animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: -20 },
+    exit: { opacity: 0, x: -10 },
   },
   scale: {
-    initial: { opacity: 0, scale: 0.95 },
+    initial: { opacity: 0, scale: 0.98 },
     animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.95 },
+    exit: { opacity: 0, scale: 0.97 },
   },
   rotate: {
-    initial: { opacity: 0, rotate: 2 },
+    initial: { opacity: 0, rotate: 1 },
     animate: { opacity: 1, rotate: 0 },
-    exit: { opacity: 0, rotate: -2 },
+    exit: { opacity: 0, rotate: -1 },
+  },
+  none: {
+    initial: {},
+    animate: {},
+    exit: {},
   },
 };
 
@@ -56,7 +62,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     } else if (location.pathname.includes('/login') || location.pathname.includes('/register')) {
       return transitionVariants.scale;
     } else if (location.pathname.includes('/admin')) {
-      return transitionVariants.rotate;
+      return transitionVariants.fade;
     }
     
     // Use context-defined transition or default to fade
@@ -71,7 +77,12 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
         animate="animate"
         exit="exit"
         variants={getTransitionVariant()}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
+        transition={{ 
+          duration: 0.2, 
+          ease: "easeInOut", 
+          staggerChildren: 0.05,
+          delayChildren: 0.02
+        }}
         className="page-transition-container"
       >
         {children}

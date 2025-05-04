@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTransition } from '@/contexts/TransitionContext';
 
 interface TransitionOptions {
-  type?: 'fade' | 'slideUp' | 'slideLeft' | 'scale' | 'rotate';
+  type?: 'fade' | 'slideUp' | 'slideLeft' | 'scale' | 'rotate' | 'none';
   duration?: number;
 }
 
@@ -17,7 +17,7 @@ export const usePageTransition = () => {
     to: string, 
     options: TransitionOptions = {}
   ) => {
-    const { type = 'fade', duration = 300 } = options;
+    const { type = 'fade', duration = 200 } = options;
     
     // Set transition type
     setTransitionName(type);
@@ -35,7 +35,7 @@ export const usePageTransition = () => {
         document.body.classList.remove('page-transitioning');
         setIsTransitioning(false);
       }, duration);
-    }, 50);
+    }, 20); // Giảm thời gian chờ trước khi chuyển trang
   };
   
   // Monitor current route for analytics or other purposes
