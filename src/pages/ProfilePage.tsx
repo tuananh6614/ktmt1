@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "@/components/componentsforpages/NavBar";
@@ -53,7 +54,8 @@ interface EnrolledCourse {
   enrolled_date: string;
 }
 
-interface TestResult {
+// Đổi tên TestResult thành ProfileTestResult để không xung đột với TestResult từ TestResults.tsx
+interface ProfileTestResult {
   id: string;
   title: string;
   date: string;
@@ -61,7 +63,7 @@ interface TestResult {
   total: number;
   passed: boolean;
   course_title: string;
-  chapter_id: string | null;
+  chapter_id: number | null;
 }
 
 interface PurchasedDocument {
@@ -352,7 +354,7 @@ const ProfilePage = () => {
         
         // Chỉ tiếp tục xử lý nếu component vẫn được mount
         if (isMounted) {
-          // Chuyển đổi sang định dạng TestResult
+          // Chuyển đổi sang định dạng TestResult cho component TestResults
           const formattedResults = [
             ...chapterResults.map((result: any) => ({
               id: result.id.toString(),
@@ -362,7 +364,7 @@ const ProfilePage = () => {
               total: 100, // Thường tính theo thang điểm 100
               passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
               course_title: result.course_title,
-              chapter_id: result.chapter_id
+              chapter_id: result.chapter_id ? result.chapter_id : null
             })),
             ...finalResults.map((result: any) => ({
               id: result.id.toString(),
