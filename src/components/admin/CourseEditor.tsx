@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ChapterList from "./course-editor/ChapterList";
 import CourseHeader from "./course-editor/CourseHeader";
+import { API_URL } from '../../config/api';
 
 interface Course {
   id: number;
@@ -36,8 +37,6 @@ interface Page {
   page_type: string;
   content: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const CourseEditor = () => {
   const { courseId } = useParams<{ courseId: string }>();

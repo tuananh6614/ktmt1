@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, Video } from 'lucide-react';
 import PageEditor from './PageEditor';
+import { API_URL } from '../../../config/api';
 
 interface Page {
   id: number;
@@ -16,8 +17,6 @@ interface PageListProps {
   pages?: Page[];
   onDataChanged: () => void;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const PageList = ({ lessonId, pages: initialPages, onDataChanged }: PageListProps) => {
   const [pages, setPages] = useState<Page[]>(initialPages || []);

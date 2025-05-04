@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { API_URL } from '../../config/api';
 
 interface User {
   id: number;
@@ -11,8 +12,6 @@ interface User {
   role: string;
   created_at: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const UserManagement = () => {
   const [users, setUsers] = useState<User[]>([]);

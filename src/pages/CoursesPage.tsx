@@ -5,6 +5,7 @@ import Footer from "@/components/componentsforpages/Footer";
 import ChatBox from "@/components/componentsforpages/ChatBox";
 import CourseCard from "@/components/componentsforpages/CourseCard";
 import { Input } from "@/components/ui/input";
+import { API_URL } from '../config/api';
 
 // Định nghĩa interface cho dữ liệu khóa học từ API
 interface Course {
@@ -16,8 +17,6 @@ interface Course {
   created_at: string;
   updated_at: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const CoursesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");

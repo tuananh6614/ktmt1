@@ -44,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Clock, FileText, Users, CheckCircle2 } from "lucide-react";
+import { API_URL } from '../../config/api';
 
 interface Course {
   id: number;
@@ -90,8 +91,6 @@ interface UserExam {
   user_email?: string;
   user_name?: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const ExamManagement = () => {
   const queryClient = useQueryClient();

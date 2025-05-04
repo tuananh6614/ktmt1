@@ -16,6 +16,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { API_URL } from '../config/api';
 
 // Định nghĩa interface cho dữ liệu khóa học từ API
 interface Course {
@@ -27,8 +28,6 @@ interface Course {
   created_at: string;
   updated_at: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const Index = () => {
   const [popularCourses, setPopularCourses] = useState<Course[]>([]);

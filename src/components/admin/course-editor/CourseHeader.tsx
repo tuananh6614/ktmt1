@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { X, Upload, Edit } from 'lucide-react';
+import { API_URL } from '../../../config/api';
 
 interface Course {
   id: number;
@@ -14,8 +15,6 @@ interface CourseHeaderProps {
   course: Course;
   onCourseUpdated: () => void;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const CourseHeader = ({ course, onCourseUpdated }: CourseHeaderProps) => {
   const [isEditing, setIsEditing] = useState(false);

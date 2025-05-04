@@ -48,6 +48,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { API_URL } from '../../config/api';
 
 interface Document {
   id: number;
@@ -64,8 +65,6 @@ interface Category {
   id: number;
   category_name: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const DocumentManagement = () => {
   const [documents, setDocuments] = useState<Document[]>([]);

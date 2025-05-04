@@ -48,6 +48,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { API_URL } from '../../config/api';
 
 interface Course {
   id: number;
@@ -102,8 +103,6 @@ interface AIQuestionBatch {
   status: 'processing' | 'completed' | 'error';
   message?: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const QuestionManagement = () => {
   const queryClient = useQueryClient();

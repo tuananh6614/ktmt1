@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-
-const API_URL = 'http://localhost:3000/api';
+import { API_URL } from '../config/api';
 
 const AdminLogin = () => {
   const navigate = useNavigate();

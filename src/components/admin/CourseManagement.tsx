@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { X, Upload } from "lucide-react";
+import { API_URL } from '../../config/api';
 
 interface Course {
   id: number;
@@ -17,8 +18,6 @@ interface CourseFormData {
   description: string;
   status: string;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const CourseManagement = () => {
   const [courses, setCourses] = useState<Course[]>([]);

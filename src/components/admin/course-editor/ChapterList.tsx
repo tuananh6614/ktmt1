@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { ChevronDown, ChevronUp, Plus, Edit, Trash2 } from 'lucide-react';
 import LessonList from './LessonList';
+import { API_URL } from '../../../config/api';
 
 interface Chapter {
   id: number;
@@ -23,8 +24,6 @@ interface ChapterListProps {
   chapters: Chapter[];
   onDataChanged: () => void;
 }
-
-const API_URL = 'http://localhost:3000/api';
 
 const ChapterList = ({ courseId, chapters, onDataChanged }: ChapterListProps) => {
   const [expandedChapters, setExpandedChapters] = useState<number[]>([]);

@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import AdminDashboard from "@/pages/AdminDashboard";
 import CourseEditor from "@/components/admin/CourseEditor";
-
-const API_URL = 'http://localhost:3000/api';
+import { API_URL } from '../../config/api';
 
 interface AdminUser {
   id: number;

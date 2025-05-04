@@ -6,8 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-
-const API_URL = 'http://localhost:3000/api';
+import { API_URL } from '../config/api';
 
 interface LoginData {
   email: string;
