@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "@/components/componentsforpages/NavBar";
@@ -17,11 +16,14 @@ import {
   BookOpen,
   CheckCircle,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import LogoutConfirmDialog from "@/components/profile/LogoutConfirmDialog";
 import StatsSection from "@/components/profile/StatsSection";
 import TestResults from "@/components/profile/TestResults";
+import EnrolledCourses from "@/components/EnrolledCourses";
+import PurchasedDocuments from "@/components/profile/PurchasedDocuments";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 import { API_BASE_URL } from "@/config/config";
@@ -63,9 +65,15 @@ interface PurchasedDocument {
   updated_at: string;
   document_title: string;
   document_file: string;
+  price: number;
+  original_price: number;
+  category: string;
+  author: string;
+  pages: number;
+  file_size: string;
+  file_format: string;
 }
 
-// Đổi tên TestResult thành ProfileTestResult để không xung đột với TestResult từ TestResults.tsx
 interface ProfileTestResult {
   id: string;
   title: string;
@@ -75,6 +83,9 @@ interface ProfileTestResult {
   passed: boolean;
   course_title: string;
   chapter_id: number | null;
+  course_id?: number;
+  exam_id?: number;
+  incorrect_answers?: number;
 }
 
 interface ProfilePageProps {}
@@ -117,10 +128,13 @@ const ProfilePage = () => {
           return;
         }
 
-        console.log("Đang gọi API từ URL:", `${API_BASE_URL}/api/users/me`);
-        const response = await fetch(`${API_BASE_URL}/api/users/me`, {
+        console.log("Đang gọi API từ URL:", `${API_BASE_URL}/api/profile`);
+        const response = await fetch(`${API_BASE_URL}/api/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           },
         });
 
@@ -140,7 +154,20 @@ const ProfilePage = () => {
 
         const data = await response.json();
         console.log("User data received:", data);
-        setUserData(data);
+        // Chuyển đổi dữ liệu về định dạng UserData mới
+        setUserData({
+          id: data.id,
+          name: data.full_name,
+          email: data.email,
+          phone: data.phone_number || '',
+          address: data.school || '',
+          birthdate: '',
+          gender: '',
+          avatar: data.avatar_url ? `${API_BASE_URL}${data.avatar_url}` : "/placeholder.svg",
+          role: data.role || 'Học viên',
+          created_at: data.created_at || new Date().toISOString(),
+          updated_at: data.updated_at || new Date().toISOString()
+        });
       } catch (error) {
         console.error("Error fetching user data:", error);
         setError("Không thể tải thông tin người dùng. Vui lòng thử lại sau.");
@@ -159,10 +186,13 @@ const ProfilePage = () => {
           return;
         }
 
-        console.log("Đang gọi API khóa học từ URL:", `${API_BASE_URL}/api/users/enrolled-courses`);
-        const response = await fetch(`${API_BASE_URL}/api/users/enrolled-courses`, {
+        console.log("Đang gọi API khóa học từ URL:", `${API_BASE_URL}/api/enrollments`);
+        const response = await fetch(`${API_BASE_URL}/api/enrollments`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           },
         });
 
@@ -172,7 +202,22 @@ const ProfilePage = () => {
 
         const data = await response.json();
         console.log("Enrolled courses data:", data);
-        setEnrolledCourses(data);
+        
+        // Chuyển đổi dữ liệu về định dạng EnrolledCourse mới
+        const mappedCourses = data.map((course: any) => ({
+          id: course.id,
+          course_id: course.course_id,
+          user_id: course.user_id || 0,
+          start_date: course.enrolled_date || '',
+          end_date: '',
+          progress: course.progress_percent || 0,
+          created_at: course.enrolled_date || '',
+          updated_at: '',
+          course_title: course.title || '',
+          course_image: course.thumbnail.startsWith('/') ? `${API_BASE_URL}${course.thumbnail}` : course.thumbnail
+        }));
+        
+        setEnrolledCourses(mappedCourses);
       } catch (error) {
         console.error("Error fetching enrolled courses:", error);
         // Hiển thị error state nhưng không redirect
@@ -186,10 +231,13 @@ const ProfilePage = () => {
           return;
         }
 
-        console.log("Đang gọi API tài liệu từ URL:", `${API_BASE_URL}/api/users/purchased-documents`);
-        const response = await fetch(`${API_BASE_URL}/api/users/purchased-documents`, {
+        console.log("Đang gọi API tài liệu từ URL:", `${API_BASE_URL}/api/purchased-documents`);
+        const response = await fetch(`${API_BASE_URL}/api/purchased-documents`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           },
         });
 
@@ -199,7 +247,35 @@ const ProfilePage = () => {
 
         const data = await response.json();
         console.log("Purchased documents data:", data);
-        setPurchasedDocs(data);
+        
+        // Chuyển đổi dữ liệu về định dạng PurchasedDocument mới với thông tin bổ sung
+        const mappedDocs = data.map((doc: any) => {
+          // Tạo một đối tượng cơ bản
+          const baseDoc = {
+            id: doc.id,
+            user_id: doc.user_id || 0,
+            document_id: doc.id,
+            purchase_date: doc.purchase_date || new Date().toISOString(),
+            created_at: doc.created_at || '',
+            updated_at: doc.updated_at || '',
+            document_title: doc.title || '',
+            document_file: doc.file_path || ''
+          };
+          
+          // Thêm các thông tin bổ sung
+          return {
+            ...baseDoc,
+            price: doc.price || 75000, // Giá mặc định nếu không có
+            original_price: doc.original_price || 100000, // Giá gốc mặc định
+            category: doc.category_name || 'Tài liệu học tập',
+            author: doc.author || 'Giảng viên KTMT',
+            pages: doc.pages || Math.floor(Math.random() * 100) + 20, // Số trang ngẫu nhiên
+            file_size: doc.file_size || `${Math.floor(Math.random() * 10) + 1}MB`, // Kích thước ngẫu nhiên
+            file_format: doc.file_format || 'pdf' // Định dạng mặc định
+          };
+        });
+        
+        setPurchasedDocs(mappedDocs);
       } catch (error) {
         console.error("Error fetching purchased documents:", error);
         // Hiển thị error state nhưng không redirect
@@ -217,18 +293,24 @@ const ProfilePage = () => {
         }
         
         // Fetch các kết quả thi chương
-        console.log("Đang gọi API kết quả thi chương từ URL:", `${API_BASE_URL}/api/exams/results/chapter`);
-        const chapterResponse = await fetch(`${API_BASE_URL}/api/exams/results/chapter`, {
+        console.log("Đang gọi API kết quả thi chương từ URL:", `${API_BASE_URL}/api/exam-results/chapter`);
+        const chapterResponse = await fetch(`${API_BASE_URL}/api/exam-results/chapter`, {
           headers: { 
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
         
         // Fetch các kết quả thi cuối khóa
-        console.log("Đang gọi API kết quả thi cuối khóa từ URL:", `${API_BASE_URL}/api/exams/results/final`);
-        const finalResponse = await fetch(`${API_BASE_URL}/api/exams/results/final`, {
+        console.log("Đang gọi API kết quả thi cuối khóa từ URL:", `${API_BASE_URL}/api/exam-results/final`);
+        const finalResponse = await fetch(`${API_BASE_URL}/api/exam-results/final`, {
           headers: { 
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
         
@@ -246,23 +328,29 @@ const ProfilePage = () => {
           const formattedResults = [
             ...chapterResults.map((result: any) => ({
               id: result.id.toString(),
-              title: result.title || `Bài kiểm tra chương ${result.chapter_id}`,
-              date: new Date(result.created_at).toLocaleDateString('vi-VN'),
+              title: result.exam_title || `Bài kiểm tra chương ${result.chapter_id}`,
+              date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
               score: result.score || 0,
               total: 100, // Thường tính theo thang điểm 100
               passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
-              course_title: result.course_title,
-              chapter_id: result.chapter_id ? result.chapter_id : null
+              course_title: result.course_title || '',
+              chapter_id: result.chapter_id ? parseInt(result.chapter_id) : null,
+              course_id: result.course_id || null,
+              exam_id: result.exam_id || null,
+              incorrect_answers: Math.round((100 - (result.score || 0)) / 10) // Ước tính số câu sai
             })),
             ...finalResults.map((result: any) => ({
               id: result.id.toString(),
-              title: result.title || "Bài kiểm tra cuối khóa",
-              date: new Date(result.created_at).toLocaleDateString('vi-VN'),
+              title: result.exam_title || "Bài kiểm tra cuối khóa",
+              date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
               score: result.score || 0,
               total: 100,
               passed: (result.score || 0) >= 70,
-              course_title: result.course_title,
-              chapter_id: null
+              course_title: result.course_title || '',
+              chapter_id: null,
+              course_id: result.course_id || null,
+              exam_id: result.exam_id || null,
+              incorrect_answers: Math.round((100 - (result.score || 0)) / 10) // Ước tính số câu sai
             }))
           ];
           
@@ -293,7 +381,7 @@ const ProfilePage = () => {
       role: userData.role || 'Học viên',
       email: userData.email || '',
       phone: userData.phone || '',
-      school: '', // không có trong UserData
+      school: userData.address || '',
       image: userData.avatar || '',
       joined: new Date(userData.created_at).toLocaleDateString('vi-VN'),
       stats: {
@@ -421,22 +509,7 @@ const ProfilePage = () => {
             <TabsContent value="courses" className="mt-4">
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Khóa học đã đăng ký</h3>
-                  {enrolledCourses.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {enrolledCourses.map((course) => (
-                        <div key={course.id} className="bg-white rounded-xl shadow-md overflow-hidden">
-                          <img src={course.course_image} alt={course.course_title} className="w-full h-40 object-cover" />
-                          <div className="p-4">
-                            <h4 className="text-lg font-semibold text-gray-900">{course.course_title}</h4>
-                            <p className="text-gray-600">Tiến độ: {course.progress}%</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-8">Bạn chưa đăng ký khóa học nào.</p>
-                  )}
+                  <EnrolledCourses courses={enrolledCourses} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -444,21 +517,7 @@ const ProfilePage = () => {
             <TabsContent value="documents" className="mt-4">
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Tài liệu đã mua</h3>
-                  {purchasedDocs.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {purchasedDocs.map((doc) => (
-                        <div key={doc.id} className="bg-white rounded-xl shadow-md overflow-hidden">
-                          <div className="p-4">
-                            <h4 className="text-lg font-semibold text-gray-900">{doc.document_title}</h4>
-                            <p className="text-gray-600">Ngày mua: {new Date(doc.purchase_date).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-8">Bạn chưa mua tài liệu nào.</p>
-                  )}
+                  <PurchasedDocuments documents={purchasedDocs} />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -466,11 +525,17 @@ const ProfilePage = () => {
             <TabsContent value="tests" className="mt-4">
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Kết quả bài kiểm tra</h3>
+                  <h3 className="text-xl font-semibold mb-4">Kết quả các bài kiểm tra</h3>
                   {testResults.length > 0 ? (
                     <TestResults results={testResults} />
                   ) : (
-                    <p className="text-gray-500 text-center py-8">Bạn chưa hoàn thành bài kiểm tra nào.</p>
+                    <div className="text-gray-500 text-center py-8 flex flex-col items-center">
+                      <div className="bg-amber-100 p-6 rounded-full mb-3 inline-block">
+                        <AlertTriangle size={24} className="text-amber-500" />
+                      </div>
+                      <p className="text-lg font-medium mb-1">Bạn chưa hoàn thành bài kiểm tra nào</p>
+                      <p className="max-w-md mx-auto">Hoàn thành các bài kiểm tra trong khóa học để xem kết quả của bạn tại đây.</p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
