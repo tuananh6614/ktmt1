@@ -16,6 +16,7 @@ import {
   Clock,
   BookOpen,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import LogoutConfirmDialog from "@/components/profile/LogoutConfirmDialog";
@@ -23,6 +24,8 @@ import StatsSection from "@/components/profile/StatsSection";
 import TestResults from "@/components/profile/TestResults";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "@/config/config";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface UserData {
   id: number;
@@ -86,6 +89,7 @@ const ProfilePage = () => {
   const [purchasedDocs, setPurchasedDocs] = useState<PurchasedDocument[]>([]);
   const [testResults, setTestResults] = useState<ProfileTestResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -113,21 +117,38 @@ const ProfilePage = () => {
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
+        console.log("Đang gọi API từ URL:", `${API_BASE_URL}/api/users/me`);
+        const response = await fetch(`${API_BASE_URL}/api/users/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
-          navigate("/login");
-          return;
+          if (response.status === 401) {
+            localStorage.removeItem("token");
+            navigate("/login");
+            toast({
+              title: "Phiên đăng nhập hết hạn",
+              description: "Vui lòng đăng nhập lại để tiếp tục.",
+              variant: "destructive"
+            });
+            return;
+          }
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log("User data received:", data);
         setUserData(data);
       } catch (error) {
         console.error("Error fetching user data:", error);
+        setError("Không thể tải thông tin người dùng. Vui lòng thử lại sau.");
+        toast({
+          title: "Lỗi tải dữ liệu",
+          description: "Không thể tải thông tin người dùng. Vui lòng thử lại sau.",
+          variant: "destructive"
+        });
       }
     };
 
@@ -135,25 +156,26 @@ const ProfilePage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.error("No authentication token found");
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/enrolled-courses`, {
+        console.log("Đang gọi API khóa học từ URL:", `${API_BASE_URL}/api/users/enrolled-courses`);
+        const response = await fetch(`${API_BASE_URL}/api/users/enrolled-courses`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
-          console.error("Failed to fetch enrolled courses");
-          return;
+          throw new Error("Failed to fetch enrolled courses");
         }
 
         const data = await response.json();
+        console.log("Enrolled courses data:", data);
         setEnrolledCourses(data);
       } catch (error) {
         console.error("Error fetching enrolled courses:", error);
+        // Hiển thị error state nhưng không redirect
       }
     };
 
@@ -161,25 +183,26 @@ const ProfilePage = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          console.error("No authentication token found");
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/purchased-documents`, {
+        console.log("Đang gọi API tài liệu từ URL:", `${API_BASE_URL}/api/users/purchased-documents`);
+        const response = await fetch(`${API_BASE_URL}/api/users/purchased-documents`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
         if (!response.ok) {
-          console.error("Failed to fetch purchased documents");
-          return;
+          throw new Error("Failed to fetch purchased documents");
         }
 
         const data = await response.json();
+        console.log("Purchased documents data:", data);
         setPurchasedDocs(data);
       } catch (error) {
         console.error("Error fetching purchased documents:", error);
+        // Hiển thị error state nhưng không redirect
       }
     };
     
@@ -190,31 +213,32 @@ const ProfilePage = () => {
         const token = localStorage.getItem("token");
         
         if (!token) {
-          console.error("No authentication token found");
           return;
         }
         
         // Fetch các kết quả thi chương
-        const chapterResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/exams/results/chapter`, {
+        console.log("Đang gọi API kết quả thi chương từ URL:", `${API_BASE_URL}/api/exams/results/chapter`);
+        const chapterResponse = await fetch(`${API_BASE_URL}/api/exams/results/chapter`, {
           headers: { 
             'Authorization': `Bearer ${token}`
           }
         });
         
         // Fetch các kết quả thi cuối khóa
-        const finalResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/exams/results/final`, {
+        console.log("Đang gọi API kết quả thi cuối khóa từ URL:", `${API_BASE_URL}/api/exams/results/final`);
+        const finalResponse = await fetch(`${API_BASE_URL}/api/exams/results/final`, {
           headers: { 
             'Authorization': `Bearer ${token}`
           }
         });
         
         if (!chapterResponse.ok || !finalResponse.ok) {
-          console.error("Failed to fetch test results");
-          return;
+          throw new Error("Failed to fetch test results");
         }
         
         const chapterResults = await chapterResponse.json();
         const finalResults = await finalResponse.json();
+        console.log("Test results data:", { chapter: chapterResults, final: finalResults });
         
         // Chỉ tiếp tục xử lý nếu component vẫn được mount
         if (isMounted) {
@@ -250,10 +274,12 @@ const ProfilePage = () => {
         };
       } catch (error) {
         console.error("Error fetching test results:", error);
+        // Hiển thị error state nhưng không redirect
       }
     };
     
     setIsLoading(true);
+    setError(null);
     Promise.all([fetchUserData(), fetchEnrolledCourses(), fetchPurchasedDocs(), fetchTestResults()])
       .finally(() => setIsLoading(false));
   }, [navigate]);
@@ -281,12 +307,94 @@ const ProfilePage = () => {
     };
   };
 
+  // Hiển thị trạng thái loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavBar />
+        <main className="flex-grow container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <div className="relative h-32 sm:h-40 rounded-xl overflow-hidden bg-gradient-to-r from-dtktmt-blue-medium via-dtktmt-purple-medium to-dtktmt-pink-medium shadow-lg animate-pulse">
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
+            
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+              
+              <Skeleton className="h-10 w-64" />
+              <div className="space-y-2">
+                <Skeleton className="h-64 w-full" />
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Hiển thị trạng thái lỗi
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavBar />
+        <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="bg-red-100 text-red-600 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold">Đã xảy ra lỗi</h2>
+              <p className="mt-2">{error}</p>
+            </div>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark"
+            >
+              Thử lại
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const formattedUserData = getFormattedUserData();
+  
+  // Nếu không có dữ liệu người dùng sau khi tải xong
+  if (!formattedUserData) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <NavBar />
+        <main className="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="bg-amber-100 text-amber-600 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold">Không tìm thấy thông tin người dùng</h2>
+              <p className="mt-2">Vui lòng đăng nhập để xem thông tin cá nhân.</p>
+            </div>
+            <Button 
+              onClick={() => navigate('/login')}
+              className="bg-dtktmt-blue-medium hover:bg-dtktmt-blue-dark"
+            >
+              Đăng nhập
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <NavBar />
       <main className="flex-grow container mx-auto px-4 py-8">
         <ProfileHeader 
-          user={getFormattedUserData()} 
+          user={formattedUserData} 
           onProfileUpdate={handleEditProfile} 
         />
         
