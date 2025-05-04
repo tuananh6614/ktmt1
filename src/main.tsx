@@ -1,12 +1,10 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import './styles/transitions.css';
 
 // Xác định loại ứng dụng đang chạy (admin hoặc user)
-const appType = import.meta.env.VITE_APP_TYPE || 'user';
+const appType = process.env.VITE_APP_TYPE || 'user';
 
 // Thêm class để phân biệt giữa admin và user
 if (appType === 'admin') {
