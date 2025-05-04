@@ -70,7 +70,8 @@ const ExamPage = () => {
           return;
         }
 
-        let url = `${API_BASE_URL}/api/exams?course_id=${courseId}`;
+        const timestamp = new Date().getTime();
+        let url = `${API_BASE_URL}/api/exams?course_id=${courseId}&_t=${timestamp}`;
         if (testType === 'chapter' && chapterId) {
           url += `&chapter_id=${chapterId}`;
         } else {
@@ -80,7 +81,10 @@ const ExamPage = () => {
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
 
@@ -137,13 +141,17 @@ const ExamPage = () => {
       console.log("Đang tạo bài kiểm tra cho exam_id:", examId);
       console.log("Loại bài kiểm tra:", testType, "Course ID:", courseId, "Chapter ID:", chapterId);
 
+      const timestamp = new Date().getTime();
       // Create a new user exam entry
-      const createResponse = await fetch(`${API_BASE_URL}/api/user-exams`, {
+      const createResponse = await fetch(`${API_BASE_URL}/api/user-exams?_t=${timestamp}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
         body: JSON.stringify({
           exam_id: examId,
@@ -187,7 +195,14 @@ const ExamPage = () => {
   // Fetch chapter title if needed
   useEffect(() => {
     if (testType === 'chapter' && chapterId) {
-      fetch(`${API_BASE_URL}/api/chapters/${chapterId}`)
+      const timestamp = new Date().getTime();
+      fetch(`${API_BASE_URL}/api/chapters/${chapterId}?_t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
         .then(res => res.json())
         .then(data => {
           setChapterTitle(data.title);

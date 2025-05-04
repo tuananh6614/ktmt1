@@ -110,6 +110,14 @@ app.use('/documents', express.static('uploads/documents'));
 app.use(cors());
 app.use(express.json());
 
+// Middleware để vô hiệu hóa cache cho tất cả các API response
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 // Logging middleware
 app.use((req, res, next) => {
     console.log('\n=== New Request ===');
@@ -1086,8 +1094,9 @@ app.get('/api/questions/:courseId', auth, questionController.getQuestionsByCours
 app.post('/api/questions', adminAuth, questionController.addQuestion);
 app.put('/api/questions/:id', adminAuth, questionController.updateQuestion);
 app.delete('/api/questions/:id', adminAuth, questionController.deleteQuestion);
-
-// Thêm routes mới cho API trích xuất câu hỏi từ file đề thi
+app.post('/api/questions/:courseId/seed', adminAuth, questionController.seedQuestions);
+app.delete('/api/questions/course/:courseId', adminAuth, questionController.deleteAllQuestionsByCourse);
+app.delete('/api/questions/batch-delete', adminAuth, questionController.batchDeleteQuestions);
 app.post('/api/questions/upload-exam', adminAuth, examFileUpload.single('examFile'), questionController.uploadExamFile);
 app.post('/api/questions/batch', adminAuth, questionController.createQuestionBatch);
 
@@ -1098,6 +1107,107 @@ app.post('/api/user-exams', auth, examController.createUserExam);
 app.get('/api/user-exams/:id/questions', auth, examController.getUserExamQuestions);
 app.post('/api/user-exams/:id/submit', auth, examController.submitUserExam);
 app.get('/api/user-exam-results', auth, examController.getUserExamResults);
+
+// Thêm API mới để phục vụ frontend
+app.get('/api/exam-results/chapter', auth, async(req, res) => {
+    try {
+        const userId = req.user.id;
+        console.log(`=== Processing chapter exam results request for user ${userId} ===`);
+        console.log(`Timestamp: ${new Date().toISOString()}`);
+        console.log(`Request URL: ${req.url}`);
+        
+        const query = `
+            SELECT ue.*, e.title as exam_title, e.chapter_id, c.title as course_title, e.course_id
+            FROM user_exam ue
+            JOIN exams e ON ue.exam_id = e.id
+            JOIN courses c ON e.course_id = c.id
+            WHERE ue.user_id = ? AND e.chapter_id IS NOT NULL
+            ORDER BY ue.created_at DESC
+        `;
+        
+        const [results] = await db.execute(query, [userId]);
+        console.log(`Found ${results.length} chapter exam results for user ${userId}`);
+        
+        // Thêm header để ngăn chặn cache
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.set('X-Content-Type-Options', 'nosniff');
+        
+        console.log(`=== Completed chapter exam results request for user ${userId} ===`);
+        return res.json(results);
+    } catch (error) {
+        console.error('Error fetching chapter exam results:', error);
+        return res.status(500).json({ message: 'Lỗi khi lấy kết quả kiểm tra chương', error: error.message });
+    }
+});
+
+app.get('/api/exam-results/final', auth, async(req, res) => {
+    try {
+        const userId = req.user.id;
+        console.log(`=== Processing final exam results request for user ${userId} ===`);
+        console.log(`Timestamp: ${new Date().toISOString()}`);
+        console.log(`Request URL: ${req.url}`);
+        
+        const query = `
+            SELECT ue.*, e.title as exam_title, e.chapter_id, c.title as course_title, e.course_id
+            FROM user_exam ue
+            JOIN exams e ON ue.exam_id = e.id
+            JOIN courses c ON e.course_id = c.id
+            WHERE ue.user_id = ? AND e.chapter_id IS NULL
+            ORDER BY ue.created_at DESC
+        `;
+        
+        const [results] = await db.execute(query, [userId]);
+        console.log(`Found ${results.length} final exam results for user ${userId}`);
+        
+        // Thêm header để ngăn chặn cache
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.set('X-Content-Type-Options', 'nosniff');
+        
+        console.log(`=== Completed final exam results request for user ${userId} ===`);
+        return res.json(results);
+    } catch (error) {
+        console.error('Error fetching final exam results:', error);
+        return res.status(500).json({ message: 'Lỗi khi lấy kết quả kiểm tra cuối khóa', error: error.message });
+    }
+});
+
+// API cho purchased-documents
+app.get('/api/purchased-documents', auth, async(req, res) => {
+    try {
+        const userId = req.user.id;
+        console.log(`=== Processing purchased documents request for user ${userId} ===`);
+        console.log(`Timestamp: ${new Date().toISOString()}`);
+        console.log(`Request URL: ${req.url}`);
+        
+        // Lấy danh sách tài liệu đã mua từ bảng documents_user
+        const [purchases] = await db.execute(`
+            SELECT d.*, c.category_name, du.transaction_date as purchase_date
+            FROM documents_user du
+            JOIN documents d ON du.document_id = d.id
+            LEFT JOIN documents_categories c ON d.category_id = c.id
+            WHERE du.user_id = ?
+            ORDER BY du.transaction_date DESC
+        `, [userId]);
+        
+        console.log(`Found ${purchases.length} purchased documents for user ${userId}`);
+        
+        // Thêm header để ngăn chặn cache
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.set('X-Content-Type-Options', 'nosniff');
+        
+        console.log(`=== Completed purchased documents request for user ${userId} ===`);
+        return res.json(purchases);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách tài liệu đã mua:', error);
+        return res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+});
 
 // Admin exam routes
 app.get('/api/admin/exams', adminAuth, examController.getAdminExams);

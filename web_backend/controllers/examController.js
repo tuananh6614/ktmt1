@@ -19,12 +19,17 @@ exports.getExams = async(req, res) => {
             query += ' AND chapter_id IS NULL';
         }
 
+        // Thêm lệnh cập nhật database để đảm bảo dữ liệu mới nhất
+        console.log('Fetching exam data with query:', query);
+        console.log('Query parameters:', params);
+
         const [exams] = await db.execute(query, params);
 
         if (!exams || exams.length === 0) {
             return res.status(404).json({ message: 'Không tìm thấy bài kiểm tra' });
         }
 
+        console.log(`Found ${exams.length} exams for query`);
         res.json(exams);
     } catch (error) {
         console.error('Error in getExams:', error);

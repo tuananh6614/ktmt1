@@ -106,10 +106,15 @@ const ProfilePage = () => {
       }
 
       try {
-        const response = await fetch(`${API_URL}/profile`, {
+        setIsLoading(true);
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${API_URL}/profile?_t=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
 
@@ -140,7 +145,6 @@ const ProfilePage = () => {
           image: userData.avatar_url ? `${API_BASE_URL}${userData.avatar_url}` : "/placeholder.svg"
         }));
 
-        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching profile:', error);
         toast.error("Có lỗi xảy ra khi tải thông tin người dùng");
@@ -150,6 +154,8 @@ const ProfilePage = () => {
           localStorage.removeItem('user');
           navigate('/login');
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -162,8 +168,8 @@ const ProfilePage = () => {
     let isRequesting = false;
     
     const fetchEnrolledCourses = async () => {
-      // Nếu đang gọi API hoặc đã có dữ liệu, không gọi lại
-      if (isRequesting || (enrolledCourses.length > 0 && !isLoadingCourses)) return;
+      // Nếu đang gọi API thì không gọi lại
+      if (isRequesting) return;
       
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -174,10 +180,13 @@ const ProfilePage = () => {
         
         console.log('Đang tải danh sách khóa học đã đăng ký');
         
-        const response = await fetch(`${API_BASE_URL}/api/enrollments`, {
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${API_BASE_URL}/api/enrollments?_t=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache, no-store'
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
 
@@ -204,7 +213,7 @@ const ProfilePage = () => {
       }
     };
 
-    if (!isLoading) {
+    if (!isLoading && profileUser) {
       fetchEnrolledCourses();
     }
     
@@ -212,7 +221,7 @@ const ProfilePage = () => {
     return () => {
       isMounted = false;
     };
-  }, [isLoading, enrolledCourses.length, isLoadingCourses]);
+  }, [isLoading, profileUser]);
 
   // Fetch các tài liệu đã mua
   useEffect(() => {
@@ -220,8 +229,8 @@ const ProfilePage = () => {
     let isRequesting = false;
     
     const fetchPurchasedDocuments = async () => {
-      // Nếu đang gọi API hoặc đã có dữ liệu, không gọi lại
-      if (isRequesting || (purchasedDocuments.length > 0 && !isLoadingDocuments)) return;
+      // Nếu đang gọi API thì không gọi lại
+      if (isRequesting) return;
       
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -232,10 +241,13 @@ const ProfilePage = () => {
         
         console.log('Đang tải danh sách tài liệu đã mua');
         
-        const response = await fetch(`${API_BASE_URL}/api/user/documents`, {
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${API_BASE_URL}/api/purchased-documents?_t=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache, no-store'
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
 
@@ -248,15 +260,18 @@ const ProfilePage = () => {
         
         if (isMounted) {
           setPurchasedDocuments(documents);
-
-          // Cập nhật số tài liệu đã mua trong stats
-          if (profileUser) {
-            setProfileUser({
-              ...profileUser,
-              stats: {
-                ...profileUser.stats,
-                documentsPurchased: documents.length
-              }
+          
+          // Nếu có profileUser và số lượng tài liệu đã thay đổi, cập nhật stats
+          if (profileUser && profileUser.stats.documentsPurchased !== documents.length) {
+            setProfileUser(prev => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                stats: {
+                  ...prev.stats,
+                  documentsPurchased: documents.length
+                }
+              };
             });
           }
         }
@@ -281,7 +296,7 @@ const ProfilePage = () => {
     return () => {
       isMounted = false;
     };
-  }, [isLoading, profileUser, purchasedDocuments.length, isLoadingDocuments]);
+  }, [isLoading, profileUser]);
 
   // Fetch kết quả các bài kiểm tra
   useEffect(() => {
@@ -289,53 +304,84 @@ const ProfilePage = () => {
     let isRequesting = false;
     
     const fetchTestResults = async () => {
-      // Nếu đang gọi API hoặc đã có dữ liệu, không gọi lại
-      if (isRequesting || (testResults.length > 0 && !isLoadingTestResults)) return;
-      
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token || isRequesting) return;
 
       try {
+        // Đánh dấu đang request
         isRequesting = true;
         setIsLoadingTestResults(true);
         
-        // Thêm log để debug
-        console.log('Đang tải kết quả kiểm tra cho người dùng');
+        // Lấy kết quả bài kiểm tra chương
+        const timestamp = new Date().getTime();
+        console.log("Bắt đầu gọi API kết quả kiểm tra chương");
         
-        const response = await fetch(`${API_BASE_URL}/api/user-exam-results`, {
+        const chapterResponse = await fetch(`${API_BASE_URL}/api/exam-results/chapter?_t=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache, no-store'
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch test results');
+        if (!chapterResponse.ok) {
+          throw new Error('Failed to fetch chapter test results');
         }
 
-        const examResults = await response.json();
+        const chapterResults = await chapterResponse.json();
+        
+        // Lấy kết quả bài kiểm tra cuối khóa
+        const finalResponse = await fetch(`${API_BASE_URL}/api/exam-results/final?_t=${timestamp}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+
+        if (!finalResponse.ok) {
+          throw new Error('Failed to fetch final test results');
+        }
+
+        const finalResults = await finalResponse.json();
         
         // Kiểm tra kết quả nhận được
-        console.log(`Đã nhận được ${examResults.length} kết quả kiểm tra`);
+        console.log(`Đã nhận được ${chapterResults.length + finalResults.length} kết quả kiểm tra`);
         
         // Chỉ tiếp tục xử lý nếu component vẫn được mount
         if (isMounted) {
           // Chuyển đổi sang định dạng TestResult
-          const formattedResults = examResults.map((result: any) => ({
-            id: result.id.toString(),
-            title: result.exam_title,
-            date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
-            score: result.score || 0,
-            total: 100, // Thường tính theo thang điểm 100
-            passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
-            course_title: result.course_title,
-            chapter_id: result.chapter_id
-          }));
+          const formattedResults = [
+            ...chapterResults.map((result: any) => ({
+              id: result.id.toString(),
+              title: result.exam_title,
+              date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
+              score: result.score || 0,
+              total: 100, // Thường tính theo thang điểm 100
+              passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
+              course_title: result.course_title,
+              chapter_id: result.chapter_id
+            })),
+            ...finalResults.map((result: any) => ({
+              id: result.id.toString(),
+              title: result.exam_title,
+              date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
+              score: result.score || 0,
+              total: 100, // Thường tính theo thang điểm 100
+              passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
+              course_title: result.course_title,
+              chapter_id: null
+            }))
+          ];
 
           setTestResults(formattedResults);
 
-          // Tính số liệu thống kê
-          calculateStats(formattedResults, examResults);
+          // Tính số liệu thống kê chỉ khi có profileUser
+          if (profileUser) {
+            calculateStats(formattedResults, chapterResults.concat(finalResults));
+          }
         }
       } catch (error) {
         console.error('Error fetching test results:', error);
@@ -380,16 +426,24 @@ const ProfilePage = () => {
           }
         });
 
-        setProfileUser({
-          ...profileUser,
-          stats: {
-            ...profileUser.stats,
-            coursesCompleted: completedCourses.size,
-            coursesInProgress: inProgressCourses.size,
-            avgScore: avgScore,
-            documentsPurchased: profileUser.stats.documentsPurchased
-          }
-        });
+        // Chỉ cập nhật khi có sự thay đổi thống kê
+        if (profileUser.stats.avgScore !== avgScore || 
+            profileUser.stats.coursesCompleted !== completedCourses.size || 
+            profileUser.stats.coursesInProgress !== inProgressCourses.size) {
+          
+          setProfileUser(prev => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              stats: {
+                ...prev.stats,
+                coursesCompleted: completedCourses.size,
+                coursesInProgress: inProgressCourses.size,
+                avgScore: avgScore
+              }
+            };
+          });
+        }
       }
     };
 
@@ -401,7 +455,7 @@ const ProfilePage = () => {
     return () => {
       isMounted = false;
     };
-  }, [isLoading, profileUser, testResults.length, isLoadingTestResults]);
+  }, [isLoading, profileUser]);
 
   if (isLoading) {
     return (

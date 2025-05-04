@@ -323,6 +323,78 @@ const questionController = {
       console.error('Lỗi khi tạo câu hỏi hàng loạt:', error);
       res.status(500).json({ message: 'Lỗi khi tạo câu hỏi', error: error.message });
     }
+  },
+
+  // Thêm hàm xóa tất cả câu hỏi theo khóa học
+  deleteAllQuestionsByCourse: async (req, res) => {
+    try {
+      // Kiểm tra quyền admin
+      if (req.user && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+      }
+
+      const courseId = req.params.courseId;
+
+      // Kiểm tra khóa học tồn tại
+      const [courses] = await db.query('SELECT * FROM courses WHERE id = ?', [courseId]);
+      if (courses.length === 0) {
+        return res.status(404).json({ message: 'Không tìm thấy khóa học' });
+      }
+
+      // Lấy danh sách chapter_id thuộc khóa học
+      const [chapters] = await db.query('SELECT id FROM chapters WHERE course_id = ?', [courseId]);
+      
+      if (chapters.length === 0) {
+        return res.status(200).json({ message: 'Không có chương nào trong khóa học này' });
+      }
+
+      const chapterIds = chapters.map(chapter => chapter.id);
+      
+      // Xóa tất cả câu hỏi thuộc các chương của khóa học
+      const [result] = await db.query(
+        'DELETE FROM questions WHERE chapter_id IN (?)',
+        [chapterIds]
+      );
+
+      res.json({
+        message: `Đã xóa ${result.affectedRows} câu hỏi thành công`,
+        courseId,
+        affectedRows: result.affectedRows
+      });
+    } catch (error) {
+      console.error('Lỗi khi xóa tất cả câu hỏi:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
+  },
+
+  // Xóa hàng loạt câu hỏi
+  batchDeleteQuestions: async (req, res) => {
+    try {
+      // Kiểm tra quyền admin
+      if (req.user && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Không có quyền thực hiện hành động này' });
+      }
+
+      const { questionIds } = req.body;
+
+      if (!Array.isArray(questionIds) || questionIds.length === 0) {
+        return res.status(400).json({ message: 'Danh sách câu hỏi không hợp lệ' });
+      }
+
+      // Xóa các câu hỏi
+      const [result] = await db.query(
+        'DELETE FROM questions WHERE id IN (?)',
+        [questionIds]
+      );
+
+      res.json({
+        message: `Đã xóa ${result.affectedRows} câu hỏi thành công`,
+        deletedCount: result.affectedRows
+      });
+    } catch (error) {
+      console.error('Lỗi khi xóa hàng loạt câu hỏi:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
   }
 };
 

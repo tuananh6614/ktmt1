@@ -118,10 +118,14 @@ const CourseContent = () => {
           return;
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/courses/${courseId}/structure`, {
+        const timestamp = new Date().getTime();
+        const response = await fetch(`${API_BASE_URL}/api/courses/${courseId}/structure?_t=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           }
         });
 
@@ -200,10 +204,13 @@ const CourseContent = () => {
         const updatedLessons = await Promise.all(
           chapter.lessons.map(async (lesson) => {
             try {
-              const response = await fetch(`${API_BASE_URL}/api/lessons/${lesson.id}/pages`, {
+              const timestamp = new Date().getTime();
+              const response = await fetch(`${API_BASE_URL}/api/lessons/${lesson.id}/pages?_t=${timestamp}`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,
-                  'Accept': 'application/json'
+                  'Cache-Control': 'no-cache, no-store, must-revalidate',
+                  'Pragma': 'no-cache',
+                  'Expires': '0'
                 }
               });
 
