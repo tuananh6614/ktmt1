@@ -54,14 +54,21 @@ interface EnrolledCourse {
 }
 
 interface TestResult {
-  id: string;
-  title: string;
-  date: string;
+  id: number;
+  exam_id: number;
+  user_id: number;
+  attempt_count: number;
   score: number;
-  total: number;
-  passed: boolean;
-  course_title: string;
-  chapter_id: string | null;
+  completed_at: string;
+  created_at: string;
+  title?: string;
+  date?: string;
+  total?: number;
+  passed?: boolean;
+  course_title?: string;
+  chapter_id?: number | null;
+  exam_title?: string;
+  course_id?: number;
 }
 
 interface PurchasedDocument {
@@ -312,11 +319,11 @@ const ProfilePage = () => {
         isRequesting = true;
         setIsLoadingTestResults(true);
         
-        // Lấy kết quả bài kiểm tra chương
+        // Lấy tất cả kết quả bài kiểm tra
         const timestamp = new Date().getTime();
-        console.log("Bắt đầu gọi API kết quả kiểm tra chương");
+        console.log("Bắt đầu gọi API kết quả kiểm tra");
         
-        const chapterResponse = await fetch(`${API_BASE_URL}/api/exam-results/chapter?_t=${timestamp}`, {
+        const response = await fetch(`${API_BASE_URL}/api/user-exam-results?_t=${timestamp}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -325,62 +332,31 @@ const ProfilePage = () => {
           }
         });
 
-        if (!chapterResponse.ok) {
-          throw new Error('Failed to fetch chapter test results');
+        if (!response.ok) {
+          throw new Error('Failed to fetch test results');
         }
 
-        const chapterResults = await chapterResponse.json();
-        
-        // Lấy kết quả bài kiểm tra cuối khóa
-        const finalResponse = await fetch(`${API_BASE_URL}/api/exam-results/final?_t=${timestamp}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        });
-
-        if (!finalResponse.ok) {
-          throw new Error('Failed to fetch final test results');
-        }
-
-        const finalResults = await finalResponse.json();
+        const examResults = await response.json();
         
         // Kiểm tra kết quả nhận được
-        console.log(`Đã nhận được ${chapterResults.length + finalResults.length} kết quả kiểm tra`);
+        console.log(`Đã nhận được ${examResults.length} kết quả kiểm tra`);
         
         // Chỉ tiếp tục xử lý nếu component vẫn được mount
         if (isMounted) {
           // Chuyển đổi sang định dạng TestResult
-          const formattedResults = [
-            ...chapterResults.map((result: any) => ({
-              id: result.id.toString(),
-              title: result.exam_title,
-              date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
-              score: result.score || 0,
-              total: 100, // Thường tính theo thang điểm 100
-              passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
-              course_title: result.course_title,
-              chapter_id: result.chapter_id
-            })),
-            ...finalResults.map((result: any) => ({
-              id: result.id.toString(),
-              title: result.exam_title,
-              date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
-              score: result.score || 0,
-              total: 100, // Thường tính theo thang điểm 100
-              passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
-              course_title: result.course_title,
-              chapter_id: null
-            }))
-          ];
+          const formattedResults = examResults.map((result: any) => ({
+            ...result,
+            title: result.exam_title,
+            date: new Date(result.completed_at || result.created_at).toLocaleDateString('vi-VN'),
+            total: 100, // Thường tính theo thang điểm 100
+            passed: (result.score || 0) >= 70, // Pass nếu đạt 70% trở lên
+          }));
 
           setTestResults(formattedResults);
 
           // Tính số liệu thống kê chỉ khi có profileUser
           if (profileUser) {
-            calculateStats(formattedResults, chapterResults.concat(finalResults));
+            calculateStats(formattedResults, examResults);
           }
         }
       } catch (error) {

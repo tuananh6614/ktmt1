@@ -2,14 +2,21 @@ import { Button } from "@/components/ui/button";
 import { Check, X, BookOpen, Calendar } from "lucide-react";
 
 interface TestResult {
-  id: string;
-  title: string;
-  date: string;
+  id: number;
+  exam_id: number;
+  user_id: number;
+  attempt_count: number;
   score: number;
-  total: number;
-  passed: boolean;
+  completed_at: string;
+  created_at: string;
+  title?: string;
+  date?: string;
+  total?: number;
+  passed?: boolean;
   course_title?: string;
   chapter_id?: number | null;
+  exam_title?: string;
+  course_id?: number;
 }
 
 interface TestResultsProps {
@@ -44,7 +51,7 @@ const TestResults = ({ results }: TestResultsProps) => {
             {results.map((test) => (
               <tr key={test.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-medium text-gray-900">{test.title}</div>
+                  <div className="font-medium text-gray-900">{test.title || test.exam_title}</div>
                   <div className="text-xs text-gray-500">
                     {test.chapter_id === null ? 
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-dtktmt-purple-light text-dtktmt-purple-dark">
@@ -65,14 +72,14 @@ const TestResults = ({ results }: TestResultsProps) => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center text-gray-700">
                     <Calendar size={14} className="mr-1 text-dtktmt-blue-medium" />
-                    <span>{test.date}</span>
+                    <span>{test.date || new Date(test.completed_at || test.created_at).toLocaleDateString('vi-VN')}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-medium text-gray-900">{test.score}/{test.total}</div>
+                  <div className="font-medium text-gray-900">{test.score}/{test.total || 100}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {test.passed ? (
+                  {(test.passed !== undefined ? test.passed : (test.score || 0) >= 70) ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       <Check size={12} className="mr-1" />
                       Đạt

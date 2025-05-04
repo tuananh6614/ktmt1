@@ -2013,4 +2013,38 @@ app.listen(PORT, () => {
     console.log('=====================\n');
 });
 
+// Add API to get all exam results for a user
+app.get('/api/user-exam-results', auth, async(req, res) => {
+    try {
+        const userId = req.user.id;
+        console.log(`=== Processing all exam results request for user ${userId} ===`);
+        console.log(`Timestamp: ${new Date().toISOString()}`);
+        console.log(`Request URL: ${req.url}`);
+        
+        const query = `
+            SELECT ue.*, e.title as exam_title, e.chapter_id, c.title as course_title, e.course_id
+            FROM user_exam ue
+            JOIN exams e ON ue.exam_id = e.id
+            JOIN courses c ON e.course_id = c.id
+            WHERE ue.user_id = ?
+            ORDER BY ue.created_at DESC
+        `;
+        
+        const [results] = await db.execute(query, [userId]);
+        console.log(`Found ${results.length} exam results for user ${userId}`);
+        
+        // Thêm header để ngăn chặn cache
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.set('X-Content-Type-Options', 'nosniff');
+        
+        console.log(`=== Completed all exam results request for user ${userId} ===`);
+        return res.json(results);
+    } catch (error) {
+        console.error('Error fetching all exam results:', error);
+        return res.status(500).json({ message: 'Lỗi khi lấy kết quả kiểm tra', error: error.message });
+    }
+});
+
 module.exports = app;
