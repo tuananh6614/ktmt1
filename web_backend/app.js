@@ -362,7 +362,7 @@ app.put('/api/profile/avatar', auth, avatarUpload.single('avatar'), async(req, r
         }
 
         const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-        const fullAvatarUrl = `http://localhost:3000${avatarUrl}`;
+        const fullAvatarUrl = `https://api.epulearn.xyz${avatarUrl}`;
 
         const [result] = await db.execute(
             'UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, req.user.id]

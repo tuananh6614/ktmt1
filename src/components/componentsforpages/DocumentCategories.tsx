@@ -12,7 +12,7 @@ interface DocumentCategoriesProps {
 }
 
 const fetchCategories = async (): Promise<DocumentCategory[]> => {
-  const res = await fetch("http://localhost:3000/api/document-categories");
+  const res = await fetch("https://api.epulearn.xyz/api/document-categories");
   if (!res.ok) throw new Error("Không thể lấy danh mục");
   return res.json();
 };

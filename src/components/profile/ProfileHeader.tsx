@@ -70,7 +70,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
   const handleSaveProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/profile/update', {
+      const response = await fetch('https://api.epulearn.xyz/api/profile/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ const ProfileHeader = ({ user, onProfileUpdate }: ProfileHeaderProps) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/profile/change-password', {
+      const response = await fetch('https://api.epulearn.xyz/api/profile/change-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

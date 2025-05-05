@@ -16,7 +16,7 @@ export default defineConfig(({ mode, command }) => {
       proxy: {
         // Cấu hình proxy để chuyển tiếp các request API đến backend
         '/api': {
-          target: 'http://localhost:3000',
+          target: 'https://api.epulearn.xyz',
           changeOrigin: true,
           secure: false
         }

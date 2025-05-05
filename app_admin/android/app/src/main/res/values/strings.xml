@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KTMT1_admin</string>
+    <string name="title_activity_main">KTMT1_admin</string>
+    <string name="package_name">com.epulearn.ktmt1</string>
+    <string name="custom_url_scheme">com.epulearn.ktmt1</string>
+</resources>

@@ -6,6 +6,6 @@ const isProdHostname = window.location.hostname !== 'localhost' &&
 // API URL configuration based on environment
 export const API_URL = isProdHostname
   ? 'https://api.epulearn.xyz/api'
-  : 'http://localhost:3000/api';
+  : 'https://api.epulearn.xyz/api';
 
 export default API_URL; 

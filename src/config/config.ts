@@ -1,19 +1,19 @@
 // Import API_URL từ api.ts
 import { API_URL } from './api';
 
+// Kiểm tra nếu đang chạy trên môi trường di động
+const isMobileApp = window.location.protocol === 'capacitor:' || 
+                   window.location.protocol === 'file:' ||
+                   /android|ios/.test(navigator.userAgent.toLowerCase());
+
 // Lấy hostname từ URL hiện tại
 const currentHostname = window.location.hostname;
 const isProdEnvironment = currentHostname !== 'localhost' && 
                           currentHostname !== '127.0.0.1' && 
                           !window.location.port;
 
-// Trong môi trường production:
-// - Sử dụng protocol HTTPS
-// - Sử dụng subdomain api.
-// - Không hiển thị port
-export const API_BASE_URL = isProdEnvironment
-  ? `https://api.${currentHostname.replace('admin.', '')}`
-  : `http://${currentHostname}:3000`; 
+// Trong môi trường production hoặc trên thiết bị di động - luôn sử dụng API production
+export const API_BASE_URL = `https://api.epulearn.xyz`;
 
 // Loại bỏ tiền tố /api để sử dụng cho URL tài nguyên
 export const getFullResourceUrl = (path: string | null) => {
